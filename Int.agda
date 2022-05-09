@@ -8,6 +8,7 @@
 module Int where
   open import Agda.Builtin.Int renaming (Int to ℤ) public
   open import Agda.Builtin.Nat renaming (_+_ to _+ℕ_; _-_ to _-ℕ_)
+  open import Agda.Builtin.Equality
   open import Ops
 
   instance
@@ -20,6 +21,8 @@ module Int where
     _+_ ⦃ Sumℤ ⦄ (negsuc a)        (pos zero)       = negsuc a              -- -(a + 1) + 0 = -(a + 1)
     _+_ ⦃ Sumℤ ⦄ (negsuc zero)     (pos (suc b))    = pos b                 -- -(0 + 1) + (b + 1) = b
     _+_ ⦃ Sumℤ ⦄ (negsuc (suc a)) (pos (suc b))     = negsuc a + pos b      -- -((a + 1) + 1) + (b + 1) = -(a + 1) + b
+    additive-zero ⦃ Sumℤ ⦄ = pos 0
+    lemma-sum-zero ⦃ Sumℤ ⦄ x = {!   !}
 
   instance
     Negateℤ : Sub ℤ
@@ -35,5 +38,7 @@ module Int where
     _·_ ⦃ Mulℤ ⦄ (negsuc a)    (pos zero)    = pos zero                   -- -(b + 1) · 0 = 0
     _·_ ⦃ Mulℤ ⦄ (negsuc a)    (pos (suc b)) = negsuc (b * suc a +ℕ b)    -- -(a + 1) · (b + 1) = -(a · (b + 1) + (b + 1)) = -((a · (b + 1) + b) + 1)
     _·_ ⦃ Mulℤ ⦄ (negsuc a)    (negsuc b)    = pos (a * b +ℕ a +ℕ b +ℕ 1) -- -(a + 1) · -(b +1) = a · b + a + b + 1
+    unit ⦃ Mulℤ ⦄ = pos 1
+    lemma-unit ⦃ Mulℤ ⦄ x = {!   !}
 
 
