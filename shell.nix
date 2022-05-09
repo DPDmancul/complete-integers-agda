@@ -4,16 +4,19 @@ pkgs.mkShell {
     gnumake
     gnused
     agda
-    pandoc
     (texlive.combine { inherit (texlive)
-      scheme-basic
-      xcolor
-      booktabs
-      etoolbox
-      mdwtools;
+      scheme-small
+      xifthen
+      ifmtarg
+#       xcolor
+      polytable
+      lazylist
+#       etoolbox
+      environ
+#       xkeyval
+#       mathtools
+      newunicodechar
+      latexmk;
     })
-    ( rWrapper.override{ packages = with rPackages; [
-      bookdown
-    ]; })
   ];
 }

@@ -1,24 +1,17 @@
-R := Rscript -e
-bookdown = $(R) "bookdown::render_book('_bookdown.yml', 'bookdown::$(1)')"
-
+OUT := _out
 
 .PHONY: all
-all: pdf epub html agda_html
+all: $(OUT)/ci.pdf
 
-html:
-	$(call bookdown,gitbook)
+%.pdf: %.tex
+	cd "$(dir $^)"; latexmk -xelatex "$(notdir $^)"
 
-pdf:
-	$(call bookdown,pdf_book)
 
-epub:
-	$(call bookdown,epub_book)
-	
-agda_html:
-	agda --html --html-dir=_code ci.lagda.md 
+$(OUT)/%.tex: %.lagda.tex
+	agda --latex --latex-dir="$(OUT)" "$^"
 
 
 .PHONY: clean
 clean:
-	rm -rf _book _code
+	rm -rf "$(OUT)"
 

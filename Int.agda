@@ -11,7 +11,6 @@ module Int where
   open import Ops
 
   instance
-    open Sum ⦃ ... ⦄ public
     Sumℤ : Sum ℤ
     _+_ ⦃ Sumℤ ⦄ (pos a)           (pos b)          = pos (a +ℕ b)          -- a + b = a + b
     _+_ ⦃ Sumℤ ⦄ (negsuc a)        (negsuc b)       = negsuc (suc (a +ℕ b)) -- -(a + 1) + -(b + 1) = -((a + b + 1) + 1)
@@ -23,14 +22,12 @@ module Int where
     _+_ ⦃ Sumℤ ⦄ (negsuc (suc a)) (pos (suc b))     = negsuc a + pos b      -- -((a + 1) + 1) + (b + 1) = -(a + 1) + b
 
   instance
-    open Sub ⦃ ... ⦄ public
     Negateℤ : Sub ℤ
     -_ ⦃ Negateℤ ⦄ (pos zero)    = pos zero
     -_ ⦃ Negateℤ ⦄ (pos (suc a)) = negsuc a
     -_ ⦃ Negateℤ ⦄ (negsuc a)    = pos (suc a)
 
   instance
-    open Mul ⦃ ... ⦄ public
     Mulℤ : Mul ℤ
     _·_ ⦃ Mulℤ ⦄ (pos a)       (pos b)       = pos (a * b)                -- a · b = a · b
     _·_ ⦃ Mulℤ ⦄ (pos zero)    (negsuc b)    = pos zero                   -- 0 · -(b + 1) = 0

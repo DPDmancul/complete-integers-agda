@@ -21,7 +21,6 @@ module F2 where
     _⊕_ ⦃ Sum𝔽₂ ⦄ one  b = ¬ b
 
   instance
-    open Mul ⦃ ... ⦄ public
     Mul𝔽₂ : Mul 𝔽₂
     _·_ ⦃ Mul𝔽₂ ⦄ zero _ = zero
     _·_ ⦃ Mul𝔽₂ ⦄ one  b = b

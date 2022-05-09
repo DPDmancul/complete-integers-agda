@@ -1,9 +1,0 @@
-book_filename: complete-integers.Rmd
-
-view: "https://gitlab.com/DPDmancul/complete-integers-agda/blob/main/%s"
-
-delete_merged_file: true
-
-rmd_files:
-  - ci.lagda.md
-

@@ -1,0 +1,96 @@
+\documentclass[a4paper]{report}
+\usepackage[hidelinks]{hyperref}
+\usepackage[links]{agda}
+\usepackage{amsmath, amssymb, mathtools, amsthm, newunicodechar}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\newcommand\bN{\mathbb{N}}
+\newunicodechar{ℕ}{\ensuremath{\mathbb{N}}}
+\newcommand\bZ{\mathbb{Z}}
+\newunicodechar{ℤ}{\ensuremath{\mathbb{Z}}}
+\newcommand\bF{\mathbb{F}}
+\newunicodechar{𝔽}{\ensuremath{\mathbb{F}}}
+\newunicodechar{₂}{\ensuremath{_2}}
+\newunicodechar{⊕}{\ensuremath{\oplus}}
+\newunicodechar{⦃}{\ensuremath{\{\{}}
+\newunicodechar{⦄}{\ensuremath{\}\}}}
+
+\title{Complete integers}
+\author{Davide Peressoni}
+\date{May 2022}
+
+\begin{document}
+
+\maketitle
+
+\begin{code}
+-- (c) Davide Peressoni 2022
+
+open import Int
+open import F2
+open import Agda.Builtin.Equality
+\end{code}
+
+\chapter{Complete integer numbers}
+
+\textbf{TODO} sistemare\\
+In this chapter we will define the ring of complete integers ($\bZ_C$) and we will
+see that it is a superset of $\bZ$. Then we will call the remaining dis-integers
+($\bZ_D$) which are the dual of integers ($\bZ$) along parity (e.g. in $\bZ$ the unit is
+odd, in $\bZ_D$ the unit is even).
+
+\begin{definition}[Complete integers prime]
+Let's define the set of the complete integer numbers prime as
+
+\[\bZ_C' \coloneqq \bZ\times\bF_2\]
+
+We will call the first component \emph{value}, and the second \emph{parity}.
+
+\begin{code}
+record ℤC' : Set where
+  constructor [_,_]
+  field
+    val : ℤ
+    par : 𝔽₂
+\end{code}
+\end{definition}
+
+\begin{definition}[Ring $\bZ_C'$]
+Let's define $\bZ_C'$ as a commutative ring with unit:
+
+Given $[a,b], [c,d] \in \bZ_C'$
+
+\[[a,b] + [c,d] \coloneqq [a+c, b\oplus d]\]
+
+\begin{code}
+instance
+  open import Ops
+  SumℤC' : Sum ℤC'
+  _+_ ⦃ SumℤC' ⦄ [ a , b ] [ c , d ] = [ a + c , b ⊕ d ]
+\end{code}
+
+\[[a,b] \cdot [c,d] \coloneqq [a\cdot c, b\cdot d]\]
+
+\begin{code}
+instance
+  open import Ops
+  MulℤC' : Mul ℤC'
+  _·_ ⦃ MulℤC' ⦄ [ a , b ] [ c , d ] = [ a · c , b · d ]
+\end{code}
+\end{definition}
+
+\begin{proof}
+  Now let's check if the given definition is valid:
+  \begin{enumerate}
+    \item Associative property of addition
+      \begin{code}
+associative-SumℤC' : (x y z : ℤC') → (x + y) + z ≡ x + (y + z)
+associative-SumℤC' = {!   !}
+      \end{code}
+  \end{enumerate}
+\end{proof}
+
+\end{document}
+

@@ -19,6 +19,8 @@ module Ops where
     infixl 6 _+_
     field _+_ : A → A → A
 
+  open Sum ⦃ ... ⦄ public
+
   ---------
   -- Sub --
   ---------
@@ -28,9 +30,10 @@ module Ops where
     field -_ : A → A
 
     infixl 6 _-_
-    open Sum ⦃ ... ⦄
     _-_ : A → A → A
     a - b = a + (- b)
+
+  open Sub ⦃ ... ⦄ public
 
   ---------
   -- Mul --
@@ -39,5 +42,7 @@ module Ops where
 
     infixl 6 _·_
     field _·_ : A → A → A
+
+  open Mul ⦃ ... ⦄ public
 
 

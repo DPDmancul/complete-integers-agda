@@ -1,0 +1,13 @@
+stages:
+  - build
+
+build:
+  image: nixos/nix
+  stage: build
+  script:
+    - nix-channel --add https://nixos.org/channels/nixos-unstable nixos
+    - nix-channel --update
+    - nix-shell --run "cd $(pwd); make"
+    - cp _out/*.pdf ./
+  artifacts:
+    paths: [ *.pdf ]
