@@ -8,13 +8,9 @@ pkgs.mkShell {
       scheme-small
       xifthen
       ifmtarg
-#       xcolor
       polytable
       lazylist
-#       etoolbox
       environ
-#       xkeyval
-#       mathtools
       newunicodechar
       latexmk;
     })

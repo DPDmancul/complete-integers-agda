@@ -10,4 +10,4 @@ build:
     - nix-shell --run "cd $(pwd); make"
     - cp _out/*.pdf ./
   artifacts:
-    paths: [ *.pdf ]
+    paths: [ "*.pdf" ]
