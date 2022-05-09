@@ -1,1 +1,12 @@
+# Agda
 *.agdai
+_code
+
+# Rmd
+.Rproj.user
+.Rhistory
+.RData
+_book
+_bookdown_files
+rsconnect
+

@@ -1,0 +1,7 @@
+bookdown::gitbook:
+  split_by: section+number
+  config:
+    # sharing:
+      # gitlab: true
+
+#bookdown::pdf_book:

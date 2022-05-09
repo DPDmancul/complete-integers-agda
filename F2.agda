@@ -7,11 +7,12 @@
 
 module F2 where
   open import Agda.Builtin.Bool renaming (Bool to 𝔽₂; false to zero; true to one) public
-  open import Ops
 
   ¬ : 𝔽₂ → 𝔽₂
   ¬ zero = one
   ¬ one  = zero
+
+  open import Ops
 
   instance
     open Sum ⦃ ... ⦄ renaming (_+_ to _⊕_) public
