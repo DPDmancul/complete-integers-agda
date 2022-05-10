@@ -14,8 +14,9 @@
 \newunicodechar{𝔽}{\ensuremath{\mathbb{F}}}
 \newunicodechar{₂}{\ensuremath{_2}}
 \newunicodechar{⊕}{\ensuremath{\oplus}}
-\newunicodechar{⦃}{\ensuremath{\{\{}}
-\newunicodechar{⦄}{\ensuremath{\}\}}}
+\newunicodechar{⦃}{\ensuremath{\{\kern-0.6ex|}}
+\newunicodechar{⦄}{\ensuremath{|\kern-0.6ex\}}}
+\newunicodechar{λ}{\ensuremath{\lambda}}
 
 \title{Complete integers}
 \author{Davide Peressoni}
@@ -67,8 +68,12 @@ Given $[a,b], [c,d] \in \bZ_C'$
 \begin{code}
 instance
   open import Ops
+  open import Utils
   SumℤC' : Sum ℤC'
   _+_ ⦃ SumℤC' ⦄ [ a , b ] [ c , d ] = [ a + c , b ⊕ d ]
+  additive-zero ⦃ SumℤC' ⦄ = [ pos 0 , zero ]
+  lemma-sum-zero ⦃ SumℤC' ⦄ [ pos _    , par ] = cong (λ n → [ pos n , par ]) refl
+  lemma-sum-zero ⦃ SumℤC' ⦄ [ negsuc _ , par ] = cong (λ n → [ negsuc n , par ]) refl
 \end{code}
 
 \[[a,b] \cdot [c,d] \coloneqq [a\cdot c, b\cdot d]\]
@@ -76,8 +81,12 @@ instance
 \begin{code}
 instance
   open import Ops
+  open import Utils
   MulℤC' : Mul ℤC'
   _·_ ⦃ MulℤC' ⦄ [ a , b ] [ c , d ] = [ a · c , b · d ]
+  unit ⦃ MulℤC' ⦄ = [ pos 1 , one ]
+  lemma-unit ⦃ MulℤC' ⦄ [ pos n    , par ] = cong (λ n → [ pos n , par ]) (lemma-plus-zero n)
+  lemma-unit ⦃ MulℤC' ⦄ [ negsuc n , par ] = cong (λ n → [ negsuc n , par ]) (lemma-plus-zero n)
 \end{code}
 \end{definition}
 
@@ -86,8 +95,8 @@ instance
   \begin{enumerate}
     \item Associative property of addition
       \begin{code}
-associative-SumℤC' : (x y z : ℤC') → (x + y) + z ≡ x + (y + z)
-associative-SumℤC' = {!   !}
+-- associative-SumℤC' : (x y z : ℤC') → (x + y) + z ≡ x + (y + z)
+-- associative-SumℤC' = {!   !}
       \end{code}
   \end{enumerate}
 \end{proof}
