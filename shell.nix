@@ -3,7 +3,7 @@ pkgs.mkShell {
   nativeBuildInputs = with pkgs; [
     gnumake
     gnused
-    agda
+    (agda.withPackages (p: [ p.standard-library ]))
     (texlive.combine { inherit (texlive)
       scheme-small
       xifthen

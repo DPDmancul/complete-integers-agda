@@ -72,5 +72,3 @@ module Ops where
     _^_ ⦃ NatPow ⦄ _ zero = unit
     _^_ ⦃ NatPow ⦄ b (suc e) = b · b ^ e
 
-
-

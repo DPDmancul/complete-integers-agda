@@ -29,9 +29,9 @@
 \begin{code}
 -- (c) Davide Peressoni 2022
 
-open import Int
-open import F2
-open import Utils.Equality
+open import Data.Int
+open import Data.F2
+open import Relation.Binary.PropositionalEquality
 \end{code}
 
 \chapter{Complete integer numbers}
@@ -70,9 +70,8 @@ instance
   open import Ops
   SumℤC' : Sum ℤC'
   _+_ ⦃ SumℤC' ⦄ [ a , b ] [ c , d ] = [ a + c , b ⊕ d ]
-  additive-zero ⦃ SumℤC' ⦄ = [ pos 0 , zero ]
-  lemma-sum-zero ⦃ SumℤC' ⦄ [ pos _    , par ] = cong (λ n → [ pos n , par ]) refl
-  lemma-sum-zero ⦃ SumℤC' ⦄ [ negsuc _ , par ] = cong (λ n → [ negsuc n , par ]) refl
+  additive-zero ⦃ SumℤC' ⦄ = [ 0ℤ , zero ]
+  lemma-sum-zero ⦃ SumℤC' ⦄ = cong₂ [_,_] (lemma-sum-zero Sumℤ) (lemma-sum-zero Sum𝔽₂)
 \end{code}
 
 \[[a,b] \cdot [c,d] \coloneqq [a\cdot c, b\cdot d]\]
@@ -80,24 +79,57 @@ instance
 \begin{code}
 instance
   open import Ops
-  open import Nat using (lemma-nat-plus-zero)
   MulℤC' : Mul ℤC'
   _·_ ⦃ MulℤC' ⦄ [ a , b ] [ c , d ] = [ a · c , b · d ]
-  unit ⦃ MulℤC' ⦄ = [ pos 1 , one ]
-  lemma-unit ⦃ MulℤC' ⦄ [ pos n    , par ] = cong (λ n → [ pos n , par ]) (lemma-nat-plus-zero n)
-  lemma-unit ⦃ MulℤC' ⦄ [ negsuc n , par ] = cong (λ n → [ negsuc n , par ]) (lemma-nat-plus-zero n)
+  unit ⦃ MulℤC' ⦄ = [ 1ℤ , one ]
+  lemma-unit ⦃ MulℤC' ⦄ = cong₂ [_,_] lemma-unit lemma-unit
 \end{code}
 \end{definition}
 
 \begin{proof}
   Now let's check if the given definition is valid:
-  \begin{enumerate}
-    \item Associative property of addition
-      \begin{code}
--- associative-SumℤC' : (x y z : ℤC') → (x + y) + z ≡ x + (y + z)
--- associative-SumℤC' = {!   !}
-      \end{code}
-  \end{enumerate}
+  \begin{code}
+module _ where
+  open import Algebra
+  open import Agda.Builtin.Sigma
+  import Data.Bool.Properties as 𝔽₂p
+  import Data.Integer.Properties as ℤp
+
+  ℤC'-isMagma = record
+    { isEquivalence = {! IsEquivalence _≡_ !}
+    ; ∙-cong        = {!   !}
+    }
+  ℤC'-isSemigroup = record
+    { isMagma = ℤC'-isMagma
+      ; assoc   = λ [ a , b ] [ c , d ] [ e , f ] → cong₂ [_,_] (ℤp.+-assoc a c e) (𝔽₂p.∨-assoc b d f)
+    }
+  ℤC'-isMonoid = record
+    { isSemigroup = ℤC'-isSemigroup
+    ; identity    = (λ [ v , p ] → cong₂ [_,_] (ℤp.+-identityˡ v) (𝔽₂p.∨-identityˡ p)) , λ [ v , p ] → cong₂ [_,_] (ℤp.+-identityʳ v) (𝔽₂p.∨-identityʳ p)
+    }
+  ℤC'-isGroup = record
+    { isMonoid = ℤC'-isMonoid
+    ; inverse  = (λ [ v , p ] → cong₂ [_,_] (ℤp.+-inverseˡ v) (𝔽₂p.∨-inverseˡ p)) , λ [ v , p ] → cong₂ [_,_] (ℤp.+-inverseʳ v) (𝔽₂p.∨-inverseʳ p)
+    ; ⁻¹-cong  = λ _ → cong₂ [_,_] refl refl
+    }
+  ℤC'-isAbelianGroup = record
+    { isGroup = ℤC'-isGroup
+    ; comm    = λ [ a , b ] [ c , d ] → cong₂ [_,_] (ℤp.+-comm a c) (𝔽₂p.∨-comm b d)
+    }
+  ℤC'-isRing = record
+    { +-isAbelianGroup = ℤC'-isAbelianGroup
+    --; *-cong = ?
+    --; *-assoc = ?
+    --; *-identity = ?
+    --; distrib = ?
+    --; zero = ?
+    }
+  ℤC'-isCommRing = record
+    { isRing = ℤC'-isRing
+    ; *-comm = λ [ a , b ] [ c , d ] → cong₂ [_,_] (ℤp.*-comm a c) (𝔽₂p.∧-comm b d)
+    }
+
+  \end{code}
 \end{proof}
 
 \end{document}
