@@ -31,7 +31,7 @@
 
 open import Int
 open import F2
-open import Agda.Builtin.Equality
+open import Utils.Equality
 \end{code}
 
 \chapter{Complete integer numbers}
@@ -68,7 +68,6 @@ Given $[a,b], [c,d] \in \bZ_C'$
 \begin{code}
 instance
   open import Ops
-  open import Utils
   SumℤC' : Sum ℤC'
   _+_ ⦃ SumℤC' ⦄ [ a , b ] [ c , d ] = [ a + c , b ⊕ d ]
   additive-zero ⦃ SumℤC' ⦄ = [ pos 0 , zero ]
@@ -81,12 +80,12 @@ instance
 \begin{code}
 instance
   open import Ops
-  open import Utils
+  open import Nat using (lemma-nat-plus-zero)
   MulℤC' : Mul ℤC'
   _·_ ⦃ MulℤC' ⦄ [ a , b ] [ c , d ] = [ a · c , b · d ]
   unit ⦃ MulℤC' ⦄ = [ pos 1 , one ]
-  lemma-unit ⦃ MulℤC' ⦄ [ pos n    , par ] = cong (λ n → [ pos n , par ]) (lemma-plus-zero n)
-  lemma-unit ⦃ MulℤC' ⦄ [ negsuc n , par ] = cong (λ n → [ negsuc n , par ]) (lemma-plus-zero n)
+  lemma-unit ⦃ MulℤC' ⦄ [ pos n    , par ] = cong (λ n → [ pos n , par ]) (lemma-nat-plus-zero n)
+  lemma-unit ⦃ MulℤC' ⦄ [ negsuc n , par ] = cong (λ n → [ negsuc n , par ]) (lemma-nat-plus-zero n)
 \end{code}
 \end{definition}
 

@@ -23,7 +23,7 @@ module Ops where
 
     field
       additive-zero : A
-      lemma-sum-zero : (a : A) → additive-zero + a ≡ a
+      lemma-sum-zero : {a : A} → additive-zero + a ≡ a
 
   open Sum ⦃ ... ⦄ public
 
@@ -51,7 +51,7 @@ module Ops where
 
     field
       unit : A
-      lemma-unit : (a : A) → unit · a ≡ a
+      lemma-unit : {a : A} → unit · a ≡ a
 
   open Mul ⦃ ... ⦄ public
 
