@@ -14,7 +14,7 @@ module Data.F2 where
   open import Ops
 
   instance
-    open Sum ⦃ ... ⦄ renaming (_+_ to _⊕_) public
+    open Sum ⦃ ... ⦄ using () renaming (_+_ to _⊕_) public
     Sum𝔽₂ : Sum 𝔽₂
     _⊕_ ⦃ Sum𝔽₂ ⦄ = Data.Bool._xor_
 

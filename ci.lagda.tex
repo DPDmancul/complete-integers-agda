@@ -78,7 +78,7 @@ instance
   SumℤC' : Sum ℤC'
   _+_ ⦃ SumℤC' ⦄ [ a , b ] [ c , d ] = [ a + c , b ⊕ d ]
   additive-zero ⦃ SumℤC' ⦄ = [ 0ℤ , zero ]
-  lemma-sum-zero ⦃ SumℤC' ⦄ = cong₂ [_,_] (lemma-sum-zero Sumℤ) (lemma-sum-zero Sum𝔽₂)
+  lemma-sum-zero ⦃ SumℤC' ⦄ = cong₂ [_,_] lemma-sum-zero lemma-sum-zero
 
   SubℤC' : Sub ℤC'
   -_ ⦃ SubℤC' ⦄ [ a , b ] = [ - a , b ]
@@ -115,14 +115,14 @@ module RingℤC' where
   +-comm : (a b : ℤC') → a + b ≡ b + a
   +-comm [ va , pa ] [ vb , pb ] = cong₂ [_,_] (ℤp.+-comm va vb) (𝔽₂p.⊕-comm pa pb)
 
-  +-identityˡ : (z : ℤC') → (additive-zero SumℤC') + z ≡ z
-  +-identityˡ _ = lemma-sum-zero SumℤC'
-  +-identityʳ : (z : ℤC') → z + (additive-zero SumℤC') ≡ z
-  +-identityʳ z = trans (+-comm z (additive-zero SumℤC')) (+-identityˡ z)
+  +-identityˡ : (z : ℤC') → additive-zero + z ≡ z
+  +-identityˡ _ = lemma-sum-zero
+  +-identityʳ : (z : ℤC') → z + additive-zero ≡ z
+  +-identityʳ z = trans (+-comm z additive-zero) (+-identityˡ z)
 
-  +-inverseˡ : (z : ℤC') → (- z) + z ≡ (additive-zero SumℤC')
+  +-inverseˡ : (z : ℤC') → (- z) + z ≡ additive-zero
   +-inverseˡ [ v , p ] = cong₂ [_,_] (ℤp.+-inverseˡ v) (𝔽₂p.⊕-self p)
-  +-inverseʳ : (z : ℤC') → z + (- z) ≡ (additive-zero SumℤC')
+  +-inverseʳ : (z : ℤC') → z + (- z) ≡ additive-zero
   +-inverseʳ [ v , p ] = cong₂ [_,_] (ℤp.+-inverseʳ v) (𝔽₂p.⊕-self p)
 
   ----------------------
