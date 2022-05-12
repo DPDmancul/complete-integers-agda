@@ -6,13 +6,14 @@ module Data.F2.Properties where
 
   open import Relation.Binary.PropositionalEquality
   open import Data.F2
+  open import Ops
 
-  ⊕-assoc : (a : 𝔽₂) → (b : 𝔽₂) → (c : 𝔽₂) → (a ⊕ b) ⊕ c ≡ a ⊕ (b ⊕ c)
+  ⊕-assoc : (a b c : 𝔽₂) → (a ⊕ b) ⊕ c ≡ a ⊕ (b ⊕ c)
   ⊕-assoc zero _    _ = refl
   ⊕-assoc one  zero _ = refl
   ⊕-assoc one  one  c = sym (not-involutive c)
 
-  ⊕-comm : (a : 𝔽₂) → (b : 𝔽₂) → a ⊕ b ≡ b ⊕ a
+  ⊕-comm : (a b : 𝔽₂) → a ⊕ b ≡ b ⊕ a
   ⊕-comm zero zero = refl
   ⊕-comm zero one  = refl
   ⊕-comm one  zero = refl
@@ -21,3 +22,9 @@ module Data.F2.Properties where
   ⊕-self : (a : 𝔽₂) → a ⊕ a ≡ zero
   ⊕-self zero = refl
   ⊕-self one  = refl
+
+  ∧-distribʳ-⊕ : (c a b : 𝔽₂) → (a ⊕ b) · c ≡ a · c ⊕ b · c
+  ∧-distribʳ-⊕ c zero b    = refl
+  ∧-distribʳ-⊕ c one  zero = sym (⊕-comm c zero)
+  ∧-distribʳ-⊕ c one  one  = sym (⊕-self c)
+

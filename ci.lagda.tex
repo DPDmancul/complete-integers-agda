@@ -105,9 +105,9 @@ module RingℤC' where
   import Data.F2.Properties as 𝔽₂p
   import Data.Integer.Properties as ℤp
 
-  ----------------------
-  -- Propoerties of + --
-  ----------------------
+  ---------------------
+  -- Properties of + --
+  ---------------------
 
   +-assoc : (a b c : ℤC') → (a + b) + c ≡ a + (b + c)
   +-assoc [ va , pa ] [ vb , pb ] [ vc , pc ] = cong₂ [_,_] (ℤp.+-assoc va vb vc) (𝔽₂p.⊕-assoc pa pb pc)
@@ -125,50 +125,88 @@ module RingℤC' where
   +-inverseʳ : (z : ℤC') → z + (- z) ≡ additive-zero
   +-inverseʳ [ v , p ] = cong₂ [_,_] (ℤp.+-inverseʳ v) (𝔽₂p.⊕-self p)
 
-  ----------------------
-  -- Propoerties of · --
-  ----------------------
+  ---------------------
+  -- Properties of · --
+  ---------------------
+
+  ·-assoc : (a b c : ℤC') → (a · b) · c ≡ a · (b · c)
+  ·-assoc [ va , pa ] [ vb , pb ] [ vc , pc ] = cong₂ [_,_] (ℤp.*-assoc va vb vc) (𝔽₂p.∧-assoc pa pb pc)
 
   ·-comm : (a b : ℤC') → a · b ≡ b · a
   ·-comm [ va , pa ] [ vb , pb ] = cong₂ [_,_] (ℤp.*-comm va vb) (𝔽₂p.∧-comm pa pb)
+
+  ·-identityˡ : (z : ℤC') → unit · z ≡ z
+  ·-identityˡ _ = lemma-unit
+  ·-identityʳ : (z : ℤC') → z · unit ≡ z
+  ·-identityʳ z = trans (·-comm z unit) (·-identityˡ z)
+
+  ·-distribʳ-+ : (c a b : ℤC') → (a + b) · c ≡ a · c + b · c
+  ·-distribʳ-+ [ vc , pc ] [ va , pa ] [ vb , pb ] = cong₂ [_,_] (ℤp.*-distribʳ-+ vc va vb) (𝔽₂p.∧-distribʳ-⊕ pc pa pb)
+  ·-distribˡ-+ : (c a b : ℤC') → c · (a + b) ≡ c · a + c · b
+  ·-distribˡ-+ c a b = trans (trans (·-comm c (a + b)) (·-distribʳ-+ c a b)) (cong₂ _+_  (·-comm a c) (·-comm b c))
+
+  ·-zeroˡ : (a : ℤC') → additive-zero · a ≡ additive-zero
+  ·-zeroˡ [ v , p ] = cong₂ [_,_] (ℤp.*-zeroˡ v)  (𝔽₂p.∧-zeroˡ p)
+  ·-zeroʳ : (a : ℤC') → a · additive-zero ≡ additive-zero
+  ·-zeroʳ a = trans (·-comm a additive-zero) (·-zeroˡ a)
 
   ----------------
   -- Structures --
   ----------------
 
-  ℤC'-isMagma = record
+  ℤC'-+-isMagma = record
     { isEquivalence = isEquivalence
     ; ∙-cong        =  cong₂ (_+_ ⦃ SumℤC' ⦄)
     }
-  ℤC'-isSemigroup = record
-    { isMagma = ℤC'-isMagma
+  ℤC'-·-isMagma = record
+    { isEquivalence = isEquivalence
+    ; ∙-cong        =  cong₂ (_·_ ⦃ MulℤC' ⦄)
+    }
+
+  ℤC'-+-isSemigroup = record
+    { isMagma = ℤC'-+-isMagma
     ; assoc   = +-assoc
     }
-  ℤC'-isMonoid = record
-    { isSemigroup = ℤC'-isSemigroup
+  ℤC'-·-isSemigroup = record
+    { isMagma = ℤC'-·-isMagma
+    ; assoc   = ·-assoc
+    }
+
+  ℤC'-+-isMonoid = record
+    { isSemigroup = ℤC'-+-isSemigroup
     ; identity    = +-identityˡ , +-identityʳ
     }
     where open import Agda.Builtin.Sigma
-  ℤC'-isGroup = record
-    { isMonoid = ℤC'-isMonoid
+  ℤC'-·-isMonoid = record
+    { isSemigroup = ℤC'-·-isSemigroup
+    ; identity    = ·-identityˡ , ·-identityʳ
+    }
+    where open import Agda.Builtin.Sigma
+
+  ℤC'-+-isGroup = record
+    { isMonoid = ℤC'-+-isMonoid
     ; inverse  = +-inverseˡ , +-inverseʳ
     ; ⁻¹-cong  = cong (-_)
     }
     where open import Agda.Builtin.Sigma
-  ℤC'-isAbelianGroup = record
-    { isGroup = ℤC'-isGroup
+
+  ℤC'-+-isAbelianGroup = record
+    { isGroup = ℤC'-+-isGroup
     ; comm    = +-comm
     }
-  -- ℤC'-isRing = record
-  --   { +-isAbelianGroup = ℤC'-isAbelianGroup
-  --   ; *-isMonoid       = {!   !}
-  --   ; distrib          = {!   !}
-  --   ; zero             = {!   !}
-  --   }
-  -- ℤC'-isCommRing = record
-  --   { isRing = {!   !} --ℤC'-isRing
-  --   ; *-comm = ·-comm
-  --   }
+
+  ℤC'-isRing = record
+    { +-isAbelianGroup = ℤC'-+-isAbelianGroup
+    ; *-isMonoid       = ℤC'-·-isMonoid
+    ; distrib          = ·-distribˡ-+ , ·-distribʳ-+
+    ; zero             = ·-zeroˡ , ·-zeroʳ
+    }
+    where open import Agda.Builtin.Sigma
+
+  ℤC'-isCommRing = record
+    { isRing = ℤC'-isRing
+    ; *-comm = ·-comm
+    }
 
   \end{code}
 \end{proof}
