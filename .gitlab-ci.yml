@@ -8,6 +8,7 @@ build:
     - nix-channel --add https://nixos.org/channels/nixos-unstable nixos
     - nix-channel --update
     - nix-shell --run "cd $(pwd); make"
-    - cp _out/*.pdf ./
+    - mv _out/*.pdf ./
+    - mv _out/html ./
   artifacts:
-    paths: [ "*.pdf" ]
+    paths: [ "*.pdf", "html/*" ]

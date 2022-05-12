@@ -148,14 +148,13 @@ module RingℤC' where
   ·-distribʳ-+ [ vc , pc ] [ va , pa ] [ vb , pb ] =
     cong₂ [_,_] (ℤp.*-distribʳ-+ vc va vb) (𝔽₂p.∧-distribʳ-⊕ pc pa pb)
   ·-distribˡ-+ : (c a b : ℤC') → c · (a + b) ≡ c · a + c · b
-  ·-distribˡ-+ c a b =
-    trans (trans (·-comm c (a + b)) (·-distribʳ-+ c a b))
-          (cong₂ _+_  (·-comm a c) (·-comm b c))
+  ·-distribˡ-+ c a b rewrite (·-comm c (a + b)) rewrite  (·-distribʳ-+ c a b)=
+    (cong₂ _+_  (·-comm a c) (·-comm b c))
 
   ·-zeroˡ : (a : ℤC') → additive-zero · a ≡ additive-zero
   ·-zeroˡ [ v , p ] = cong₂ [_,_] (ℤp.*-zeroˡ v)  (𝔽₂p.∧-zeroˡ p)
   ·-zeroʳ : (a : ℤC') → a · additive-zero ≡ additive-zero
-  ·-zeroʳ a = trans (·-comm a additive-zero) (·-zeroˡ a)
+  ·-zeroʳ a rewrite (·-comm a additive-zero) = ·-zeroˡ a
 
   ----------------
   -- Structures --
@@ -214,7 +213,6 @@ module RingℤC' where
     { isRing = ℤC'-isRing
     ; *-comm = ·-comm
     }
-
   \end{code}
 \end{proof}
 

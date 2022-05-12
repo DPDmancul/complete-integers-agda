@@ -1,17 +1,24 @@
 OUT := _out
+HTML := $(OUT)/html
 
-.PHONY: all
-all: $(OUT)/ci.pdf $(OUT)/html/ci.html
+MAIN := ci
 
-%.pdf: %.tex
-	cd "$(dir $^)"; latexmk -xelatex "$(notdir $^)"
+LITS := $(wildcard *.lagda.tex)
 
-$(OUT)/html/%.html: %.lagda.tex
-	agda --html --html-dir="$(OUT)/html" "$^"
+.PHONY: all pdf html
+all: pdf html
+
+pdf: $(OUT)/$(MAIN).pdf
+html: $(HTML)/$(MAIN).html
+
+$(OUT)/$(MAIN).pdf: $(LITS:%.lagda.tex=$(OUT)/%.tex)
+	cd "$(OUT)"; latexmk -xelatex "$(MAIN).tex"
+
+$(HTML)/%.html: %.lagda.tex
+	agda --html --html-dir="$(HTML)" "$<"
 
 $(OUT)/%.tex: %.lagda.tex
-	agda --latex --latex-dir="$(OUT)" "$^"
-
+	agda --latex --latex-dir="$(OUT)" "$<"
 
 .PHONY: clean
 clean:
