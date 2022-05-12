@@ -17,6 +17,12 @@
 \newunicodechar{⦃}{\ensuremath{\{\kern-0.6ex|}}
 \newunicodechar{⦄}{\ensuremath{|\kern-0.6ex\}}}
 \newunicodechar{λ}{\ensuremath{\lambda}}
+\newunicodechar{ˡ}{\ensuremath{^l}}
+\newunicodechar{ʳ}{\ensuremath{^r}}
+\newunicodechar{≡}{\ensuremath{\equiv}}
+\newunicodechar{∧}{\ensuremath{\land}}
+\newunicodechar{∙}{\ensuremath{\cdot}}
+\newunicodechar{⁻}{\ensuremath{^-}}
 
 \title{Complete integers}
 \author{Davide Peressoni}
@@ -68,10 +74,14 @@ Given $[a,b], [c,d] \in \bZ_C'$
 \begin{code}
 instance
   open import Ops
+
   SumℤC' : Sum ℤC'
   _+_ ⦃ SumℤC' ⦄ [ a , b ] [ c , d ] = [ a + c , b ⊕ d ]
   additive-zero ⦃ SumℤC' ⦄ = [ 0ℤ , zero ]
   lemma-sum-zero ⦃ SumℤC' ⦄ = cong₂ [_,_] (lemma-sum-zero Sumℤ) (lemma-sum-zero Sum𝔽₂)
+
+  SubℤC' : Sub ℤC'
+  -_ ⦃ SubℤC' ⦄ [ a , b ] = [ - a , b ]
 \end{code}
 
 \[[a,b] \cdot [c,d] \coloneqq [a\cdot c, b\cdot d]\]
@@ -79,6 +89,7 @@ instance
 \begin{code}
 instance
   open import Ops
+
   MulℤC' : Mul ℤC'
   _·_ ⦃ MulℤC' ⦄ [ a , b ] [ c , d ] = [ a · c , b · d ]
   unit ⦃ MulℤC' ⦄ = [ 1ℤ , one ]
@@ -89,45 +100,75 @@ instance
 \begin{proof}
   Now let's check if the given definition is valid:
   \begin{code}
-module _ where
+module RingℤC' where
   open import Algebra
-  open import Agda.Builtin.Sigma
-  import Data.Bool.Properties as 𝔽₂p
+  import Data.F2.Properties as 𝔽₂p
   import Data.Integer.Properties as ℤp
 
+  ----------------------
+  -- Propoerties of + --
+  ----------------------
+
+  +-assoc : (a b c : ℤC') → (a + b) + c ≡ a + (b + c)
+  +-assoc [ va , pa ] [ vb , pb ] [ vc , pc ] = cong₂ [_,_] (ℤp.+-assoc va vb vc) (𝔽₂p.⊕-assoc pa pb pc)
+
+  +-comm : (a b : ℤC') → a + b ≡ b + a
+  +-comm [ va , pa ] [ vb , pb ] = cong₂ [_,_] (ℤp.+-comm va vb) (𝔽₂p.⊕-comm pa pb)
+
+  +-identityˡ : (z : ℤC') → (additive-zero SumℤC') + z ≡ z
+  +-identityˡ _ = lemma-sum-zero SumℤC'
+  +-identityʳ : (z : ℤC') → z + (additive-zero SumℤC') ≡ z
+  +-identityʳ z = trans (+-comm z (additive-zero SumℤC')) (+-identityˡ z)
+
+  +-inverseˡ : (z : ℤC') → (- z) + z ≡ (additive-zero SumℤC')
+  +-inverseˡ [ v , p ] = cong₂ [_,_] (ℤp.+-inverseˡ v) (𝔽₂p.⊕-self p)
+  +-inverseʳ : (z : ℤC') → z + (- z) ≡ (additive-zero SumℤC')
+  +-inverseʳ [ v , p ] = cong₂ [_,_] (ℤp.+-inverseʳ v) (𝔽₂p.⊕-self p)
+
+  ----------------------
+  -- Propoerties of · --
+  ----------------------
+
+  ·-comm : (a b : ℤC') → a · b ≡ b · a
+  ·-comm [ va , pa ] [ vb , pb ] = cong₂ [_,_] (ℤp.*-comm va vb) (𝔽₂p.∧-comm pa pb)
+
+  ----------------
+  -- Structures --
+  ----------------
+
   ℤC'-isMagma = record
-    { isEquivalence = {! IsEquivalence _≡_ !}
-    ; ∙-cong        = {!   !}
+    { isEquivalence = isEquivalence
+    ; ∙-cong        =  cong₂ (_+_ ⦃ SumℤC' ⦄)
     }
   ℤC'-isSemigroup = record
     { isMagma = ℤC'-isMagma
-      ; assoc   = λ [ a , b ] [ c , d ] [ e , f ] → cong₂ [_,_] (ℤp.+-assoc a c e) (𝔽₂p.∨-assoc b d f)
+    ; assoc   = +-assoc
     }
   ℤC'-isMonoid = record
     { isSemigroup = ℤC'-isSemigroup
-    ; identity    = (λ [ v , p ] → cong₂ [_,_] (ℤp.+-identityˡ v) (𝔽₂p.∨-identityˡ p)) , λ [ v , p ] → cong₂ [_,_] (ℤp.+-identityʳ v) (𝔽₂p.∨-identityʳ p)
+    ; identity    = +-identityˡ , +-identityʳ
     }
+    where open import Agda.Builtin.Sigma
   ℤC'-isGroup = record
     { isMonoid = ℤC'-isMonoid
-    ; inverse  = (λ [ v , p ] → cong₂ [_,_] (ℤp.+-inverseˡ v) (𝔽₂p.∨-inverseˡ p)) , λ [ v , p ] → cong₂ [_,_] (ℤp.+-inverseʳ v) (𝔽₂p.∨-inverseʳ p)
-    ; ⁻¹-cong  = λ _ → cong₂ [_,_] refl refl
+    ; inverse  = +-inverseˡ , +-inverseʳ
+    ; ⁻¹-cong  = cong (-_)
     }
+    where open import Agda.Builtin.Sigma
   ℤC'-isAbelianGroup = record
     { isGroup = ℤC'-isGroup
-    ; comm    = λ [ a , b ] [ c , d ] → cong₂ [_,_] (ℤp.+-comm a c) (𝔽₂p.∨-comm b d)
+    ; comm    = +-comm
     }
-  ℤC'-isRing = record
-    { +-isAbelianGroup = ℤC'-isAbelianGroup
-    --; *-cong = ?
-    --; *-assoc = ?
-    --; *-identity = ?
-    --; distrib = ?
-    --; zero = ?
-    }
-  ℤC'-isCommRing = record
-    { isRing = ℤC'-isRing
-    ; *-comm = λ [ a , b ] [ c , d ] → cong₂ [_,_] (ℤp.*-comm a c) (𝔽₂p.∧-comm b d)
-    }
+  -- ℤC'-isRing = record
+  --   { +-isAbelianGroup = ℤC'-isAbelianGroup
+  --   ; *-isMonoid       = {!   !}
+  --   ; distrib          = {!   !}
+  --   ; zero             = {!   !}
+  --   }
+  -- ℤC'-isCommRing = record
+  --   { isRing = {!   !} --ℤC'-isRing
+  --   ; *-comm = ·-comm
+  --   }
 
   \end{code}
 \end{proof}

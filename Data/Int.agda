@@ -6,7 +6,7 @@
 ---------------------
 
 module Data.Int where
-  open import Data.Integer hiding (_+_ ; -_ ; _*_) public
+  open import Data.Integer hiding (_+_ ; -_ ; _-_ ; _*_) public
   open import Data.Integer.Properties
 
   open import Ops
