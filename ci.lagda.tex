@@ -110,15 +110,17 @@ module RingℤC' where
   ---------------------
 
   +-assoc : (a b c : ℤC') → (a + b) + c ≡ a + (b + c)
-  +-assoc [ va , pa ] [ vb , pb ] [ vc , pc ] = cong₂ [_,_] (ℤp.+-assoc va vb vc) (𝔽₂p.⊕-assoc pa pb pc)
+  +-assoc [ va , pa ] [ vb , pb ] [ vc , pc ] =
+    cong₂ [_,_] (ℤp.+-assoc va vb vc) (𝔽₂p.⊕-assoc pa pb pc)
 
   +-comm : (a b : ℤC') → a + b ≡ b + a
-  +-comm [ va , pa ] [ vb , pb ] = cong₂ [_,_] (ℤp.+-comm va vb) (𝔽₂p.⊕-comm pa pb)
+  +-comm [ va , pa ] [ vb , pb ] =
+    cong₂ [_,_] (ℤp.+-comm va vb) (𝔽₂p.⊕-comm pa pb)
 
   +-identityˡ : (z : ℤC') → additive-zero + z ≡ z
   +-identityˡ _ = lemma-sum-zero
   +-identityʳ : (z : ℤC') → z + additive-zero ≡ z
-  +-identityʳ z = trans (+-comm z additive-zero) (+-identityˡ z)
+  +-identityʳ z rewrite (+-comm z additive-zero) = +-identityˡ z
 
   +-inverseˡ : (z : ℤC') → (- z) + z ≡ additive-zero
   +-inverseˡ [ v , p ] = cong₂ [_,_] (ℤp.+-inverseˡ v) (𝔽₂p.⊕-self p)
@@ -130,20 +132,25 @@ module RingℤC' where
   ---------------------
 
   ·-assoc : (a b c : ℤC') → (a · b) · c ≡ a · (b · c)
-  ·-assoc [ va , pa ] [ vb , pb ] [ vc , pc ] = cong₂ [_,_] (ℤp.*-assoc va vb vc) (𝔽₂p.∧-assoc pa pb pc)
+  ·-assoc [ va , pa ] [ vb , pb ] [ vc , pc ] =
+    cong₂ [_,_] (ℤp.*-assoc va vb vc) (𝔽₂p.∧-assoc pa pb pc)
 
   ·-comm : (a b : ℤC') → a · b ≡ b · a
-  ·-comm [ va , pa ] [ vb , pb ] = cong₂ [_,_] (ℤp.*-comm va vb) (𝔽₂p.∧-comm pa pb)
+  ·-comm [ va , pa ] [ vb , pb ] =
+    cong₂ [_,_] (ℤp.*-comm va vb) (𝔽₂p.∧-comm pa pb)
 
   ·-identityˡ : (z : ℤC') → unit · z ≡ z
   ·-identityˡ _ = lemma-unit
   ·-identityʳ : (z : ℤC') → z · unit ≡ z
-  ·-identityʳ z = trans (·-comm z unit) (·-identityˡ z)
+  ·-identityʳ z rewrite (·-comm z unit) = ·-identityˡ z
 
   ·-distribʳ-+ : (c a b : ℤC') → (a + b) · c ≡ a · c + b · c
-  ·-distribʳ-+ [ vc , pc ] [ va , pa ] [ vb , pb ] = cong₂ [_,_] (ℤp.*-distribʳ-+ vc va vb) (𝔽₂p.∧-distribʳ-⊕ pc pa pb)
+  ·-distribʳ-+ [ vc , pc ] [ va , pa ] [ vb , pb ] =
+    cong₂ [_,_] (ℤp.*-distribʳ-+ vc va vb) (𝔽₂p.∧-distribʳ-⊕ pc pa pb)
   ·-distribˡ-+ : (c a b : ℤC') → c · (a + b) ≡ c · a + c · b
-  ·-distribˡ-+ c a b = trans (trans (·-comm c (a + b)) (·-distribʳ-+ c a b)) (cong₂ _+_  (·-comm a c) (·-comm b c))
+  ·-distribˡ-+ c a b =
+    trans (trans (·-comm c (a + b)) (·-distribʳ-+ c a b))
+          (cong₂ _+_  (·-comm a c) (·-comm b c))
 
   ·-zeroˡ : (a : ℤC') → additive-zero · a ≡ additive-zero
   ·-zeroˡ [ v , p ] = cong₂ [_,_] (ℤp.*-zeroˡ v)  (𝔽₂p.∧-zeroˡ p)
