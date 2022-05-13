@@ -6,6 +6,12 @@
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}
 
+\theoremstyle{lemma}
+\newtheorem{lemma}{Lemma}
+
+\theoremstyle{theorem}
+\newtheorem{theorem}{Theorem}
+
 \newcommand\bN{\mathbb{N}}
 \newunicodechar{ℕ}{\ensuremath{\mathbb{N}}}
 \newcommand\bZ{\mathbb{Z}}
@@ -23,6 +29,9 @@
 \newunicodechar{∧}{\ensuremath{\land}}
 \newunicodechar{∙}{\ensuremath{\cdot}}
 \newunicodechar{⁻}{\ensuremath{^-}}
+\newunicodechar{⟨}{\ensuremath{\langle}}
+\newunicodechar{⟩}{\ensuremath{\rangle}}
+\newunicodechar{∎}{\ensuremath{\qed}}
 
 \title{Complete integers}
 \author{Davide Peressoni}
@@ -35,8 +44,12 @@
 \begin{code}
 -- (c) Davide Peressoni 2022
 
+open import Data.N
 open import Data.Int
+import Data.Integer.Properties as ℤp
 open import Data.F2
+import Data.F2.Properties as 𝔽₂p
+open import Algebra
 open import Relation.Binary.PropositionalEquality
 \end{code}
 
@@ -101,9 +114,6 @@ instance
   Now let's check if the given definition is valid:
   \begin{code}
 module RingℤC' where
-  open import Algebra
-  import Data.F2.Properties as 𝔽₂p
-  import Data.Integer.Properties as ℤp
 
   ---------------------
   -- Properties of + --
@@ -215,6 +225,107 @@ module RingℤC' where
     }
   \end{code}
 \end{proof}
+
+\begin{lemma}[Powers of $\bZ_C'$]
+  \[[v,p]^n = [v^n,p]\quad\forall\ n\in\bN^+\]
+  \[[v,p]^0 = [1,1]\]
+\end{lemma}
+\begin{proof}~\\
+  \begin{code}
+lemma-ℤC'-powers : {z : ℤC'} {n : ℕ}
+  → z ^ n ≡ [_,_] ((ℤC'.val z) ^ n) ((ℤC'.par z) ^ n)
+lemma-ℤC'-powers {n = zero}    = refl
+lemma-ℤC'-powers {z} {ℕ.suc n} = cong (λ z' → z · z') (lemma-ℤC'-powers {n = n})
+
+lemma-ℤC'-powers-succ : {z : ℤC'} {n : ℕ}
+  → z ^ ℕ.suc n ≡ [_,_] ((ℤC'.val z) ^ ℕ.suc n) (ℤC'.par z)
+lemma-ℤC'-powers-succ {[ _ , p ]} {n}
+  = trans (lemma-ℤC'-powers {n = ℕ.suc n}) (cong₂ [_,_] refl (𝔽₂p.pow p n))
+
+lemma-ℤC'-powers-zero : {z : ℤC'} → z ^ zero ≡ unit
+lemma-ℤC'-powers-zero = refl
+\end{code}
+\end{proof}
+
+\section{Value and parity}
+In this section we will see two functions, that explain the role of $v$ and $p$,
+and see their properties.
+
+\begin{definition}[Value function]
+  \[\mathrm{val} \colon A \to \bZ\]
+  \[\mathrm{val}(z) \coloneqq z \quad\forall\ z\in\bZ\]
+  \[\mathrm{val}([v,p]) \coloneqq v \quad\forall\ [v,p]\in\bZ_C'\]
+  Later on we will define this function for other sets $A$.
+
+  \begin{code}
+record Val (A : Set) : Set where
+  field
+    val : A → ℤ
+
+open Val ⦃ ... ⦄
+
+instance
+  Valℤ : Val ℤ
+  val ⦃ Valℤ ⦄ z = z
+
+instance
+  ValℤC' : Val ℤC'
+  val ⦃ ValℤC' ⦄ = ℤC'.val
+  \end{code}
+\end{definition}
+
+\begin{theorem}[Properties of value]
+Given $x,y\in\bZ \lor $ and $z\in\bZ$
+\begin{enumerate}
+  \item Value is odd.
+    \[\mathrm{val}(-x) = -\mathrm{val}(x)\]
+    \begin{code}
+th-val-odd-ℤ : {x : ℤ} → val (- x) ≡ - val x
+th-val-odd-ℤ = refl
+th-val-odd-ℤC' : {x : ℤC'} → val (- x) ≡ - val x
+th-val-odd-ℤC' = refl
+\end{code}
+  \item Linearity.
+    \[\mathrm{val}(x+y) = \mathrm{val}(x)+\mathrm{val}(y)\]
+    \[\mathrm{val}(z\cdot x) = z\mathrm{val}(x)\]
+    \begin{code}
+th-val-linearity-+-ℤ : {x y : ℤ} → val (x + y) ≡ val x + val y
+th-val-linearity-+-ℤ = refl
+
+th-val-linearity-·-ℤ : {x z : ℤ} → val (z · x) ≡ z · val x
+th-val-linearity-·-ℤ = refl
+
+
+th-val-linearity-+-ℤC' : {x y : ℤC'} → val (x + y) ≡ val x + val y
+th-val-linearity-+-ℤC' = refl
+
+th-val-linearity-×ℕ-ℤC' : {x : ℤC'} {n : ℕ} → val (n × x) ≡ ℤ.pos n · val x
+th-val-linearity-×ℕ-ℤC' {n = zero}    = refl
+th-val-linearity-×ℕ-ℤC' {x} {ℕ.suc n} = begin
+  val (ℕ.suc n × x)            ≡⟨⟩
+  val (x + n × x)              ≡⟨ th-val-linearity-+-ℤC' {x} {n × x} ⟩
+  val x + val (n × x)          ≡⟨ cong (λ y → val x + y)
+                                  (th-val-linearity-×ℕ-ℤC' {x} {n}) ⟩
+  val x + ℤ.pos n · val x      ≡⟨ cong (λ y → y + ℤ.pos n · val x)
+                                       (sym (ℤp.*-identityˡ (val  x))) ⟩
+  1ℤ · val x + ℤ.pos n · val x ≡⟨ sym (ℤp.*-distribʳ-+ (val x) 1ℤ (ℤ.pos n)) ⟩
+  (1ℤ + ℤ.pos n) · val x       ≡⟨⟩
+  ℤ.pos (ℕ.suc n) · val x      ∎
+  where open ≡-Reasoning
+
+th-val-linearity-×-ℤC' : {x : ℤC'} {z : ℤ} → val (z × x) ≡ z · val x
+th-val-linearity-×-ℤC' {z = ℤ.pos n}  = cong val (th-val-linearity-×ℕ-ℤC' {n = n})
+th-val-linearity-×-ℤC' {x} { -[1+ n ]} = begin
+  val (-[1+ n ] × x)        ≡⟨⟩
+  val (- (ℕ.suc n × x))     ≡⟨⟩
+  - val (ℕ.suc n × x)       ≡⟨ cong (-_) (th-val-linearity-×ℕ-ℤC' {n = ℕ.suc n}) ⟩
+  - (+[1+ n ] · val x)      ≡⟨ ℤp.neg-distribˡ-* +[1+ n ] (val x) ⟩
+  (- +[1+ n ]) · val x      ≡⟨⟩
+  -[1+ n ] · val x          ∎
+  where open ≡-Reasoning
+  \end{code}
+\end{enumerate}
+\end{theorem}
 
 \end{document}
 

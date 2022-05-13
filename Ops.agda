@@ -55,9 +55,39 @@ module Ops where
 
   open Mul ⦃ ... ⦄ public
 
-  ---------
-  -- Pow --
-  ---------
+  --------------------------------
+  -- Times (Sum exponentiation) --
+  --------------------------------
+  record Times (A B : Set) {C : Set} : Set where
+
+    infixl 7 _×_
+    field _×_ : A → B → C
+
+  open Times ⦃ ... ⦄ public
+
+  instance
+    open import Agda.Builtin.Nat hiding (_+_)
+    open import Data.Integer hiding (_+_ ; -_)
+
+  -- Times with natural coefficients
+    NatTimesˡ : {A : Set} ⦃ _ : Sum A ⦄ → Times Nat A {A}
+    _×_ ⦃ NatTimesˡ ⦄ zero    _ = additive-zero
+    _×_ ⦃ NatTimesˡ ⦄ (suc e) b = b + e × b
+
+    NatTimesʳ : {A : Set} ⦃ _ : Sum A ⦄ → Times A Nat {A}
+    _×_ ⦃ NatTimesʳ ⦄ a b = b × a
+
+  -- Times with integer coefficients
+    IntTimesˡ : {A : Set} ⦃ _ : Sum A ⦄ ⦃ _ : Sub A ⦄ → Times ℤ A {A}
+    _×_ ⦃ IntTimesˡ ⦄ (ℤ.pos e)  b = e × b
+    _×_ ⦃ IntTimesˡ ⦄ (-[1+_] e) b = - (Nat.suc e × b)
+
+    IntTimesʳ : {A : Set} ⦃ _ : Sum A ⦄ ⦃ _ : Sub A ⦄ → Times A ℤ {A}
+    _×_ ⦃ IntTimesʳ ⦄ a b = b × a
+
+  ------------------------------
+  -- Pow (Mul exponentiation) --
+  ------------------------------
   record Pow (B E : Set) {R : Set} : Set where
 
     infixl 8 _^_
@@ -69,6 +99,7 @@ module Ops where
   instance
     open import Agda.Builtin.Nat
     NatPow : {A : Set} ⦃ _ : Mul A ⦄ → Pow A Nat {A}
-    _^_ ⦃ NatPow ⦄ _ zero = unit
+    _^_ ⦃ NatPow ⦄ _ zero    = unit
     _^_ ⦃ NatPow ⦄ b (suc e) = b · b ^ e
+
 

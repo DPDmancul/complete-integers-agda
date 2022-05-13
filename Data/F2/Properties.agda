@@ -6,6 +6,7 @@ module Data.F2.Properties where
 
   open import Relation.Binary.PropositionalEquality
   open import Data.F2
+  open import Data.N
   open import Ops
 
   ⊕-assoc : (a b c : 𝔽₂) → (a ⊕ b) ⊕ c ≡ a ⊕ (b ⊕ c)
@@ -27,4 +28,8 @@ module Data.F2.Properties where
   ∧-distribʳ-⊕ c zero b    = refl
   ∧-distribʳ-⊕ c one  zero = sym (⊕-comm c zero)
   ∧-distribʳ-⊕ c one  one  = sym (⊕-self c)
+
+  pow : (z : 𝔽₂) (n : ℕ) → z ^ (suc n) ≡ z
+  pow z zero   = ∧-identityʳ z
+  pow z (suc n) rewrite pow z n = ∧-idem z
 
