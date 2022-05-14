@@ -104,7 +104,7 @@ instance
   open import Ops
 
   MulℤC' : Mul ℤC'
-  _·_ ⦃ MulℤC' ⦄ [ a , b ] [ c , d ] = [ a · c , b · d ]
+  _*_ ⦃ MulℤC' ⦄ [ a , b ] [ c , d ] = [ a · c , b · d ]
   unit ⦃ MulℤC' ⦄ = [ 1ℤ , one ]
   lemma-unit ⦃ MulℤC' ⦄ = cong₂ [_,_] lemma-unit lemma-unit
 \end{code}
@@ -176,7 +176,7 @@ module RingℤC' where
     }
   ℤC'-·-isMagma = record
     { isEquivalence = isEquivalence
-    ; ∙-cong        =  cong₂ (_·_ ⦃ MulℤC' ⦄)
+    ; ∙-cong        =  cong₂ (_*_ ⦃ MulℤC' ⦄)
     }
 
   ℤC'-+-isSemigroup = record
@@ -299,13 +299,13 @@ th-val-linearity-·-ℤ = refl
 th-val-linearity-+-ℤC' : {x y : ℤC'} → val (x + y) ≡ val x + val y
 th-val-linearity-+-ℤC' = refl
 
-th-val-linearity-×ℕ-ℤC' : {x : ℤC'} {n : ℕ} → val (n × x) ≡ ℤ.pos n · val x
-th-val-linearity-×ℕ-ℤC' {n = zero}    = refl
-th-val-linearity-×ℕ-ℤC' {x} {ℕ.suc n} = begin
-  val (ℕ.suc n × x)            ≡⟨⟩
-  val (x + n × x)              ≡⟨ th-val-linearity-+-ℤC' {x} {n × x} ⟩
-  val x + val (n × x)          ≡⟨ cong (λ y → val x + y)
-                                  (th-val-linearity-×ℕ-ℤC' {x} {n}) ⟩
+th-val-linearity-·ℕ-ℤC' : {x : ℤC'} {n : ℕ} → val (n · x) ≡ ℤ.pos n · val x
+th-val-linearity-·ℕ-ℤC' {n = zero}    = refl
+th-val-linearity-·ℕ-ℤC' {x} {ℕ.suc n} = begin
+  val (ℕ.suc n · x)            ≡⟨⟩
+  val (x + n · x)              ≡⟨ th-val-linearity-+-ℤC' {x} {n · x} ⟩
+  val x + val (n · x)          ≡⟨ cong (λ y → val x + y)
+                                  (th-val-linearity-·ℕ-ℤC' {x} {n}) ⟩
   val x + ℤ.pos n · val x      ≡⟨ cong (λ y → y + ℤ.pos n · val x)
                                        (sym (ℤp.*-identityˡ (val  x))) ⟩
   1ℤ · val x + ℤ.pos n · val x ≡⟨ sym (ℤp.*-distribʳ-+ (val x) 1ℤ (ℤ.pos n)) ⟩
@@ -313,12 +313,12 @@ th-val-linearity-×ℕ-ℤC' {x} {ℕ.suc n} = begin
   ℤ.pos (ℕ.suc n) · val x      ∎
   where open ≡-Reasoning
 
-th-val-linearity-×-ℤC' : {x : ℤC'} {z : ℤ} → val (z × x) ≡ z · val x
-th-val-linearity-×-ℤC' {z = ℤ.pos n}  = cong val (th-val-linearity-×ℕ-ℤC' {n = n})
-th-val-linearity-×-ℤC' {x} { -[1+ n ]} = begin
-  val (-[1+ n ] × x)        ≡⟨⟩
-  val (- (ℕ.suc n × x))     ≡⟨⟩
-  - val (ℕ.suc n × x)       ≡⟨ cong (-_) (th-val-linearity-×ℕ-ℤC' {n = ℕ.suc n}) ⟩
+th-val-linearity-·-ℤC' : {x : ℤC'} {z : ℤ} → val (z · x) ≡ z · val x
+th-val-linearity-·-ℤC' {z = ℤ.pos n}  = cong val (th-val-linearity-·ℕ-ℤC' {n = n})
+th-val-linearity-·-ℤC' {x} { -[1+ n ]} = begin
+  val (-[1+ n ] · x)        ≡⟨⟩
+  val (- (ℕ.suc n · x))     ≡⟨⟩
+  - val (ℕ.suc n · x)       ≡⟨ cong (-_) (th-val-linearity-·ℕ-ℤC' {n = ℕ.suc n}) ⟩
   - (+[1+ n ] · val x)      ≡⟨ ℤp.neg-distribˡ-* +[1+ n ] (val x) ⟩
   (- +[1+ n ]) · val x      ≡⟨⟩
   -[1+ n ] · val x          ∎

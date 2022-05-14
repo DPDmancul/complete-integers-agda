@@ -24,7 +24,7 @@ module Data.Int where
 
   instance
     Mulℤ : Mul ℤ
-    _·_ ⦃ Mulℤ ⦄ = Data.Integer._*_
+    _*_ ⦃ Mulℤ ⦄ = Data.Integer._*_
 
     unit ⦃ Mulℤ ⦄ = 1ℤ
     lemma-unit ⦃ Mulℤ ⦄ {a} = *-identityˡ a

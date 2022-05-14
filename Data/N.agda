@@ -20,7 +20,7 @@ module Data.N where
 
   instance
     Mulℕ : Mul ℕ
-    _·_ ⦃ Mulℕ ⦄ = Data.Nat._*_
+    _*_ ⦃ Mulℕ ⦄ = Data.Nat._*_
 
     unit ⦃ Mulℕ ⦄ = 1
     lemma-unit ⦃ Mulℕ ⦄ {a} = *-identityˡ a

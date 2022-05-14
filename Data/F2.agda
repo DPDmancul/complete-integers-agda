@@ -23,7 +23,7 @@ module Data.F2 where
 
   instance
     Mul𝔽₂ : Mul 𝔽₂
-    _·_ ⦃ Mul𝔽₂ ⦄ = Data.Bool._∧_
+    _*_ ⦃ Mul𝔽₂ ⦄ = Data.Bool._∧_
 
     unit ⦃ Mul𝔽₂ ⦄ = one
     lemma-unit ⦃ Mul𝔽₂ ⦄ = refl
