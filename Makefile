@@ -1,26 +1,33 @@
-OUT := _out
-HTML := $(OUT)/html
+R := Rscript -e
+bookdown = $(R) "bookdown::render_book('_bookdown.yml', 'bookdown::$(1)')"
 
-MAIN := ci
+SRC := $(CURDIR)/src
+MAIN := $(SRC)/ci.lagda.md
+OUT := $(CURDIR)/_book
 
-LITS := $(wildcard *.lagda.tex)
-
-.PHONY: all pdf html
+.PHONY: all test pdf html
 all: pdf html
 
-pdf: $(OUT)/$(MAIN).pdf
-html: $(HTML)/$(MAIN).html
+test:
+	cd "$(SRC)"; agda "$(MAIN)"
 
-$(OUT)/$(MAIN).pdf: $(LITS:%.lagda.tex=$(OUT)/%.tex)
-	cd "$(OUT)"; latexmk -xelatex "$(MAIN).tex"
+pdf:
+	$(call bookdown,pdf_book)
 
-$(HTML)/%.html: %.lagda.tex
-	agda --html --html-dir="$(HTML)" "$<"
-
-$(OUT)/%.tex: %.lagda.tex
-	agda --latex --latex-dir="$(OUT)" "$<"
+html: TMP := $(shell mktemp -d)
+html:
+	@mkdir -p "$(TMP)/$(notdir $(SRC))"
+	cd "$(SRC)"; agda --html --html-highlight=auto --html-dir="$(TMP)" "$(MAIN)"
+	@cd "$(TMP)"; for e in *.md; do mv "$$e" "$(notdir $(SRC))/$${e%.md}.lagda.md"; done
+	@cp *.{yml,Rmd} "$(TMP)/"
+	cd "$(TMP)"; $(call bookdown,gitbook)
+	@cp -r "$(TMP)/$(notdir $(OUT))" "$(dir $(OUT))/"
+	@chmod +w "$(TMP)/"*.css
+	@sed -i 's/\(;\? *}\|;\)/ !important\1/' "$(TMP)/"*.css
+	@cp "$(TMP)/"*.{html,css} "$(OUT)/"
+	@rm -rf "$(TMP)"
 
 .PHONY: clean
 clean:
-	rm -rf "$(OUT)"
+	rm -rf "$(OUT)" _minted* *.pyg *.log
 

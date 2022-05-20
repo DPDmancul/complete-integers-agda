@@ -1,47 +1,5 @@
-\documentclass[a4paper]{report}
-\usepackage[hidelinks]{hyperref}
-\usepackage[links]{agda}
-\usepackage{amsmath, amssymb, mathtools, amsthm, newunicodechar}
-
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}
-
-\theoremstyle{lemma}
-\newtheorem{lemma}{Lemma}
-
-\theoremstyle{theorem}
-\newtheorem{theorem}{Theorem}
-
-\newcommand\bN{\mathbb{N}}
-\newunicodechar{ℕ}{\ensuremath{\mathbb{N}}}
-\newcommand\bZ{\mathbb{Z}}
-\newunicodechar{ℤ}{\ensuremath{\mathbb{Z}}}
-\newcommand\bF{\mathbb{F}}
-\newunicodechar{𝔽}{\ensuremath{\mathbb{F}}}
-\newunicodechar{₂}{\ensuremath{_2}}
-\newunicodechar{⊕}{\ensuremath{\oplus}}
-\newunicodechar{⦃}{\ensuremath{\{\kern-0.6ex|}}
-\newunicodechar{⦄}{\ensuremath{|\kern-0.6ex\}}}
-\newunicodechar{λ}{\ensuremath{\lambda}}
-\newunicodechar{ˡ}{\ensuremath{^l}}
-\newunicodechar{ʳ}{\ensuremath{^r}}
-\newunicodechar{≡}{\ensuremath{\equiv}}
-\newunicodechar{∧}{\ensuremath{\land}}
-\newunicodechar{∙}{\ensuremath{\cdot}}
-\newunicodechar{⁻}{\ensuremath{^-}}
-\newunicodechar{⟨}{\ensuremath{\langle}}
-\newunicodechar{⟩}{\ensuremath{\rangle}}
-\newunicodechar{∎}{\ensuremath{\qed}}
-
-\title{Complete integers}
-\author{Davide Peressoni}
-\date{May 2022}
-
-\begin{document}
-
-\maketitle
-
-\begin{code}
+<!--
+```agda
 -- (c) Davide Peressoni 2022
 
 open import Data.N
@@ -51,40 +9,41 @@ open import Data.F2
 import Data.F2.Properties as 𝔽₂p
 open import Algebra
 open import Relation.Binary.PropositionalEquality
-\end{code}
+```
+-->
 
-\chapter{Complete integer numbers}
+# Complete integer numbers
 
-\textbf{TODO} sistemare\\
+**TODO** sistemare  
 In this chapter we will define the ring of complete integers ($\bZ_C$) and we will
 see that it is a superset of $\bZ$. Then we will call the remaining dis-integers
 ($\bZ_D$) which are the dual of integers ($\bZ$) along parity (e.g. in $\bZ$ the unit is
 odd, in $\bZ_D$ the unit is even).
 
-\begin{definition}[Complete integers prime]
+::: {.definition name="Complete integers prime"}
 Let's define the set of the complete integer numbers prime as
 
-\[\bZ_C' \coloneqq \bZ\times\bF_2\]
+$$\bZ_C' \coloneqq \bZ\times\bF_2$$
 
 We will call the first component \emph{value}, and the second \emph{parity}.
 
-\begin{code}
+```agda
 record ℤC' : Set where
   constructor [_,_]
   field
     val : ℤ
     par : 𝔽₂
-\end{code}
-\end{definition}
+```
+:::
 
-\begin{definition}[Ring $\bZ_C'$]
+::: {.definition name="Ring $\bZ_C'$"}
 Let's define $\bZ_C'$ as a commutative ring with unit:
 
 Given $[a,b], [c,d] \in \bZ_C'$
 
-\[[a,b] + [c,d] \coloneqq [a+c, b\oplus d]\]
+$$[a,b] + [c,d] \coloneqq [a+c, b\oplus d]$$
 
-\begin{code}
+```agda
 instance
   open import Ops
 
@@ -95,11 +54,11 @@ instance
 
   SubℤC' : Sub ℤC'
   -_ ⦃ SubℤC' ⦄ [ a , b ] = [ - a , b ]
-\end{code}
+```
 
-\[[a,b] \cdot [c,d] \coloneqq [a\cdot c, b\cdot d]\]
+$$[a,b] \cdot [c,d] \coloneqq [a\cdot c, b\cdot d]$$
 
-\begin{code}
+```agda
 instance
   open import Ops
 
@@ -107,12 +66,11 @@ instance
   _·_ ⦃ MulℤC' ⦄ [ a , b ] [ c , d ] = [ a · c , b · d ]
   unit ⦃ MulℤC' ⦄ = [ 1ℤ , one ]
   lemma-unit ⦃ MulℤC' ⦄ = cong₂ [_,_] lemma-unit lemma-unit
-\end{code}
-\end{definition}
-
-\begin{proof}
+```
+:::
+::: {.proof}
   Now let's check if the given definition is valid:
-  \begin{code}
+```agda
 module RingℤC' where
 
   ---------------------
@@ -223,15 +181,16 @@ module RingℤC' where
     { isRing = ℤC'-isRing
     ; *-comm = ·-comm
     }
-  \end{code}
-\end{proof}
+  ```
+:::
 
-\begin{lemma}[Powers of $\bZ_C'$]
-  \[[v,p]^n = [v^n,p]\quad\forall\ n\in\bN^+\]
-  \[[v,p]^0 = [1,1]\]
-\end{lemma}
-\begin{proof}~\\
-  \begin{code}
+::: {.lemma name="Powers of $\bZ_C'$"}
+  $$[v,p]^n = [v^n,p]\quad\forall\ n\in\bN^+$$
+  $$[v,p]^0 = [1,1]$$
+:::
+::: {.proof}
+\   
+```agda
 lemma-ℤC'-powers : {z : ℤC'} {n : ℕ}
   → z ^ n ≡ [_,_] ((ℤC'.val z) ^ n) ((ℤC'.par z) ^ n)
 lemma-ℤC'-powers {n = zero}    = refl
@@ -244,20 +203,20 @@ lemma-ℤC'-powers-succ {[ _ , p ]} {n}
 
 lemma-ℤC'-powers-zero : {z : ℤC'} → z ^ zero ≡ unit
 lemma-ℤC'-powers-zero = refl
-\end{code}
-\end{proof}
+```
+:::
 
-\section{Value and parity}
+## Value and parity
 In this section we will see two functions, that explain the role of $v$ and $p$,
 and see their properties.
 
-\begin{definition}[Value function]
-  \[\mathrm{val} \colon A \to \bZ\]
-  \[\mathrm{val}(z) \coloneqq z \quad\forall\ z\in\bZ\]
-  \[\mathrm{val}([v,p]) \coloneqq v \quad\forall\ [v,p]\in\bZ_C'\]
+::: {.definition name="Value function"}
+  $$\mathrm{val} \colon A \to \bZ$$
+  $$\mathrm{val}(z) \coloneqq z \quad\forall\ z\in\bZ$$
+  $$\mathrm{val}([v,p]) \coloneqq v \quad\forall\ [v,p]\in\bZ_C'$$
   Later on we will define this function for other sets $A$.
 
-  \begin{code}
+```agda
 record Val (A : Set) : Set where
   field
     val : A → ℤ
@@ -271,24 +230,29 @@ instance
 instance
   ValℤC' : Val ℤC'
   val ⦃ ValℤC' ⦄ = ℤC'.val
-  \end{code}
-\end{definition}
+```
+:::
 
-\begin{theorem}[Properties of value]
-Given $x,y\in\bZ \lor $ and $z\in\bZ$
-\begin{enumerate}
-  \item Value is odd.
-    \[\mathrm{val}(-x) = -\mathrm{val}(x)\]
-    \begin{code}
+::: {.theorem name="Properties of value"}
+Given $x,y\in\bZ \lor x,y\in\bZ_C'$ and $z\in\bZ$
+
+1. Value is odd.
+
+  $$\mathrm{val}(-x) = -\mathrm{val}(x)$$
+
+```agda
 th-val-odd-ℤ : {x : ℤ} → val (- x) ≡ - val x
 th-val-odd-ℤ = refl
 th-val-odd-ℤC' : {x : ℤC'} → val (- x) ≡ - val x
 th-val-odd-ℤC' = refl
-\end{code}
-  \item Linearity.
-    \[\mathrm{val}(x+y) = \mathrm{val}(x)+\mathrm{val}(y)\]
-    \[\mathrm{val}(z\cdot x) = z\mathrm{val}(x)\]
-    \begin{code}
+```
+
+2. Linearity.
+
+  $$\mathrm{val}(x+y) = \mathrm{val}(x)+\mathrm{val}(y)$$
+  $$\mathrm{val}(z\cdot x) = z\mathrm{val}(x)$$
+
+```agda
 th-val-linearity-+-ℤ : {x y : ℤ} → val (x + y) ≡ val x + val y
 th-val-linearity-+-ℤ = refl
 
@@ -299,13 +263,13 @@ th-val-linearity-·-ℤ = refl
 th-val-linearity-+-ℤC' : {x y : ℤC'} → val (x + y) ≡ val x + val y
 th-val-linearity-+-ℤC' = refl
 
-th-val-linearity-×ℕ-ℤC' : {x : ℤC'} {n : ℕ} → val (n × x) ≡ ℤ.pos n · val x
-th-val-linearity-×ℕ-ℤC' {n = zero}    = refl
-th-val-linearity-×ℕ-ℤC' {x} {ℕ.suc n} = begin
+th-val-linearity-·ℕ-ℤC' : {x : ℤC'} {n : ℕ} → val (n × x) ≡ ℤ.pos n · val x
+th-val-linearity-·ℕ-ℤC' {n = zero}    = refl
+th-val-linearity-·ℕ-ℤC' {x} {ℕ.suc n} = begin
   val (ℕ.suc n × x)            ≡⟨⟩
   val (x + n × x)              ≡⟨ th-val-linearity-+-ℤC' {x} {n × x} ⟩
   val x + val (n × x)          ≡⟨ cong (λ y → val x + y)
-                                  (th-val-linearity-×ℕ-ℤC' {x} {n}) ⟩
+                                  (th-val-linearity-·ℕ-ℤC' {x} {n}) ⟩
   val x + ℤ.pos n · val x      ≡⟨ cong (λ y → y + ℤ.pos n · val x)
                                        (sym (ℤp.*-identityˡ (val  x))) ⟩
   1ℤ · val x + ℤ.pos n · val x ≡⟨ sym (ℤp.*-distribʳ-+ (val x) 1ℤ (ℤ.pos n)) ⟩
@@ -313,19 +277,17 @@ th-val-linearity-×ℕ-ℤC' {x} {ℕ.suc n} = begin
   ℤ.pos (ℕ.suc n) · val x      ∎
   where open ≡-Reasoning
 
-th-val-linearity-×-ℤC' : {x : ℤC'} {z : ℤ} → val (z × x) ≡ z · val x
-th-val-linearity-×-ℤC' {z = ℤ.pos n}  = cong val (th-val-linearity-×ℕ-ℤC' {n = n})
-th-val-linearity-×-ℤC' {x} { -[1+ n ]} = begin
+th-val-linearity-·-ℤC' : {x : ℤC'} {z : ℤ} → val (z × x) ≡ z · val x
+th-val-linearity-·-ℤC' {z = ℤ.pos n}  = cong val (th-val-linearity-·ℕ-ℤC' {n = n})
+th-val-linearity-·-ℤC' {x} { -[1+ n ]} = begin
   val (-[1+ n ] × x)        ≡⟨⟩
   val (- (ℕ.suc n × x))     ≡⟨⟩
-  - val (ℕ.suc n × x)       ≡⟨ cong (-_) (th-val-linearity-×ℕ-ℤC' {n = ℕ.suc n}) ⟩
+  - val (ℕ.suc n × x)       ≡⟨ cong (-_) (th-val-linearity-·ℕ-ℤC' {n = ℕ.suc n}) ⟩
   - (+[1+ n ] · val x)      ≡⟨ ℤp.neg-distribˡ-* +[1+ n ] (val x) ⟩
   (- +[1+ n ]) · val x      ≡⟨⟩
   -[1+ n ] · val x          ∎
   where open ≡-Reasoning
-  \end{code}
-\end{enumerate}
-\end{theorem}
+```
 
-\end{document}
+:::
 

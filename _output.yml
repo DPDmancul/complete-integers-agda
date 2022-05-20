@@ -1,0 +1,15 @@
+bookdown::gitbook:
+  split_by: section+number
+  css: [ "Agda.css" ]
+  config:
+    # sharing:
+      # gitlab: true
+
+bookdown::pdf_book:
+  extra_dependencies:
+    minted: null
+  pandoc_args:
+    - --lua-filter=minted.lua
+  includes:
+    in_header: "chars.tex"
+

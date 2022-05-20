@@ -1,5 +1,6 @@
 stages:
   - build
+  - publish
 
 build:
   image: nixos/nix
@@ -8,7 +9,14 @@ build:
     - nix-channel --add https://nixos.org/channels/nixos-unstable nixos
     - nix-channel --update
     - nix-shell --run "cd $(pwd); make"
-    - mv _out/*.pdf ./
-    - mv _out/html ./
   artifacts:
-    paths: [ "*.pdf", "html/*" ]
+    paths: [ _book ]
+
+pages:
+  stage: publish
+  script:
+    - mv _book public
+  artifacts:
+    paths: [ public ]
+  rules: [ if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH ]
+

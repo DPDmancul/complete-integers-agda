@@ -1,0 +1,29 @@
+---
+title: "Complete integers"
+author: "Davide Peressoni"
+date: "May 2022"
+description: "TODO"
+
+url: https://dpdmancul.gitlab.io/complete-integers-agda
+repo.base: https://gitlab.com/DPDmancul/complete-integers-agda
+
+documentclass: book
+---
+
+# Introduction {-}
+
+```{r, echo=F}
+library(knitr)
+if (knitr::is_latex_output())
+  options(tinytex.engine_args = '-shell-escape')
+```
+
+\newcommand\bN{\mathbb{N}}
+\newcommand\bZ{\mathbb{Z}}
+\newcommand\bF{\mathbb{F}}
+
+\newcommand{\coloneqq}{\mathrel{:=}}
+
+
+TODO
+

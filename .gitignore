@@ -1,3 +1,6 @@
 *.agdai
-_out
+_book
+*.log
+_minted*
+*.pyg
 
