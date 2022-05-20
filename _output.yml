@@ -1,5 +1,5 @@
 bookdown::gitbook:
-  split_by: section+number
+  split_by: rmd
   css: [ "Agda.css" ]
   config:
     # sharing:
