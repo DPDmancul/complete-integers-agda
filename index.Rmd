@@ -25,5 +25,11 @@ if (knitr::is_latex_output())
 \newcommand{\coloneqq}{\mathrel{:=}}
 
 
+\newcommand\mkw[1]{\mathop{\mathrm{#1}}\nolimits}
+
+\newcommand{\val}{\mkw{val}}
+\newcommand{\Par}{\mkw{par}}
+
+
 TODO
 

@@ -14,7 +14,7 @@ open import Relation.Binary.PropositionalEquality
 
 # Complete integer numbers
 
-**TODO** sistemare  
+**TODO** sistemare
 In this chapter we will define the ring of complete integers ($\bZ_C$) and we will
 see that it is a superset of $\bZ$. Then we will call the remaining dis-integers
 ($\bZ_D$) which are the dual of integers ($\bZ$) along parity (e.g. in $\bZ$ the unit is
@@ -36,7 +36,7 @@ record ℤC' : Set where
 ```
 :::
 
-::: {.definition name="Ring $\bZ_C'$"}
+::: {.definition name="Ring of complete integers prime"}
 Let's define $\bZ_C'$ as a commutative ring with unit:
 
 Given $[a,b], [c,d] \in \bZ_C'$
@@ -184,12 +184,12 @@ module RingℤC' where
   ```
 :::
 
-::: {.lemma name="Powers of $\bZ_C'$"}
+::: {.lemma name="Powers of complete integers prime"}
   $$[v,p]^n = [v^n,p]\quad\forall\ n\in\bN^+$$
   $$[v,p]^0 = [1,1]$$
 :::
 ::: {.proof}
-\   
+\
 ```agda
 lemma-ℤC'-powers : {z : ℤC'} {n : ℕ}
   → z ^ n ≡ [_,_] ((ℤC'.val z) ^ n) ((ℤC'.par z) ^ n)
@@ -211,9 +211,9 @@ In this section we will see two functions, that explain the role of $v$ and $p$,
 and see their properties.
 
 ::: {.definition name="Value function"}
-  $$\mathrm{val} \colon A \to \bZ$$
-  $$\mathrm{val}(z) \coloneqq z \quad\forall\ z\in\bZ$$
-  $$\mathrm{val}([v,p]) \coloneqq v \quad\forall\ [v,p]\in\bZ_C'$$
+  $$\val \colon A \to \bZ$$
+  $$\val(z) \coloneqq z \quad\forall\ z\in\bZ$$
+  $$\val([v,p]) \coloneqq v \quad\forall\ [v,p]\in\bZ_C'$$
   Later on we will define this function for other sets $A$.
 
 ```agda
@@ -238,38 +238,39 @@ Given $x,y\in\bZ \lor x,y\in\bZ_C'$ and $z\in\bZ$
 
 1. Value is odd.
 
-  $$\mathrm{val}(-x) = -\mathrm{val}(x)$$
+  $$\val(-x) = -\val(x)$$
 
 ```agda
 th-val-odd-ℤ : {x : ℤ} → val (- x) ≡ - val x
 th-val-odd-ℤ = refl
+
 th-val-odd-ℤC' : {x : ℤC'} → val (- x) ≡ - val x
 th-val-odd-ℤC' = refl
 ```
 
 2. Linearity.
 
-  $$\mathrm{val}(x+y) = \mathrm{val}(x)+\mathrm{val}(y)$$
-  $$\mathrm{val}(z\cdot x) = z\mathrm{val}(x)$$
+  $$\val(x+y) = \val(x)+\val(y)$$
+  $$\val(z\cdot x) = z\val(x)$$
 
 ```agda
-th-val-linearity-+-ℤ : {x y : ℤ} → val (x + y) ≡ val x + val y
-th-val-linearity-+-ℤ = refl
+th-val-linearity-ℤ : {x y : ℤ} → val (x + y) ≡ val x + val y
+th-val-linearity-ℤ = refl
 
-th-val-linearity-·-ℤ : {x z : ℤ} → val (z · x) ≡ z · val x
-th-val-linearity-·-ℤ = refl
+th-val-homogeneity-ℤ : {x z : ℤ} → val (z · x) ≡ z · val x
+th-val-homogeneity-ℤ = refl
 
 
-th-val-linearity-+-ℤC' : {x y : ℤC'} → val (x + y) ≡ val x + val y
-th-val-linearity-+-ℤC' = refl
+th-val-linearity-ℤC' : {x y : ℤC'} → val (x + y) ≡ val x + val y
+th-val-linearity-ℤC' = refl
 
-th-val-linearity-·ℕ-ℤC' : {x : ℤC'} {n : ℕ} → val (n × x) ≡ ℤ.pos n · val x
-th-val-linearity-·ℕ-ℤC' {n = zero}    = refl
-th-val-linearity-·ℕ-ℤC' {x} {ℕ.suc n} = begin
+th-val-homogeneityℕ-ℤC' : {x : ℤC'} {n : ℕ} → val (n × x) ≡ ℤ.pos n · val x
+th-val-homogeneityℕ-ℤC' {n = zero}    = refl
+th-val-homogeneityℕ-ℤC' {x} {ℕ.suc n} = begin
   val (ℕ.suc n × x)            ≡⟨⟩
-  val (x + n × x)              ≡⟨ th-val-linearity-+-ℤC' {x} {n × x} ⟩
+  val (x + n × x)              ≡⟨ th-val-linearity-ℤC' {x} {n × x} ⟩
   val x + val (n × x)          ≡⟨ cong (λ y → val x + y)
-                                  (th-val-linearity-·ℕ-ℤC' {x} {n}) ⟩
+                                  (th-val-homogeneityℕ-ℤC' {x} {n}) ⟩
   val x + ℤ.pos n · val x      ≡⟨ cong (λ y → y + ℤ.pos n · val x)
                                        (sym (ℤp.*-identityˡ (val  x))) ⟩
   1ℤ · val x + ℤ.pos n · val x ≡⟨ sym (ℤp.*-distribʳ-+ (val x) 1ℤ (ℤ.pos n)) ⟩
@@ -277,17 +278,194 @@ th-val-linearity-·ℕ-ℤC' {x} {ℕ.suc n} = begin
   ℤ.pos (ℕ.suc n) · val x      ∎
   where open ≡-Reasoning
 
-th-val-linearity-·-ℤC' : {x : ℤC'} {z : ℤ} → val (z × x) ≡ z · val x
-th-val-linearity-·-ℤC' {z = ℤ.pos n}  = cong val (th-val-linearity-·ℕ-ℤC' {n = n})
-th-val-linearity-·-ℤC' {x} { -[1+ n ]} = begin
+th-val-homogeneity-ℤC' : {x : ℤC'} {z : ℤ} → val (z × x) ≡ z · val x
+th-val-homogeneity-ℤC' {z = ℤ.pos n}  = cong val (th-val-homogeneityℕ-ℤC' {n = n})
+th-val-homogeneity-ℤC' {x} { -[1+ n ]} = begin
   val (-[1+ n ] × x)        ≡⟨⟩
   val (- (ℕ.suc n × x))     ≡⟨⟩
-  - val (ℕ.suc n × x)       ≡⟨ cong (-_) (th-val-linearity-·ℕ-ℤC' {n = ℕ.suc n}) ⟩
+  - val (ℕ.suc n × x)       ≡⟨ cong (-_) (th-val-homogeneityℕ-ℤC' {n = ℕ.suc n}) ⟩
   - (+[1+ n ] · val x)      ≡⟨ ℤp.neg-distribˡ-* +[1+ n ] (val x) ⟩
   (- +[1+ n ]) · val x      ≡⟨⟩
   -[1+ n ] · val x          ∎
   where open ≡-Reasoning
 ```
 
+3. Idempotence of the value.
+
+  $$\val\circ\val=\val$$
+
+```agda
+th-val-idempotence : {A : Set} ⦃ _ : Val A ⦄ {x : A} → val (val x) ≡ val x
+th-val-idempotence = refl
+```
+
+4. Completely multiplicative.
+
+  $$\val(1)=\val([1,1])=1$$
+  $$\val(x\cdot y) = \val(x) \cdot \val(y)$$
+
+```agda
+th-val-mul-unit-ℤ : val {ℤ} unit ≡ 1ℤ
+th-val-mul-unit-ℤ = refl
+
+th-val-mul-unit-ℤC' : val {ℤC'} unit ≡ 1ℤ
+th-val-mul-unit-ℤC' = refl
+
+th-val-mul-ℤ : {x y : ℤ} → val (x · y) ≡ val x · val y
+th-val-mul-ℤ = refl
+
+th-val-mul-ℤC' : {x y : ℤC'} → val (x · y) ≡ val x · val y
+th-val-mul-ℤC' = refl
+```
+
 :::
 
+::: {.definition name="Parity function"}
+  $$\Par \colon A \to \bF_2$$
+  $$\Par(z) \coloneqq \begin{cases}
+    0 & z\text{ even}\\
+    1 & z\text{ odd}\\
+  \end{cases} \quad\forall\ z\in\bZ$$
+  $$\Par([v,p]) \coloneqq p \quad\forall\ [v,p]\in\bZ_C'$$
+  Later on we will define this function for other sets $A$.
+
+```agda
+record Par (A : Set) : Set where
+  field
+    par : A → 𝔽₂
+
+open Par  ⦃ ... ⦄
+
+instance
+  Parℕ : Par ℕ
+  par ⦃ Parℕ ⦄ zero    = zero
+  par ⦃ Parℕ ⦄ (suc n) = ¬ (par n)
+
+instance
+  Parℤ : Par ℤ
+  par ⦃ Parℤ ⦄ (ℤ.pos n) = par n
+  par ⦃ Parℤ ⦄ -[1+ n ]  = ¬ (par n)
+
+instance
+  ParℤC' : Par ℤC'
+  par ⦃ ParℤC' ⦄ = ℤC'.par
+```
+:::
+
+::: {.theorem name="Properties of parity"}
+Given $x,y\in\bZ \lor x,y\in\bZ_C'$ and $z\in\bZ$
+
+1. Parity is even.
+
+  $$\Par(-x) = \Par(x)$$
+
+```agda
+th-par-even-ℤ : {x : ℤ} → par (- x) ≡ par x
+th-par-even-ℤ {ℤ.pos zero} = refl
+th-par-even-ℤ { +[1+ n ] } = refl
+th-par-even-ℤ { -[1+ n ] } = refl
+
+th-par-even-ℤC' : {x : ℤC'} → par (- x) ≡ par x
+th-par-even-ℤC' = refl
+```
+
+2. Idempotence of the parity.
+
+  $$\Par\circ\Par = \Par$$
+
+  To prove this we need to extend the parity to $\bF_2$ (Agda does not know
+  $\bF_2 \subset \bZ$)
+
+```agda
+instance
+  Par𝔽₂ : Par 𝔽₂
+  par ⦃ Par𝔽₂ ⦄ zero = par 0ℤ
+  par ⦃ Par𝔽₂ ⦄ one  = par 1ℤ
+```
+
+```agda
+th-par-idempotence : {A : Set} ⦃ _ : Par A ⦄ {x : A} → par (par x) ≡ par x
+th-par-idempotence {x = x} with par x
+... | zero = refl
+... | one  = refl
+```
+
+
+3. Linearity.
+
+  Since $\Par(x)\in\bF_2$ the sum operator must be replaced by exclusive or
+  ($\oplus$).
+
+  $$\Par(x+y) = \Par(x) \oplus \Par(y)$$
+
+```agda
+th-par-linearity-ℕ : {x y : ℕ} → par (x + y) ≡ par x ⊕ par y
+th-par-linearity-ℕ {zero}  {y} = refl
+th-par-linearity-ℕ {suc x} {y} = begin
+  ¬ (par (x + y)) ≡⟨ cong ¬ (th-par-linearity-ℕ {x}) ⟩
+  ¬ (par x ⊕ par y) ≡⟨ 𝔽₂p.¬-distribˡ-⊕ (par x) (par y) ⟩
+  ¬ (par x) ⊕ par y   ∎
+  where open ≡-Reasoning
+
+module th-par-linearity-ℤ where
+  private
+    helper : (x y : ℕ) → par (ℕ.suc x ⊖ ℕ.suc y) ≡ ¬ (par x) ⊕ ¬ (par y)
+    helper x         zero      = sym (begin
+      ¬ (par x) ⊕ one ≡⟨ sym (𝔽₂p.¬-distribˡ-⊕ (par x) one) ⟩
+      ¬ (par x ⊕ one) ≡⟨ cong ¬ (𝔽₂p.⊕-comm (par x) one) ⟩
+      ¬ (¬ (par x)) ≡⟨ 𝔽₂p.¬-double (par x) ⟩
+      par x ∎)
+      where open ≡-Reasoning
+    helper zero      (ℕ.suc y) = sym (𝔽₂p.¬-double (¬ (par y)))
+    helper (ℕ.suc x) (ℕ.suc y) = begin
+      par (ℕ.suc (ℕ.suc x) ⊖ ℕ.suc (ℕ.suc y)) ≡⟨ cong par (ℤp.[1+m]⊖[1+n]≡m⊖n
+                                                           (ℕ.suc x) (ℕ.suc y)) ⟩
+      par (ℕ.suc x ⊖ ℕ.suc y)                 ≡⟨ helper x y ⟩
+      ¬ (par x) ⊕ ¬ (par y)                   ≡⟨ 𝔽₂p.¬-distrib-⊕ (par x) (par y) ⟩
+      par x ⊕ par y                           ≡⟨ sym (cong₂ _⊕_
+                                                        (𝔽₂p.¬-double (par x))
+                                                        (𝔽₂p.¬-double (par y))) ⟩
+      (¬ (¬ (par x)) ⊕ ¬ (¬ (par y)))         ∎
+      where open ≡-Reasoning
+
+  th-par-linearity-ℤ : {x y : ℤ} → par (x + y) ≡ par x ⊕ par y
+  th-par-linearity-ℤ {ℤ.pos x}    {ℤ.pos y}    = th-par-linearity-ℕ {x}
+  th-par-linearity-ℤ {ℤ.pos zero} { -[1+ y ] } = refl
+  th-par-linearity-ℤ {+[1+ x ]}   { -[1+ y ] } = helper x y
+  th-par-linearity-ℤ { -[1+_] x}  {ℤ.pos zero} = 𝔽₂p.⊕-comm zero (¬ (par x))
+  th-par-linearity-ℤ { -[1+_] x}  {+[1+ y ]} rewrite helper y x =
+    (𝔽₂p.⊕-comm (¬ (par y)) (¬ (par x)))
+  th-par-linearity-ℤ { -[1+ x ] } { -[1+ y ] } = begin
+    ¬ (¬ (par (x + y)))   ≡⟨ cong (λ x → ¬ (¬ x)) (th-par-linearity-ℕ {x}) ⟩
+    ¬ (¬ (par x ⊕ par y)) ≡⟨ cong ¬ (𝔽₂p.¬-distribˡ-⊕ (par x) (par y)) ⟩
+    ¬ (¬ (par x) ⊕ par y) ≡⟨ 𝔽₂p.¬-distribʳ-⊕ (¬ (par x)) (par y) ⟩
+    ¬ (par x) ⊕ ¬ (par y) ∎
+    where open ≡-Reasoning
+
+open th-par-linearity-ℤ
+
+th-par-linearity-ℤC' : {x y : ℤC'} → par (x + y) ≡ par x ⊕ par y
+th-par-linearity-ℤC' = refl
+```
+
+4. Completely multiplicative.
+
+  $$\Par(1) = 1$$
+  $$\Par(x\cdot y) = \Par(x) \cdot \Par(y)$$
+
+```agda
+th-par-mul-unit-ℤ : par {ℤ} unit ≡ one
+th-par-mul-unit-ℤ = refl
+
+th-par-mul-unit-ℤC' : par {ℤC'} unit ≡ one
+th-par-mul-unit-ℤC' = refl
+
+-- th-par-mul-ℤ : {x y : ℤ} → par (x · y) ≡ par x · par y
+-- th-par-mul-ℤ {ℤ.pos zero} = refl
+-- th-par-mul-ℤ { +[1+ n ] } = {!   !}
+-- th-par-mul-ℤ { -[1+ n ] } = {!   !}
+
+th-par-mul-ℤC' : {x y : ℤC'} → par (x · y) ≡ par x · par y
+th-par-mul-ℤC' = refl
+```
+:::

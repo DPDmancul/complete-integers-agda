@@ -1,6 +1,10 @@
 
 -- (c) Davide Peressoni 2022
 
+----------------------------------
+-- Properties of field modulo 2 --
+----------------------------------
+
 module Data.F2.Properties where
   open import Data.Bool.Properties public
 
@@ -8,6 +12,10 @@ module Data.F2.Properties where
   open import Data.F2
   open import Data.N
   open import Ops
+
+  ¬-double : (a : 𝔽₂) → ¬ (¬ a) ≡ a
+  ¬-double zero = refl
+  ¬-double one = refl
 
   ⊕-assoc : (a b c : 𝔽₂) → (a ⊕ b) ⊕ c ≡ a ⊕ (b ⊕ c)
   ⊕-assoc zero _    _ = refl
@@ -32,4 +40,16 @@ module Data.F2.Properties where
   pow : (z : 𝔽₂) (n : ℕ) → z ^ (suc n) ≡ z
   pow z zero   = ∧-identityʳ z
   pow z (suc n) rewrite pow z n = ∧-idem z
+
+  ¬-distribˡ-⊕ : (a b : 𝔽₂) → ¬ (a ⊕ b) ≡ (¬ a) ⊕ b
+  ¬-distribˡ-⊕ zero b = refl
+  ¬-distribˡ-⊕ one  b = ¬-double b
+
+  ¬-distribʳ-⊕ : (a b : 𝔽₂) → ¬ (a ⊕ b) ≡ a ⊕ (¬ b)
+  ¬-distribʳ-⊕ zero b = refl
+  ¬-distribʳ-⊕ one  b = refl
+
+  ¬-distrib-⊕ : (a b : 𝔽₂) → (¬ a) ⊕ (¬ b) ≡ a ⊕ b
+  ¬-distrib-⊕ zero b = ¬-double b
+  ¬-distrib-⊕ one  b = refl
 
