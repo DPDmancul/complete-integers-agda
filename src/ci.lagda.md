@@ -9,6 +9,7 @@ open import Data.F2
 import Data.F2.Properties as 𝔽₂p
 open import Algebra
 open import Relation.Binary.PropositionalEquality
+open import Even
 ```
 -->
 
@@ -336,15 +337,16 @@ record Par (A : Set) : Set where
 
 open Par  ⦃ ... ⦄
 
-instance
-  Parℕ : Par ℕ
-  par ⦃ Parℕ ⦄ zero    = zero
-  par ⦃ Parℕ ⦄ (suc n) = ¬ (par n)
+-- instance
+--   Parℕ : Par ℕ
+--   par ⦃ Parℕ ⦄ zero    = zero
+--   par ⦃ Parℕ ⦄ (suc n) = ¬ (par n)
 
 instance
   Parℤ : Par ℤ
-  par ⦃ Parℤ ⦄ (ℤ.pos n) = par n
-  par ⦃ Parℤ ⦄ -[1+ n ]  = ¬ (par n)
+  par ⦃ Parℤ ⦄ z with even-or-odd z
+  ... | even _ = zero
+  ... | odd  _ = one
 
 instance
   ParℤC' : Par ℤC'
@@ -361,15 +363,73 @@ Given $x,y\in\bZ \lor x,y\in\bZ_C'$ and $z\in\bZ$
 
 ```agda
 th-par-even-ℤ : {x : ℤ} → par (- x) ≡ par x
-th-par-even-ℤ {ℤ.pos zero} = refl
-th-par-even-ℤ { +[1+ n ] } = refl
-th-par-even-ℤ { -[1+ n ] } = refl
+th-par-even-ℤ {x} with even-or-odd x
+... | even p with even (neg-even p)
+...   | even q = {! refl  !}
+th-par-even-ℤ | odd  p = {!   !}
 
 th-par-even-ℤC' : {x : ℤC'} → par (- x) ≡ par x
 th-par-even-ℤC' = refl
 ```
 
-2. Idempotence of the parity.
+2. Linearity.
+
+  Since $\Par(x)\in\bF_2$ the sum operator must be replaced by exclusive or
+  ($\oplus$).
+
+  $$\Par(x+y) = \Par(x) \oplus \Par(y)$$
+
+```agda
+-- th-par-linearity-ℕ : {x y : ℕ} → par (x + y) ≡ par x ⊕ par y
+-- th-par-linearity-ℕ {zero}  {y} = refl
+-- th-par-linearity-ℕ {suc x} {y} = begin
+--   ¬ (par (x + y)) ≡⟨ cong ¬ (th-par-linearity-ℕ {x}) ⟩
+--   ¬ (par x ⊕ par y) ≡⟨ 𝔽₂p.¬-distribˡ-⊕ (par x) (par y) ⟩
+--   ¬ (par x) ⊕ par y   ∎
+--   where open ≡-Reasoning
+
+-- module th-par-linearity-ℤ where
+--   private
+--     helper : (x y : ℕ) → par (ℕ.suc x ⊖ ℕ.suc y) ≡ ¬ (par x) ⊕ ¬ (par y)
+--     helper x         zero      = sym (begin
+--       ¬ (par x) ⊕ one ≡⟨ sym (𝔽₂p.¬-distribˡ-⊕ (par x) one) ⟩
+--       ¬ (par x ⊕ one) ≡⟨ cong ¬ (𝔽₂p.⊕-comm (par x) one) ⟩
+--       ¬ (¬ (par x)) ≡⟨ 𝔽₂p.¬-double (par x) ⟩
+--       par x ∎)
+--       where open ≡-Reasoning
+--     helper zero      (ℕ.suc y) = sym (𝔽₂p.¬-double (¬ (par y)))
+--     helper (ℕ.suc x) (ℕ.suc y) = begin
+--       par (ℕ.suc (ℕ.suc x) ⊖ ℕ.suc (ℕ.suc y)) ≡⟨ cong par (ℤp.[1+m]⊖[1+n]≡m⊖n
+--                                                            (ℕ.suc x) (ℕ.suc y)) ⟩
+--       par (ℕ.suc x ⊖ ℕ.suc y)                 ≡⟨ helper x y ⟩
+--       ¬ (par x) ⊕ ¬ (par y)                   ≡⟨ 𝔽₂p.¬-distrib-⊕ (par x) (par y) ⟩
+--       par x ⊕ par y                           ≡⟨ sym (cong₂ _⊕_
+--                                                         (𝔽₂p.¬-double (par x))
+--                                                         (𝔽₂p.¬-double (par y))) ⟩
+--       (¬ (¬ (par x)) ⊕ ¬ (¬ (par y)))         ∎
+--       where open ≡-Reasoning
+
+  -- th-par-linearity-ℤ : {x y : ℤ} → par (x + y) ≡ par x ⊕ par y
+  -- th-par-linearity-ℤ {ℤ.pos x}    {ℤ.pos y}    = th-par-linearity-ℕ {x}
+  -- th-par-linearity-ℤ {ℤ.pos zero} { -[1+ y ] } = refl
+  -- th-par-linearity-ℤ {+[1+ x ]}   { -[1+ y ] } = helper x y
+  -- th-par-linearity-ℤ { -[1+_] x}  {ℤ.pos zero} = 𝔽₂p.⊕-comm zero (¬ (par x))
+  -- th-par-linearity-ℤ { -[1+_] x}  {+[1+ y ]} rewrite helper y x =
+  --   (𝔽₂p.⊕-comm (¬ (par y)) (¬ (par x)))
+  -- th-par-linearity-ℤ { -[1+ x ] } { -[1+ y ] } = begin
+  --   ¬ (¬ (par (x + y)))   ≡⟨ cong (λ x → ¬ (¬ x)) (th-par-linearity-ℕ {x}) ⟩
+  --   ¬ (¬ (par x ⊕ par y)) ≡⟨ cong ¬ (𝔽₂p.¬-distribˡ-⊕ (par x) (par y)) ⟩
+  --   ¬ (¬ (par x) ⊕ par y) ≡⟨ 𝔽₂p.¬-distribʳ-⊕ (¬ (par x)) (par y) ⟩
+  --   ¬ (par x) ⊕ ¬ (par y) ∎
+  --   where open ≡-Reasoning
+
+-- open th-par-linearity-ℤ
+
+th-par-linearity-ℤC' : {x y : ℤC'} → par (x + y) ≡ par x ⊕ par y
+th-par-linearity-ℤC' = refl
+```
+
+3. Idempotence of the parity.
 
   $$\Par\circ\Par = \Par$$
 
@@ -390,72 +450,14 @@ th-par-idempotence {x = x} with par x
 ... | one  = refl
 ```
 
-
-3. Linearity.
-
-  Since $\Par(x)\in\bF_2$ the sum operator must be replaced by exclusive or
-  ($\oplus$).
-
-  $$\Par(x+y) = \Par(x) \oplus \Par(y)$$
-
-```agda
-th-par-linearity-ℕ : {x y : ℕ} → par (x + y) ≡ par x ⊕ par y
-th-par-linearity-ℕ {zero}  {y} = refl
-th-par-linearity-ℕ {suc x} {y} = begin
-  ¬ (par (x + y)) ≡⟨ cong ¬ (th-par-linearity-ℕ {x}) ⟩
-  ¬ (par x ⊕ par y) ≡⟨ 𝔽₂p.¬-distribˡ-⊕ (par x) (par y) ⟩
-  ¬ (par x) ⊕ par y   ∎
-  where open ≡-Reasoning
-
-module th-par-linearity-ℤ where
-  private
-    helper : (x y : ℕ) → par (ℕ.suc x ⊖ ℕ.suc y) ≡ ¬ (par x) ⊕ ¬ (par y)
-    helper x         zero      = sym (begin
-      ¬ (par x) ⊕ one ≡⟨ sym (𝔽₂p.¬-distribˡ-⊕ (par x) one) ⟩
-      ¬ (par x ⊕ one) ≡⟨ cong ¬ (𝔽₂p.⊕-comm (par x) one) ⟩
-      ¬ (¬ (par x)) ≡⟨ 𝔽₂p.¬-double (par x) ⟩
-      par x ∎)
-      where open ≡-Reasoning
-    helper zero      (ℕ.suc y) = sym (𝔽₂p.¬-double (¬ (par y)))
-    helper (ℕ.suc x) (ℕ.suc y) = begin
-      par (ℕ.suc (ℕ.suc x) ⊖ ℕ.suc (ℕ.suc y)) ≡⟨ cong par (ℤp.[1+m]⊖[1+n]≡m⊖n
-                                                           (ℕ.suc x) (ℕ.suc y)) ⟩
-      par (ℕ.suc x ⊖ ℕ.suc y)                 ≡⟨ helper x y ⟩
-      ¬ (par x) ⊕ ¬ (par y)                   ≡⟨ 𝔽₂p.¬-distrib-⊕ (par x) (par y) ⟩
-      par x ⊕ par y                           ≡⟨ sym (cong₂ _⊕_
-                                                        (𝔽₂p.¬-double (par x))
-                                                        (𝔽₂p.¬-double (par y))) ⟩
-      (¬ (¬ (par x)) ⊕ ¬ (¬ (par y)))         ∎
-      where open ≡-Reasoning
-
-  th-par-linearity-ℤ : {x y : ℤ} → par (x + y) ≡ par x ⊕ par y
-  th-par-linearity-ℤ {ℤ.pos x}    {ℤ.pos y}    = th-par-linearity-ℕ {x}
-  th-par-linearity-ℤ {ℤ.pos zero} { -[1+ y ] } = refl
-  th-par-linearity-ℤ {+[1+ x ]}   { -[1+ y ] } = helper x y
-  th-par-linearity-ℤ { -[1+_] x}  {ℤ.pos zero} = 𝔽₂p.⊕-comm zero (¬ (par x))
-  th-par-linearity-ℤ { -[1+_] x}  {+[1+ y ]} rewrite helper y x =
-    (𝔽₂p.⊕-comm (¬ (par y)) (¬ (par x)))
-  th-par-linearity-ℤ { -[1+ x ] } { -[1+ y ] } = begin
-    ¬ (¬ (par (x + y)))   ≡⟨ cong (λ x → ¬ (¬ x)) (th-par-linearity-ℕ {x}) ⟩
-    ¬ (¬ (par x ⊕ par y)) ≡⟨ cong ¬ (𝔽₂p.¬-distribˡ-⊕ (par x) (par y)) ⟩
-    ¬ (¬ (par x) ⊕ par y) ≡⟨ 𝔽₂p.¬-distribʳ-⊕ (¬ (par x)) (par y) ⟩
-    ¬ (par x) ⊕ ¬ (par y) ∎
-    where open ≡-Reasoning
-
-open th-par-linearity-ℤ
-
-th-par-linearity-ℤC' : {x y : ℤC'} → par (x + y) ≡ par x ⊕ par y
-th-par-linearity-ℤC' = refl
-```
-
 4. Completely multiplicative.
 
   $$\Par(1) = 1$$
   $$\Par(x\cdot y) = \Par(x) \cdot \Par(y)$$
 
 ```agda
-th-par-mul-unit-ℤ : par {ℤ} unit ≡ one
-th-par-mul-unit-ℤ = refl
+-- th-par-mul-unit-ℤ : par {ℤ} unit ≡ one
+-- th-par-mul-unit-ℤ = refl
 
 th-par-mul-unit-ℤC' : par {ℤC'} unit ≡ one
 th-par-mul-unit-ℤC' = refl
