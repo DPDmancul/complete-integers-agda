@@ -65,6 +65,43 @@ module Even where
   neg-even (step {z} p) rewrite ℤp.neg-distrib-+ 2ℤ z = pets (neg-even p)
   neg-even (pets {z} p) rewrite ℤp.neg-distrib-+ -[1+ 1 ] z = step (neg-even p)
 
+  neg-odd : {z : ℤ} → Odd z → Odd (- z)
+  neg-odd base = pets base
+  neg-odd (step {z} p) rewrite ℤp.neg-distrib-+ 2ℤ z = pets (neg-odd p)
+  neg-odd (pets {z} p) rewrite ℤp.neg-distrib-+ -[1+ 1 ] z = step (neg-odd p)
+
+  ----------------------------------------------------------------------------
+
+  sum-even-even : {x y : ℤ} → Even x → Even y → Even (x + y)
+  sum-even-even {y = y} base q rewrite lemma-sum-zero {ℤ} {y} = q
+  sum-even-even {y = y} (step {z} p) q = transport Even
+      (sym (ℤp.+-assoc 2ℤ z y))
+      (step (sum-even-even p q))
+  sum-even-even {y = y} (pets {z} p) q = transport Even
+      (sym (ℤp.+-assoc -[1+ 1 ] z y))
+      (pets (sum-even-even p q))
+
+  sum-odd-odd : {x y : ℤ} → Odd x → Odd y → Even (x + y)
+  sum-odd-odd         base         q = suc-odd q
+  sum-odd-odd {y = y} (step {z} p) q = transport Even
+      (sym (ℤp.+-assoc 2ℤ z y))
+      (step (sum-odd-odd p q))
+  sum-odd-odd {y = y} (pets {z} p) q = transport Even
+      (sym (ℤp.+-assoc -[1+ 1 ] z y))
+      (pets (sum-odd-odd p q))
+
+  sum-odd-even : {x y : ℤ} → Odd x → Even y → Odd (x + y)
+  sum-odd-even         base         q = suc-even q
+  sum-odd-even {y = y} (step {z} p) q = transport Odd
+      (sym (ℤp.+-assoc 2ℤ z y))
+      (step (sum-odd-even p q))
+  sum-odd-even {y = y} (pets {z} p) q = transport Odd
+      (sym (ℤp.+-assoc -[1+ 1 ] z y))
+      (pets (sum-odd-even p q))
+
+  sum-even-odd : {x y : ℤ} → Even x → Odd y → Odd (x + y)
+  sum-even-odd {x} {y} p q rewrite ℤp.+-comm x y = sum-odd-even q p
+
   ------------------
   -- Cast to Bool --
   ------------------
@@ -79,10 +116,12 @@ module Even where
   ... | even p = odd (pred-even p)
   ... | odd  p = even (pred-odd p)
 
-  -- lemma-even : {z : ℤ} → (p : Even z) → even-or-odd z ≡ even p
-  -- lemma-even {ℤ.pos  0} p = {!   !}
-  -- lemma-even { +[1+ n ] } p = {!   !}
-  -- lemma-even { -[1+ n ] } p = {!   !}
+  postulate
+    -- Since the constructors of Even and Odd don't take constructors of ℤ as
+    -- parameters it is impossible for Agda to prove there is no constructor for
+    -- Odd 0ℤ and Even (- 1ℤ).
+    lemma-even : {z : ℤ} → (p : Even z) → even-or-odd z ≡ even p
+    lemma-odd  : {z : ℤ} → (p : Odd  z) → even-or-odd z ≡ odd  p
 
   even? : ℤ → Bool
   even? z with even-or-odd z
