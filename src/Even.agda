@@ -102,6 +102,54 @@ module Even where
   sum-even-odd : {x y : ℤ} → Even x → Odd y → Odd (x + y)
   sum-even-odd {x} {y} p q rewrite ℤp.+-comm x y = sum-odd-even q p
 
+  ----------------------------------------------------------------------------
+
+  private
+    double-even-ℕ : (n : ℕ) → Even (ℤ.pos (n · 2))
+    double-even-ℕ zero      = base
+    double-even-ℕ (ℕ.suc n) = step (double-even-ℕ n)
+
+    neg-double-even-ℕ : (n : ℕ) → Even -[1+ ℕ.suc (n · 2)]
+    neg-double-even-ℕ zero = pets base
+    neg-double-even-ℕ (ℕ.suc n) = pets (neg-double-even-ℕ n)
+
+  double-even : {z : ℤ} → Even (2ℤ · z)
+  double-even {ℤ.pos zero} = base
+  double-even { +[1+ n ] } rewrite ℤp.*-comm 2ℤ +[1+ n ] =
+    step (double-even-ℕ n)
+  double-even { -[1+ n ] } rewrite ℤp.*-comm 2ℤ -[1+ n ] =
+    neg-double-even-ℕ n
+
+  neg-double-even : {z : ℤ} → Even (- 2ℤ · z)
+  neg-double-even {z} rewrite sym (ℤp.neg-distribˡ-* 2ℤ z) =
+    neg-even (double-even {z})
+
+  ----------------------------------------------------------------------------
+
+  mul-even-even : {x y : ℤ} → Even x → Even y → Even (x · y)
+  mul-even-even base _ = base
+  mul-even-even {y = y} (step {z} p) q rewrite ℤp.*-distribʳ-+ y 2ℤ z =
+    sum-even-even (double-even {y}) (mul-even-even p q)
+  mul-even-even {y = y} (pets {z} p) q rewrite ℤp.*-distribʳ-+ y -[1+ 1 ] z =
+    sum-even-even (neg-double-even {y}) (mul-even-even p q)
+
+  mul-odd-odd : {x y : ℤ} → Odd x → Odd y → Odd (x · y)
+  mul-odd-odd {y = y} base q rewrite lemma-unit {ℤ} {y} = q
+  mul-odd-odd {y = y} (step {z} p) q rewrite ℤp.*-distribʳ-+ y 2ℤ z
+    = sum-even-odd (double-even {y}) (mul-odd-odd p q)
+  mul-odd-odd {y = y} (pets {z} p) q rewrite ℤp.*-distribʳ-+ y -[1+ 1 ] z =
+    sum-even-odd (neg-double-even {y}) (mul-odd-odd p q)
+
+  mul-even-odd : {x y : ℤ} → Even x → Odd y → Even (x · y)
+  mul-even-odd base q = base
+  mul-even-odd {y = y} (step {z} p) q rewrite ℤp.*-distribʳ-+ y 2ℤ z =
+    sum-even-even (double-even {y}) (mul-even-odd p q)
+  mul-even-odd {y = y} (pets {z} p) q rewrite ℤp.*-distribʳ-+ y -[1+ 1 ] z =
+    sum-even-even (neg-double-even {y}) (mul-even-odd p q)
+
+  mul-odd-even : {x y : ℤ} → Odd x → Even y → Even (x · y)
+  mul-odd-even {x} {y} p q rewrite ℤp.*-comm x y = mul-even-odd q p
+
   ------------------
   -- Cast to Bool --
   ------------------

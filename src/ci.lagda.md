@@ -387,9 +387,9 @@ th-par-even-ℤC' = refl
 th-par-linearity-ℤ : {x y : ℤ} → par (x + y) ≡ par x ⊕ par y
 th-par-linearity-ℤ {x} {y} with even-or-odd x | even-or-odd y
 ... | even p | even q = parity-even (sum-even-even p q)
-... | even p | odd  q = parity-odd (sum-even-odd p q)
-... | odd  p | even q = parity-odd (sum-odd-even p q)
-... | odd  p | odd  q = parity-even (sum-odd-odd p q)
+... | even p | odd  q = parity-odd  (sum-even-odd  p q)
+... | odd  p | even q = parity-odd  (sum-odd-even  p q)
+... | odd  p | odd  q = parity-even (sum-odd-odd   p q)
 
 
 th-par-linearity-ℤC' : {x y : ℤC'} → par (x + y) ≡ par x ⊕ par y
@@ -429,12 +429,44 @@ th-par-mul-unit-ℤ = refl
 th-par-mul-unit-ℤC' : par {ℤC'} unit ≡ one
 th-par-mul-unit-ℤC' = refl
 
--- th-par-mul-ℤ : {x y : ℤ} → par (x · y) ≡ par x · par y
--- th-par-mul-ℤ {ℤ.pos zero} = refl
--- th-par-mul-ℤ { +[1+ n ] } = {!   !}
--- th-par-mul-ℤ { -[1+ n ] } = {!   !}
+th-par-mul-ℤ : {x y : ℤ} → par (x · y) ≡ par x · par y
+th-par-mul-ℤ {x} {y} with even-or-odd x | even-or-odd y
+... | even p | even q = parity-even (mul-even-even p q)
+... | even p | odd  q = parity-even (mul-even-odd  p q)
+... | odd  p | even q = parity-even (mul-odd-even  p q)
+... | odd  p | odd  q = parity-odd  (mul-odd-odd  p q)
 
 th-par-mul-ℤC' : {x y : ℤC'} → par (x · y) ≡ par x · par y
 th-par-mul-ℤC' = refl
 ```
 :::
+
+::: {.lemma name="Parity of powers"}
+
+$$\Par(z^n) = \Par(z) \quad \forall\ n\in\bN^+$$
+
+```agda
+par-pow-ℤ : {z : ℤ} {n : ℕ} → par (z ^ ℕ.suc n) ≡ par z
+par-pow-ℤ {z} {0} rewrite ℤp.*-identityʳ z = refl
+par-pow-ℤ {z} {ℕ.suc n}  = begin
+  par (z ^ ℕ.suc (ℕ.suc n)) ≡⟨⟩
+  par (z · z ^ ℕ.suc n)     ≡⟨ th-par-mul-ℤ {z} {z ^ ℕ.suc n} ⟩
+  par z · par (z ^ ℕ.suc n) ≡⟨ cong (_·_ (par z)) (par-pow-ℤ {z} {n}) ⟩
+  par z · par z             ≡⟨ 𝔽₂p.∧-idem (par z) ⟩
+  par z ∎
+  where open ≡-Reasoning
+
+par-pow-ℤC' : {z : ℤC'} {n : ℕ} → par (z ^ ℕ.suc n) ≡ par z
+par-pow-ℤC' {z} {0}       = 𝔽₂p.∧-identityʳ (par z)
+par-pow-ℤC' {z} {ℕ.suc n} = begin
+  par (z ^ ℕ.suc (ℕ.suc n)) ≡⟨⟩
+  par (z · z ^ ℕ.suc n)     ≡⟨ th-par-mul-ℤC' {z} {z ^ ℕ.suc n} ⟩
+  par z · par (z ^ ℕ.suc n) ≡⟨ cong (_·_ (par z)) (par-pow-ℤC' {z} {n}) ⟩
+  par z · par z             ≡⟨ 𝔽₂p.∧-idem (par z) ⟩
+  par z ∎
+  where open ≡-Reasoning
+
+```
+
+:::
+
