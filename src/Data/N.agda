@@ -16,13 +16,13 @@ module Data.N where
     _+_ ⦃ Sumℕ ⦄ = Data.Nat._+_
 
     additive-zero ⦃ Sumℕ ⦄ = 0
-    lemma-sum-zero ⦃ Sumℕ ⦄ {a} = +-identityˡ a
+    lemma-sum-zero ⦃ Sumℕ ⦄ = +-identityˡ _
 
   instance
     Mulℕ : Mul ℕ
     _·_ ⦃ Mulℕ ⦄ = Data.Nat._*_
 
     unit ⦃ Mulℕ ⦄ = 1
-    lemma-unit ⦃ Mulℕ ⦄ {a} = *-identityˡ a
+    lemma-unit ⦃ Mulℕ ⦄ = *-identityˡ _
 
 

@@ -445,6 +445,9 @@ th-par-mul-ℤC' = refl
 
 $$\Par(z^n) = \Par(z) \quad \forall\ n\in\bN^+$$
 
+:::
+::: {.proof}
+\
 ```agda
 par-pow-ℤ : {z : ℤ} {n : ℕ} → par (z ^ ℕ.suc n) ≡ par z
 par-pow-ℤ {z} {0} rewrite ℤp.*-identityʳ z = refl
@@ -465,8 +468,6 @@ par-pow-ℤC' {z} {ℕ.suc n} = begin
   par z · par z             ≡⟨ 𝔽₂p.∧-idem (par z) ⟩
   par z ∎
   where open ≡-Reasoning
-
 ```
-
 :::
 

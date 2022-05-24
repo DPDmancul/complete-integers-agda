@@ -16,7 +16,7 @@ module Data.Int where
     _+_ ⦃ Sumℤ ⦄ = Data.Integer._+_
 
     additive-zero ⦃ Sumℤ ⦄ = 0ℤ
-    lemma-sum-zero ⦃ Sumℤ ⦄ {a} = +-identityˡ a
+    lemma-sum-zero ⦃ Sumℤ ⦄ = +-identityˡ _
 
   instance
     Negateℤ : Sub ℤ
@@ -27,6 +27,6 @@ module Data.Int where
     _·_ ⦃ Mulℤ ⦄ = Data.Integer._*_
 
     unit ⦃ Mulℤ ⦄ = 1ℤ
-    lemma-unit ⦃ Mulℤ ⦄ {a} = *-identityˡ a
+    lemma-unit ⦃ Mulℤ ⦄ = *-identityˡ _
 
 
