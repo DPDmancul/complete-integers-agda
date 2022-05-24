@@ -9,6 +9,7 @@ open import Data.F2
 import Data.F2.Properties as 𝔽₂p
 open import Algebra
 open import Relation.Binary.PropositionalEquality
+open ≡-Reasoning
 open import Even
 ```
 -->
@@ -277,7 +278,6 @@ th-val-homogeneityℕ-ℤC' {x} {ℕ.suc n} = begin
   1ℤ · val x + ℤ.pos n · val x ≡⟨ sym (ℤp.*-distribʳ-+ (val x) 1ℤ (ℤ.pos n)) ⟩
   (1ℤ + ℤ.pos n) · val x       ≡⟨⟩
   ℤ.pos (ℕ.suc n) · val x      ∎
-  where open ≡-Reasoning
 
 th-val-homogeneity-ℤC' : {x : ℤC'} {z : ℤ} → val (z × x) ≡ z · val x
 th-val-homogeneity-ℤC' {z = ℤ.pos n}  = cong val (th-val-homogeneityℕ-ℤC' {n = n})
@@ -288,7 +288,6 @@ th-val-homogeneity-ℤC' {x} { -[1+ n ]} = begin
   - (+[1+ n ] · val x)      ≡⟨ ℤp.neg-distribˡ-* +[1+ n ] (val x) ⟩
   (- +[1+ n ]) · val x      ≡⟨⟩
   -[1+ n ] · val x          ∎
-  where open ≡-Reasoning
 ```
 
 3. Idempotence of the value.
@@ -434,7 +433,7 @@ th-par-mul-ℤ {x} {y} with even-or-odd x | even-or-odd y
 ... | even p | even q = parity-even (mul-even-even p q)
 ... | even p | odd  q = parity-even (mul-even-odd  p q)
 ... | odd  p | even q = parity-even (mul-odd-even  p q)
-... | odd  p | odd  q = parity-odd  (mul-odd-odd  p q)
+... | odd  p | odd  q = parity-odd  (mul-odd-odd   p q)
 
 th-par-mul-ℤC' : {x y : ℤC'} → par (x · y) ≡ par x · par y
 th-par-mul-ℤC' = refl
@@ -456,8 +455,7 @@ par-pow-ℤ {z} {ℕ.suc n}  = begin
   par (z · z ^ ℕ.suc n)     ≡⟨ th-par-mul-ℤ {z} {z ^ ℕ.suc n} ⟩
   par z · par (z ^ ℕ.suc n) ≡⟨ cong (_·_ (par z)) (par-pow-ℤ {z} {n}) ⟩
   par z · par z             ≡⟨ 𝔽₂p.∧-idem (par z) ⟩
-  par z ∎
-  where open ≡-Reasoning
+  par z                     ∎
 
 par-pow-ℤC' : {z : ℤC'} {n : ℕ} → par (z ^ ℕ.suc n) ≡ par z
 par-pow-ℤC' {z} {0}       = 𝔽₂p.∧-identityʳ (par z)
@@ -466,8 +464,7 @@ par-pow-ℤC' {z} {ℕ.suc n} = begin
   par (z · z ^ ℕ.suc n)     ≡⟨ th-par-mul-ℤC' {z} {z ^ ℕ.suc n} ⟩
   par z · par (z ^ ℕ.suc n) ≡⟨ cong (_·_ (par z)) (par-pow-ℤC' {z} {n}) ⟩
   par z · par z             ≡⟨ 𝔽₂p.∧-idem (par z) ⟩
-  par z ∎
-  where open ≡-Reasoning
+  par z                     ∎
 ```
 :::
 
