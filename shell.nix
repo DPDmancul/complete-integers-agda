@@ -4,7 +4,9 @@ pkgs.mkShell {
     gnumake
     gnused
     pandoc
-    (agda.withPackages (p: [ p.standard-library ]))
+    (agda.withPackages (p: [
+      p.standard-library  # version 1.7.1
+    ]))
     pythonPackages.pygments
     (texlive.combine { inherit (texlive)
       scheme-basic

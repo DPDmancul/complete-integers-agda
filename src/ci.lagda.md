@@ -2,15 +2,19 @@
 ```agda
 -- (c) Davide Peressoni 2022
 
+{-# OPTIONS --safe #-}
+
 open import Data.N
 open import Data.Int
 import Data.Integer.Properties as ℤp
 open import Data.F2
 import Data.F2.Properties as 𝔽₂p
 open import Algebra
-open import Relation.Binary.PropositionalEquality
+open import Relation.Binary.PropositionalEquality hiding ([_])
 open ≡-Reasoning
 open import Even
+open import Data.Empty
+open import Agda.Builtin.Sigma
 ```
 -->
 
@@ -467,4 +471,98 @@ par-pow-ℤC' {z} {ℕ.suc n} = begin
   par z                     ∎
 ```
 :::
+
+## Related sets
+
+::: {.definition name="Integers prime"} Let us define the set of integers prime as
+
+\[\bZ' \coloneqq \left\{[v,p]\in\bZ_C' \colon p = \Par(v)\right\} =
+\left\{[v,\Par(v)] \colon v\in\bZ\right\}\]
+
+```agda
+ℤ' : Set
+ℤ' = Σ ℤC' λ ([ v , p ]) → p ≡ par v
+
+ℤ'-eq : {a b : ℤ'} → fst a ≡ fst b → a ≡ b
+ℤ'-eq {_ , refl} {_ , refl} refl = refl
+```
+:::
+
+::: {.definition name="Dis-integers prime"} Let us define the set of dis-integers prime as
+
+\[\bZ_D' \coloneqq \left\{[v,p]\in\bZ_C' \colon p \neq \Par(v)\right\}\]
+
+```agda
+ℤD' : Set
+ℤD' = Σ ℤC' λ ([ v , p ]) → p ≡ par v → ⊥
+```
+:::
+
+::: {.remark}
+$\{ \bZ', \bZ_D'\}$ is a partition of $\bZ_C'$.
+\[\bZ' \sqcup \bZ_D' = \bZ_C'\]
+:::
+
+::: {.theorem name="Integers and integers prime are isomorphic"}
+The function $f_\b \colon \bZ \to \bZ'$ defined as
+\[f_\b(z) = [z, \Par(z)]\]
+is an isomorphism.
+
+```agda
+fℤ : ℤ → ℤ'
+fℤ z = [ z , par z ] , refl
+
+fℤ⁻¹ : ℤ' → ℤ
+fℤ⁻¹ ([ z , _ ] , _) = z
+```
+:::
+::: {.proof}
+Before proving this we have to say to Agda to use on $\bZ'$ the same operations
+of $\bZ_C'$
+
+```agda
+instance
+  Sumℤ' : Sum ℤ'
+  _+_ ⦃ Sumℤ' ⦄ (a , refl) (b , refl) =
+    a + b , sym (th-par-linearity-ℤ {val a})
+  additive-zero  ⦃ Sumℤ' ⦄ = additive-zero , refl
+  lemma-sum-zero ⦃ Sumℤ' ⦄ {[ v , _ ] , refl} =
+    ℤ'-eq (cong (λ z → [ z , par v ]) (lemma-sum-zero {ℤ}))
+
+  Mulℤ' : Mul ℤ'
+  _·_ ⦃ Mulℤ' ⦄ (a , refl) (b , refl) =
+    a · b , sym (th-par-mul-ℤ {val a})
+  unit       ⦃ Mulℤ' ⦄ = unit , refl
+  lemma-unit ⦃ Mulℤ' ⦄ {[ v , _ ] , refl} =
+    ℤ'-eq (cong (λ z → [ z , par v ]) (lemma-unit {ℤ}))
+```
+
+```agda
+module isomorphism-fℤ where
+
+  ---------------------
+  -- fℤ homomorphism --
+  ---------------------
+
+  addition : {a b : ℤ} → fℤ (a + b) ≡ fℤ a + fℤ b
+  addition {a} {b} rewrite sym (th-par-linearity-ℤ {a} {b}) = refl
+
+  multiplication : {a b : ℤ} → fℤ (a · b) ≡ fℤ a · fℤ b
+  multiplication {a} {b} rewrite sym (th-par-mul-ℤ {a} {b}) = refl
+
+  mul-identity : fℤ unit ≡ unit
+  mul-identity = refl
+
+  --------------------
+  -- fℤ isomorphism --
+  --------------------
+
+  fℤ∘fℤ⁻¹≡id : {z : ℤ'} → fℤ (fℤ⁻¹ z) ≡ z
+  fℤ∘fℤ⁻¹≡id {[ v , _ ] , refl} = ℤ'-eq refl
+
+  fℤ⁻¹∘fℤ≡id : {z : ℤ} → fℤ⁻¹ (fℤ z) ≡ z
+  fℤ⁻¹∘fℤ≡id = refl
+```
+:::
+
 

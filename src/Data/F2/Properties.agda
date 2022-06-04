@@ -1,6 +1,8 @@
 
 -- (c) Davide Peressoni 2022
 
+{-# OPTIONS --safe #-}
+
 ----------------------------------
 -- Properties of field modulo 2 --
 ----------------------------------
