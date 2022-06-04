@@ -3,6 +3,7 @@ pkgs.mkShell {
   nativeBuildInputs = with pkgs; [
     gnumake
     gnused
+    which
     pandoc
     (agda.withPackages (p: [
       p.standard-library  # version 1.7.1

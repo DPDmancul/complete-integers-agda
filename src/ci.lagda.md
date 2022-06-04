@@ -474,7 +474,8 @@ par-pow-ℤC' {z} {ℕ.suc n} = begin
 
 ## Related sets
 
-::: {.definition name="Integers prime"} Let us define the set of integers prime as
+::: {.definition name="Integers prime"}
+Let us define the set of integers prime as
 
 \[\bZ' \coloneqq \left\{[v,p]\in\bZ_C' \colon p = \Par(v)\right\} =
 \left\{[v,\Par(v)] \colon v\in\bZ\right\}\]
@@ -488,7 +489,8 @@ par-pow-ℤC' {z} {ℕ.suc n} = begin
 ```
 :::
 
-::: {.definition name="Dis-integers prime"} Let us define the set of dis-integers prime as
+::: {.definition name="Dis-integers prime"}
+Let us define the set of dis-integers prime as
 
 \[\bZ_D' \coloneqq \left\{[v,p]\in\bZ_C' \colon p \neq \Par(v)\right\}\]
 
@@ -504,8 +506,8 @@ $\{ \bZ', \bZ_D'\}$ is a partition of $\bZ_C'$.
 :::
 
 ::: {.theorem name="Integers and integers prime are isomorphic"}
-The function $f_\b \colon \bZ \to \bZ'$ defined as
-\[f_\b(z) = [z, \Par(z)]\]
+The function $f_\bZ \colon \bZ \to \bZ'$ defined as
+\[f_\bZ(z) = [z, \Par(z)]\]
 is an isomorphism.
 
 ```agda
