@@ -1,7 +1,7 @@
 ---
 title: "Complete integers"
 author: "Davide Peressoni"
-date: "May 2022"
+date: "May-June 2022"
 description: "TODO"
 
 url: https://dpdmancul.gitlab.io/complete-integers-agda
@@ -21,6 +21,7 @@ if (knitr::is_latex_output())
 \newcommand\bN{\mathbb{N}}
 \newcommand\bZ{\mathbb{Z}}
 \newcommand\bF{\mathbb{F}}
+\newcommand\bR{\mathbb{R}}
 
 \newcommand{\coloneqq}{\mathrel{:=}}
 
@@ -31,5 +32,9 @@ if (knitr::is_latex_output())
 \newcommand{\Par}{\mkw{par}}
 
 
-TODO
+In this work we will define a superset of integers (the complete integers,
+$\bZ_C$), which contains the dual of integers along parity (e.g. the odd zero, the
+even one, ...). Then we will see how they form a ring and can be used to define
+an TODO (parlare di x^l = |x|)
+
 
