@@ -1,7 +1,7 @@
 
 -- (c) Davide Peressoni 2022
 
-{-# OPTIONS --safe #-}
+{-# OPTIONS --safe --without-K #-}
 
 ---------------
 -- Operators --
@@ -73,8 +73,11 @@ module Ops where
 
   -- Times with natural coefficients
     NatTimesˡ : {A : Set} ⦃ _ : Sum A ⦄ → Times Nat A {A}
-    _×_ ⦃ NatTimesˡ ⦄ zero    _ = additive-zero
-    _×_ ⦃ NatTimesˡ ⦄ (suc e) b = b + e × b
+    _×_ ⦃ NatTimesˡ ⦄ = helper
+      where
+      helper : {A : Set} ⦃ _ : Sum A ⦄ → Nat → A → A
+      helper zero    _ = additive-zero
+      helper (suc e) b = b + helper e b
 
     NatTimesʳ : {A : Set} ⦃ _ : Sum A ⦄ → Times A Nat {A}
     _×_ ⦃ NatTimesʳ ⦄ a b = b × a
@@ -101,7 +104,10 @@ module Ops where
   instance
     open import Agda.Builtin.Nat
     NatPow : {A : Set} ⦃ _ : Mul A ⦄ → Pow A Nat {A}
-    _^_ ⦃ NatPow ⦄ _ zero    = unit
-    _^_ ⦃ NatPow ⦄ b (suc e) = b · b ^ e
+    _^_ ⦃ NatPow ⦄ = helper
+      where
+      helper : {A : Set} ⦃ _ : Mul A ⦄ → A → Nat → A
+      helper ⦃ NatPow ⦄ _ zero    = unit
+      helper ⦃ NatPow ⦄ b (suc e) = b · helper b e
 
 

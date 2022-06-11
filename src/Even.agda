@@ -1,7 +1,7 @@
 
 -- (c) Davide Peressoni 2022
 
-{-# OPTIONS --safe #-}
+{-# OPTIONS --safe --without-K #-}
 
 ---------------------------
 -- Even and Odd integers --
@@ -73,13 +73,13 @@ module Even where
 
   pred-even : {z : ℤ} → Even z → Odd (-1ℤ + z)
   pred-even base = esab
-  pred-even (step {n} p) rewrite ℤp.+-assoc (- 1ℤ) 1ℤ (ℤ.pos n) = suc-even p
+  pred-even (step {n} p) = suc-even p
   pred-even (pets     p) = neg-odd (suc-even (suc-odd (suc-even p)))
 
   pred-odd : {z : ℤ} → Odd z → Even (-1ℤ + z)
   pred-odd base = base
   pred-odd esab = pets base
-  pred-odd (step {n} p) rewrite ℤp.+-assoc (- 1ℤ) 1ℤ (ℤ.pos n) = suc-odd p
+  pred-odd (step {n} p) = suc-odd p
   pred-odd (pets     p) = neg-even (suc-odd (suc-even (suc-odd p)))
 
   ----------------------------------------------------------------------------

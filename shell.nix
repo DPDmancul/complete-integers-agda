@@ -7,6 +7,7 @@ pkgs.mkShell {
     pandoc
     (agda.withPackages (p: [
       p.standard-library  # version 1.7.1
+      # p.cubical
     ]))
     pythonPackages.pygments
     (texlive.combine { inherit (texlive)

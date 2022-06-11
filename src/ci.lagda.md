@@ -197,12 +197,12 @@ module RingℤC where
 \
 ```agda
 lemma-ℤC-powers : {z : ℤC} {n : ℕ}
-  → z ^ n ≡ [_,_] ((ℤC.val z) ^ n) ((ℤC.par z) ^ n)
+  → z ^ n ≡ [ (ℤC.val z) ^ n , (ℤC.par z) ^ n ]
 lemma-ℤC-powers {n = zero}    = refl
-lemma-ℤC-powers {z} {ℕ.suc n} = cong (λ z' → z · z') (lemma-ℤC-powers {n = n})
+lemma-ℤC-powers {z} {ℕ.suc n} = cong (_·_ z) (lemma-ℤC-powers {n = n})
 
 lemma-ℤC-powers-succ : {z : ℤC} {n : ℕ}
-  → z ^ ℕ.suc n ≡ [_,_] ((ℤC.val z) ^ ℕ.suc n) (ℤC.par z)
+  → z ^ ℕ.suc n ≡ [ (ℤC.val z) ^ ℕ.suc n , ℤC.par z ]
 lemma-ℤC-powers-succ {[ _ , p ]} {n}
   = trans (lemma-ℤC-powers {n = ℕ.suc n}) (cong₂ [_,_] refl (𝔽₂p.pow p n))
 
@@ -273,9 +273,9 @@ th-val-homogeneityℕ-ℤC {n = zero}    = refl
 th-val-homogeneityℕ-ℤC {x} {ℕ.suc n} = begin
   val (ℕ.suc n × x)            ≡⟨⟩
   val (x + n × x)              ≡⟨ th-val-linearity-ℤC {x} {n × x} ⟩
-  val x + val (n × x)          ≡⟨ cong (λ y → val x + y)
+  val x + val (n × x)          ≡⟨ cong (_+_ (val x))
                                   (th-val-homogeneityℕ-ℤC {x} {n}) ⟩
-  val x + ℤ.pos n · val x      ≡⟨ cong (λ y → y + ℤ.pos n · val x)
+  val x + ℤ.pos n · val x      ≡⟨ cong (_+ ℤ.pos n · val x)
                                        (sym (ℤp.*-identityˡ (val  x))) ⟩
   1ℤ · val x + ℤ.pos n · val x ≡⟨ sym (ℤp.*-distribʳ-+ (val x) 1ℤ (ℤ.pos n)) ⟩
   (1ℤ + ℤ.pos n) · val x       ≡⟨⟩
@@ -526,14 +526,14 @@ instance
     a + b , sym (th-par-linearity-ℤ {val a})
   additive-zero  ⦃ Sumℤ' ⦄ = additive-zero , refl
   lemma-sum-zero ⦃ Sumℤ' ⦄ {[ v , _ ] , refl} =
-    ℤ'-eq (cong (λ z → [ z , par v ]) (lemma-sum-zero {ℤ}))
+    ℤ'-eq (cong [_, par v ] (lemma-sum-zero {ℤ}))
 
   Mulℤ' : Mul ℤ'
   _·_ ⦃ Mulℤ' ⦄ (a , refl) (b , refl) =
     a · b , sym (th-par-mul-ℤ {val a})
   unit       ⦃ Mulℤ' ⦄ = unit , refl
   lemma-unit ⦃ Mulℤ' ⦄ {[ v , _ ] , refl} =
-    ℤ'-eq (cong (λ z → [ z , par v ]) (lemma-unit {ℤ}))
+    ℤ'-eq (cong [_, par v ] (lemma-unit {ℤ}))
 ```
 
 ```agda
@@ -570,6 +570,8 @@ won't write $\bZ'$ anymore and we will use the notation $[v, \Par(v)]$ to denote
 More precisely we will write, with an abuse of notation, $\bZ'=\bZ$ and $[v,
 \Par(v)] = v$ meaning respectively $\bZ'=f_{\bZ}(\bZ)$ and $[v, \Par(v)] =
 f_{\bZ}(v)$.
+
+TODO : Even and Odd
 
 ## Exponential of complete integers
 

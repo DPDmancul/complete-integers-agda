@@ -1,7 +1,7 @@
 
 -- (c) Davide Peressoni 2022
 
-{-# OPTIONS --safe #-}
+{-# OPTIONS --safe --without-K #-}
 
 ------------------
 -- Real numbers --
