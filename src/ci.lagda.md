@@ -571,7 +571,93 @@ More precisely we will write, with an abuse of notation, $\bZ'=\bZ$ and $[v,
 \Par(v)] = v$ meaning respectively $\bZ'=f_{\bZ}(\bZ)$ and $[v, \Par(v)] =
 f_{\bZ}(v)$.
 
-TODO : Even and Odd
+## Behaviours induced by parity
+
+We said in the introduction that dis-integers are the dual of integers along
+parity, in fact in $\bZ_D$ we have $[0,1]$ which has null value and odd parity,
+$[1,0]$ which has unitary value, but even parity, and in general $[v,p]$ where
+the parity $p$ is not the parity of the integer $v$.
+
+We now will show how this parity is not a mere binary flag, but induces the same
+properties of even and odd numbers into $\bZ_C$: complete integers with even
+parity act like even numbers and those with odd parity like odd numbers.
+
+```agda
+data ℤC-Even : ℤC → Set where
+  even : {z : ℤC} → par z ≡ zero → ℤC-Even z
+
+data ℤC-Odd : ℤC → Set where
+  odd : {z : ℤC} → par z ≡ one → ℤC-Odd z
+```
+
+::: {.lemma name="Parity of integers is preserved"}
+The usual notion of parity in $\bZ$ and this new notion of parity in $\bZ_C$ are
+the same for integer numbers.
+:::
+::: {.proof}
+\
+```agda
+evenℤ→evenℤC : {z : ℤ} → Even z → ℤC-Even (proj₁ (fℤ z))
+evenℤ→evenℤC p = even (parity-even p)
+
+oddℤ→oddℤC : {z : ℤ} → Odd z → ℤC-Odd (proj₁ (fℤ z))
+oddℤ→oddℤC p = odd (parity-odd p)
+
+evenℤC→evenℤ : {z : ℤ'} → ℤC-Even (proj₁ z) → Even (fℤ⁻¹ z)
+evenℤC→evenℤ {z} (even _) rewrite proj₂ z with even-or-odd (fℤ⁻¹ z)
+... | even q = q
+
+oddℤC→oddℤ : {z : ℤ'} → ℤC-Odd (proj₁ z) → Odd (fℤ⁻¹ z)
+oddℤC→oddℤ {z} (odd _) rewrite proj₂ z with even-or-odd (fℤ⁻¹ z)
+... | odd q = q
+```
+:::
+
+::: {.lemma name="Parity of addition"}
+\[\mathrm{even} + \mathrm{even} = \mathrm{even}\]
+\[\mathrm{even} + \mathrm{odd} = \mathrm{odd}\]
+\[\mathrm{odd} + \mathrm{even} = \mathrm{odd}\]
+\[\mathrm{odd} + \mathrm{odd} = \mathrm{even}\]
+:::
+::: {.proof}
+\
+```agda
+sum-ℤC-even-even : {x y : ℤC} → ℤC-Even x → ℤC-Even y → ℤC-Even (x + y)
+sum-ℤC-even-even (even refl) (even refl) = even refl
+
+sum-ℤC-even-odd : {x y : ℤC} → ℤC-Even x → ℤC-Odd y → ℤC-Odd (x + y)
+sum-ℤC-even-odd (even refl) (odd refl) = odd refl
+
+sum-ℤC-odd-even : {x y : ℤC} → ℤC-Odd x → ℤC-Even y → ℤC-Odd (x + y)
+sum-ℤC-odd-even (odd refl) (even refl) = odd refl
+
+sum-ℤC-odd-odd : {x y : ℤC} → ℤC-Odd x → ℤC-Odd y → ℤC-Even (x + y)
+sum-ℤC-odd-odd (odd refl) (odd refl) = even refl
+```
+:::
+
+::: {.lemma name="Parity of multiplication"}
+\[\mathrm{even} \cdot \mathrm{even} = \mathrm{even}\]
+\[\mathrm{even} \cdot \mathrm{odd} = \mathrm{even}\]
+\[\mathrm{odd} \cdot \mathrm{even} = \mathrm{even}\]
+\[\mathrm{odd} \cdot \mathrm{odd} = \mathrm{odd}\]
+:::
+::: {.proof}
+\
+```agda
+mul-ℤC-even-even : {x y : ℤC} → ℤC-Even x → ℤC-Even y → ℤC-Even (x · y)
+mul-ℤC-even-even (even refl) (even refl) = even refl
+
+mul-ℤC-even-odd : {x y : ℤC} → ℤC-Even x → ℤC-Odd y → ℤC-Even (x · y)
+mul-ℤC-even-odd (even refl) (odd refl) = even refl
+
+mul-ℤC-odd-even : {x y : ℤC} → ℤC-Odd x → ℤC-Even y → ℤC-Even (x · y)
+mul-ℤC-odd-even (odd refl) (even refl) = even refl
+
+mul-ℤC-odd-odd : {x y : ℤC} → ℤC-Odd x → ℤC-Odd y → ℤC-Odd (x · y)
+mul-ℤC-odd-odd (odd refl) (odd refl) = odd refl
+```
+:::
 
 ## Exponential of complete integers
 
