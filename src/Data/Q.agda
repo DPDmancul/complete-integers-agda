@@ -31,4 +31,13 @@ module Data.Q where
     unit ⦃ Mulℚ ⦄ = 1ℚ
     lemma-unit ⦃ Mulℚ ⦄ = *-identityˡ _
 
+  open import Relation.Binary
+  open import Data.Sum
+  open import Agda.Builtin.Bool
+  open import Relation.Nullary
+
+  ≤-<-connex : Connex _≤_ _<_
+  ≤-<-connex p q with p ≤? q
+  ... | yes p≤q = inj₁ p≤q
+  ... | no ¬p≤q = inj₂ (≰⇒> ¬p≤q)
 
