@@ -1,3 +1,1 @@
-{-# OPTIONS --safe #-}
-
 import ci

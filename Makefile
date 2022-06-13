@@ -27,7 +27,7 @@ html:
 	@chmod +w "$(TMP_SRC)/"*.css
 	@sed -i 's/\(;\? *}\|;\)/ !important\1/' "$(TMP_SRC)/"*.css
 # copy required configuration files
-	@cp *.{yml,Rmd} "$(TMP)/"
+	@cp *.{yml,md,Rmd} "$(TMP)/"
 	@sed -i 's/\.lagda//' "$(TMP)/"*.yml
 	@cp "$(OUT)/"*.pdf "$(TMP_OUT)"
 # execute bookdown

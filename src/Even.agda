@@ -87,18 +87,15 @@ module Even where
   sum-even-even : {x y : ℤ} → Even x → Even y → Even (x + y)
   sum-even-even {y = y} base q rewrite ℤp.+-identityˡ y = q
   sum-even-even {y = y} (step {n} p) q
-    rewrite ℤp.+-assoc 2ℤ (ℤ.pos n) y
-    rewrite ℤp.+-assoc 1ℤ 1ℤ ((ℤ.pos n) + y) =
+    rewrite ℤp.+-assoc 2ℤ (ℤ.pos n) y | ℤp.+-assoc 1ℤ 1ℤ ((ℤ.pos n) + y) =
       suc-odd (suc-even (sum-even-even p q))
   sum-even-even (pets {n} p) base = pets p
   sum-even-even (pets {n} p) (step {m} q)
-    rewrite ℤp.[1+m]⊖[1+n]≡m⊖n (ℕ.suc m) (ℕ.suc n)
-    rewrite ℤp.[1+m]⊖[1+n]≡m⊖n m n
-    rewrite sym (ℤp.-m+n≡n⊖m n m) =
+    rewrite ℤp.[1+m]⊖[1+n]≡m⊖n (ℕ.suc m) (ℕ.suc n) | ℤp.[1+m]⊖[1+n]≡m⊖n m n
+    | sym (ℤp.-m+n≡n⊖m n m) =
       sum-even-even (neg-even p) q
   sum-even-even (pets {n} p) (pets {m} q)
-    rewrite ℕp.+-comm n (ℕ.suc m)
-    rewrite ℕp.+-comm m n =
+    rewrite ℕp.+-comm n (ℕ.suc m) | ℕp.+-comm m n =
       pets (step (sum-even-even p q))
 
   private
@@ -159,8 +156,7 @@ module Even where
   mul-odd-odd : {x y : ℤ} → Odd x → Odd y → Odd (x · y)
   mul-odd-odd {y = y} base q rewrite ℤp.*-identityˡ y = q
   mul-odd-odd {y = y} esab q
-    rewrite sym (ℤp.neg-distribˡ-* 1ℤ y)
-    rewrite ℤp.*-identityˡ y =
+    rewrite sym (ℤp.neg-distribˡ-* 1ℤ y) | ℤp.*-identityˡ y =
       neg-odd q
   mul-odd-odd {y = y} (step {n} p) q rewrite ℤp.*-distribʳ-+ y 2ℤ (ℤ.pos n) =
     sum-even-odd (double-even {y}) (mul-odd-odd p q)

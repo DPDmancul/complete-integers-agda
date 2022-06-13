@@ -7,6 +7,8 @@
 -- Real numbers --
 ------------------
 
+-- Constructive real numbers according to Bishop
+
 module Data.R where
   open import Data.N as ℕ using (ℕ ; suc ; s≤s ; z≤n)
   import Data.Nat.Properties as ℕp
@@ -26,6 +28,10 @@ module Data.R where
       seq : Seq
       reg : (n m : ℕ) → ∣ seq (suc n) - seq (suc m) ∣ ≤ suc n ⁻¹ + suc m ⁻¹
 
+  reg : (x : ℝ) (n : ℕ) {p : n ≢0} (m : ℕ) {q : m ≢0} →
+    ∣ ℝ.seq x n - ℝ.seq x m ∣ ≤ n ⁻¹⟨ p ⟩ + m ⁻¹⟨ q ⟩
+  reg x (suc n) (suc m) = ℝ.reg x n m
+
   fromℚ : ℚ → ℝ
   ℝ.seq (fromℚ q) _ = q
   ℝ.reg (fromℚ q) n m = begin
@@ -42,8 +48,12 @@ module Data.R where
   1ℝ : ℝ
   1ℝ = fromℚ 1ℚ
 
+  ---------------------
+  -- Canonical bound --
+  ---------------------
+
   bound : Seq → ℕ
-  bound x = ℤ.∣_∣ (ceil ∣ x 1 ∣) + 2
+  bound x = suc (suc ℤ.∣ (ceil ∣ x 1 ∣) ∣)
 
   bound-is-max : (x : ℝ) → (n : ℕ) → ∣ (ℝ.seq x) (suc n) ∣ ≤ ℕtoℚ (bound (ℝ.seq x))
   bound-is-max x n = let
@@ -58,13 +68,26 @@ module Data.R where
     open ≤-Reasoning
     help₁ : {a b c : ℚ} → ∣ a - b ∣ ≤ c → ∣ a ∣ ≤ ∣ b ∣ + c
     help₁ {a} {b} {c} p = begin
-      ∣ a ∣                 ≡⟨ {!   !} ⟩
-      ∣ a ∣ - ∣ b ∣ + ∣ b ∣ ≤⟨ {!   !} ⟩
-      ∣ a - b ∣ + ∣ b ∣     ≤⟨ {!   !} ⟩
-      c + ∣ b ∣             ≡⟨ {!   !} ⟩
+      ∣ a ∣                 ≡⟨ lemma-+ ∣ a ∣ ∣ b ∣ ⟩
+      ∣ a ∣ - ∣ b ∣ + ∣ b ∣ ≤⟨ +-monoˡ-≤ ∣ b ∣ (∣a∣-∣b∣≤∣a-b∣ a b) ⟩
+      ∣ a - b ∣ + ∣ b ∣     ≤⟨ +-monoˡ-≤ ∣ b ∣ p ⟩
+      c + ∣ b ∣             ≡⟨ +-comm c ∣ b ∣ ⟩
       ∣ b ∣ + c             ∎
-    help₂ : (x : ℚ) → ∣ x ∣ + 2ℚ ≤ ℕtoℚ (ℤ.∣_∣ (ceil ∣ x ∣) + 2)
+    help₂ : (x : ℚ) → ∣ x ∣ + 2ℚ ≤ ℕtoℚ (suc (suc ℤ.∣ (ceil ∣ x ∣) ∣))
     help₂ = {!   !}
+
+  bound-is-max-nonZero : (x : ℝ) → (n : ℕ) {_ : n ≢0} →
+    ∣ (ℝ.seq x) n ∣ ≤ ℕtoℚ (bound (ℝ.seq x))
+  bound-is-max-nonZero x (suc n) = bound-is-max x n
+
+  --------------
+  -- Equality --
+  --------------
+
+
+  ----------------
+  -- Operations --
+  ----------------
 
   instance
     Sumℝ : Sum ℝ
@@ -89,8 +112,8 @@ module Data.R where
         ≡⟨ cong ∣_∣ (sym (+-assoc x2n (- x2m) (y2n - y2m))) ⟩
       ∣ (x2n - x2m) + (y2n - y2m) ∣ ≤⟨ ∣p+q∣≤∣p∣+∣q∣ (x2n - x2m) (y2n - y2m) ⟩
       ∣ x2n - x2m ∣ + ∣ y2n - y2m ∣
-        ≤⟨ +-mono-≤ (ℝ.reg x (ℕ.pred (2 · suc n)) (ℕ.pred (2 · suc m)))
-                    (ℝ.reg y (ℕ.pred (2 · suc n)) (ℕ.pred (2 · suc m))) ⟩
+        ≤⟨ +-mono-≤ (reg x (2 · suc n) (2 · suc m))
+                    (reg y (2 · suc n) (2 · suc m)) ⟩
       ((2 · suc n)⁻¹ + (2 · suc m)⁻¹) +
       ((2 · suc n)⁻¹ + (2 · suc m)⁻¹)
         ≡⟨ +-comm-middle ((2 · suc n)⁻¹) ((2 · suc m)⁻¹)
@@ -99,12 +122,6 @@ module Data.R where
         ≡⟨ cong₂ _+_ (helper n) (helper m) ⟩
       suc n ⁻¹ + suc m ⁻¹ ∎
       where
-      -- help₁ : (n m : ℕ) → (suc (suc (2 · n)))⁻¹ + (suc (suc (2 · m)))⁻¹ ≡
-      --   (2 · (suc n))⁻¹ + (2 · (suc m))⁻¹
-      -- help₁ n m = cong₂ _+_ (helper n) (helper m)
-      --   where
-      --   helper : (n : ℕ) → (suc (suc (2 · n)))⁻¹ ≡ (2 · suc n)⁻¹
-      --   helper n = ⁻¹-trans (cong suc (sym (ℕp.+-suc n (n + 0))))
       helper : (n : ℕ) → (2 · suc n)⁻¹ + (2 · suc n)⁻¹ ≡ (suc n)⁻¹
       helper n = begin
         (2 · suc n)⁻¹ + (2 · suc n)⁻¹ ≡⟨ cong (λ x → x + x) (help-helper n) ⟩
@@ -126,11 +143,21 @@ module Data.R where
     ℝ.seq (_·_ ⦃ Mulℝ ⦄ x y) n = let k = bound (ℝ.seq x) ℕ.⊔ bound (ℝ.seq y)
       in ℝ.seq x (2 · k · n) · ℝ.seq y (2 · k · n)
     ℝ.reg (_·_ ⦃ Mulℝ ⦄ x y) n m = let
-      k = bound (ℝ.seq x) ℕ.⊔ bound (ℝ.seq y)
-      xn = ℝ.seq x (2 · k · suc n)
-      yn = ℝ.seq y (2 · k · suc n)
-      xm = ℝ.seq x (2 · k · suc m)
-      ym = ℝ.seq y (2 · k · suc m)
+      kx = bound (ℝ.seq x)
+      ky = bound (ℝ.seq y)
+      k = kx ℕ.⊔ ky
+      kℚ = ℕtoℚ k
+      2k = 2 · k
+      xn = ℝ.seq x (2k · suc n)
+      yn = ℝ.seq y (2k · suc n)
+      xm = ℝ.seq x (2k · suc m)
+      ym = ℝ.seq y (2k · suc m)
+      ∣xm∣≤k : ∣ xm ∣ ≤ kℚ
+      ∣xm∣≤k = ≤-trans (bound-is-max-nonZero x (2k · suc m))
+                       (ℕtoℚ-trans-≤ (ℕp.m≤m⊔n kx ky))
+      ∣yn∣≤k : ∣ yn ∣ ≤ kℚ
+      ∣yn∣≤k = ≤-trans (bound-is-max-nonZero y (2k · suc n))
+                       (ℕtoℚ-trans-≤ (ℕp.m≤n⊔m kx ky))
       in begin
       ∣ xn · yn - xm · ym ∣ ≡⟨ cong ∣_∣ (sym (helper₁ xn xm yn ym)) ⟩
       ∣ (xn - xm) · yn + xm · (yn - ym) ∣
@@ -140,16 +167,26 @@ module Data.R where
       ∣ yn · (xn - xm) ∣ + ∣ xm · (yn - ym) ∣
         ≡⟨ cong₂ _+_ (∣p*q∣≡∣p∣*∣q∣ yn (xn - xm))
                      (∣p*q∣≡∣p∣*∣q∣ xm (yn - ym)) ⟩
-      ∣ yn ∣ · ∣ xn - xm ∣ + ∣ xm ∣ · ∣ yn - ym ∣ ≤⟨ ? ⟩
-        -- ≤⟨ +-mono-≤ (helper₂ yn xn xm (∣yn∣≤max n)
-        --   (proj₂ (ℝ.reg x ε/2max>0) (ℕp.<-transʳ (ℕp.m≤m⊔n Nx Ny) q)
-        --                             (ℕp.<-transʳ (ℕp.m≤m⊔n Nx Ny) r)))
-        --                (helper₂ xm yn ym (∣xn∣≤max m)
-        --   (proj₂ (ℝ.reg y ε/2max>0) (ℕp.<-transʳ (ℕp.m≤n⊔m Nx Ny) q)
-        --                             (ℕp.<-transʳ (ℕp.m≤n⊔m Nx Ny) r))) ⟩
-      -- ½ · ε + ½ · ε ≡⟨ sym (*-distribʳ-+ ε ½ ½) ⟩
-      -- 1ℚ · ε        ≡⟨ *-identityˡ ε ⟩
-      ? ≤⟨ ? ⟩
+      ∣ yn ∣ · ∣ xn - xm ∣ + ∣ xm ∣ · ∣ yn - ym ∣
+        ≤⟨ helper₂ {∣ yn ∣} {∣ xm ∣} (reg x (2k · suc n) (2k · suc m))
+                                     (reg y (2k · suc n) (2k · suc m)) ⟩
+      ∣ yn ∣ · ((2k · suc n)⁻¹ + (2k · suc m)⁻¹) +
+      ∣ xm ∣ · ((2k · suc n)⁻¹ + (2k · suc m)⁻¹)
+        ≤⟨ +-mono-≤
+          (*-monoʳ-≤-nonNeg ((2k · suc n)⁻¹ + (2k · suc m)⁻¹) {!   !} ∣yn∣≤k)
+          (*-monoʳ-≤-nonNeg ((2k · suc n)⁻¹ + (2k · suc m)⁻¹) {!   !} ∣xm∣≤k) ⟩
+      kℚ · ((2k · suc n)⁻¹ + (2k · suc m)⁻¹) +
+      kℚ · ((2k · suc n)⁻¹ + (2k · suc m)⁻¹)
+        ≡⟨ {!   !} ⟩
+      kℚ · (((2k · suc n)⁻¹ + (2k · suc m)⁻¹) + ((2k · suc n)⁻¹ + (2k · suc m)⁻¹))
+        ≡⟨ {! !} ⟩
+      kℚ · ((2k · suc n)⁻¹ + (2k · suc n)⁻¹ + (2k · suc m)⁻¹ + (2k · suc m)⁻¹)
+        ≡⟨ {!   !} ⟩
+      kℚ · ((k · suc n)⁻¹ + (k · suc m)⁻¹)
+        ≡⟨ {!   !} ⟩
+      kℚ · (k · suc n)⁻¹ + kℚ · (k · suc m)⁻¹
+        ≡⟨ {!   !} ⟩
+        {!   !} ≡⟨ {!   !} ⟩
       suc n ⁻¹ + suc m ⁻¹ ∎
       where
       helper₁ : (a b c d : ℚ) → (a - b) · c + b · (c - d) ≡ a · c - b · d
@@ -170,27 +207,11 @@ module Data.R where
         a · c - b · d ∎
         where open ≡-Reasoning
       open ≤-Reasoning
-      x≤y⇒x<1+y : {x y : ℚ} → x ≤ y → x < 1ℚ + y
-      x≤y⇒x<1+y {x} p = <-respˡ-≡ (+-identityˡ x)
-        (+-mono-<-≤ (*<* {0ℚ} {1ℚ} (ℤ.+<+ (s≤s z≤n))) p)
-      x≤y⇒x≤1+y : {x y : ℚ} → x ≤ y → x ≤ 1ℚ + y
-      x≤y⇒x≤1+y p = <⇒≤ (x≤y⇒x<1+y p)
-      -- ∣xn∣≤max : (n : ℕ) → ∣ ℝ.seq x n ∣ ≤ max
-      -- ∣xn∣≤max n = x≤y⇒x≤1+y (≤-trans ((proj₂ argmax-x) n) (p≤p⊔q max-x max-y))
-      -- ∣yn∣≤max : (n : ℕ) → ∣ ℝ.seq y n ∣ ≤ max
-      -- ∣yn∣≤max n = x≤y⇒x≤1+y (≤-trans ((proj₂ argmax-y) n) (p≤q⊔p max-x max-y))
-      -- max>0 : max > 0ℚ
-      -- max>0 = x≤y⇒x<1+y (≤-trans (0≤∣p∣ max-x-signed) (p≤p⊔q max-x max-y))
-      -- helper₂ : (a b c : ℚ) → ∣ a ∣ ≤ max → ∣ b - c ∣ ≤ ε/2max →
-      --   ∣ a ∣ · ∣ b - c ∣ ≤ ½ · ε
-      -- helper₂ a b c p q = begin
-      --   ∣ a ∣ · ∣ b - c ∣ ≡⟨ *-comm ∣ a ∣ ∣ b - c ∣ ⟩
-      --   ∣ b - c ∣ · ∣ a ∣
-      --     ≤⟨ *-monoˡ-≤-nonNeg ∣ b - c ∣ (nonNegative (0≤∣p∣ a)) p ⟩
-      --   ∣ b - c ∣ · max
-      --     ≤⟨ {!   !} ⟩
-      --     -- ≤⟨ *-monoʳ-≤-nonNeg max (nonNegative (0≤∣p∣ (b - c))) q ⟩
-
+      helper₂ : {a c b₁ b₂ d₁ d₂ : ℚ} →
+        {a>0 : NonNegative a} → {c>0 : NonNegative c} →
+        b₁ ≤ b₂ → d₁ ≤ d₂ → a · b₁ + c · d₁ ≤ a · b₂ + c · d₂
+      helper₂ {a} {c} {a>0 = a>0} {c>0 = c>0} p q = +-mono-≤
+        (*-monoˡ-≤-nonNeg a a>0 p) (*-monoˡ-≤-nonNeg c c>0 q)
 
     unit ⦃ Mulℝ ⦄ = 1ℝ
     lemma-unit ⦃ Mulℝ ⦄ {x} = {!   !}

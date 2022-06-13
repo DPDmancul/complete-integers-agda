@@ -38,3 +38,9 @@ even one, ...). Then we will see how they form a ring and can be used to define
 an TODO (parlare di x^l = |x|)
 
 
+## License {-}
+
+```{r engine="sh", echo = FALSE, results='asis'}
+sed -n -e '/<!--LICENSE-->/,/<!--\/LICENSE-->/p' README.md
+```
+

@@ -10,17 +10,30 @@
 module Data.Q where
   open import Data.Rational hiding (_+_ ; -_ ; _-_ ; _*_) public
   open import Data.Rational.Properties
+  open import Data.Nat.Coprimality using (1-coprimeTo) renaming (sym to csym)
   open import Data.N as ℕ using (ℕ ; suc)
   open import Data.Int as ℤ using (ℤ ; 1ℤ)
+  import Data.Integer.Properties as ℤp
 
   ℤtoℚ : ℤ → ℚ
   ℤtoℚ z = z / 1
 
+  -- ℤtoℚ-trans-≤ : {a b : ℤ} → a ℤ.≤ b → ℤtoℚ a ≤ ℤtoℚ b
+  -- ℤtoℚ-trans-≤ {a} {b} p rewrite 1-coprimeTo ℤ.∣ a ∣ = *≤* {! p  !}
+
   ℕtoℚ : ℕ → ℚ
   ℕtoℚ n = ℤtoℚ (ℤ.pos n)
 
+  ℕtoℚ-trans-≤ : {a b : ℕ} → a ℕ.≤ b → ℕtoℚ a ≤ ℕtoℚ b
+  ℕtoℚ-trans-≤ {a} {b} p rewrite normalize-coprime (csym (1-coprimeTo a))
+    | normalize-coprime (csym (1-coprimeTo b)) = *≤* (ℤp.*-monoʳ-≤-nonNeg 1 (ℤ.+≤+ p))
+
   2ℚ : ℚ
   2ℚ = ℕtoℚ 2
+
+  ----------------
+  -- Operations --
+  ----------------
 
   open import Ops
 
@@ -42,11 +55,21 @@ module Data.Q where
     unit ⦃ Mulℚ ⦄ = 1ℚ
     lemma-unit ⦃ Mulℚ ⦄ = *-identityˡ _
 
+  open import Data.Integer.DivMod using (_div_)
+
+  floor : ℚ → ℤ
+  floor x = (↥ x) div (↧ x)
+
+  ceil : ℚ → ℤ
+  ceil x = - floor (- x)
 
   open import Relation.Binary.PropositionalEquality
   open import Data.Rational.Unnormalised.Base using (_≢0) public
-  open import Data.Nat.Coprimality using (1-coprimeTo)
   import Data.Nat.Properties as ℕp
+
+  ------------------------
+  -- Natural reciprocal --
+  ------------------------
 
   infix 8 _⁻¹
   _⁻¹ : (n : ℕ) {_ : n ≢0} → ℚ
@@ -68,6 +91,10 @@ module Data.Q where
   ⁻¹-trans : {n m : ℕ} {p : n ≢0} {q : m ≢0} → n ≡ m → n ⁻¹⟨ p ⟩ ≡ m ⁻¹⟨ q ⟩
   ⁻¹-trans {suc n} refl = ⁻¹-trans-suc {n} refl
 
+  --------------------
+  -- Useful lemmas ---
+  --------------------
+
   +-assoc-middle : (a b c d : ℚ) → (a + b) + (c + d) ≡ a + (b + c) + d
   +-assoc-middle a b c d = begin
     a + b + (c + d) ≡⟨ sym (+-assoc (a + b) c d) ⟩
@@ -83,11 +110,28 @@ module Data.Q where
     (a + c) + (b + d) ∎
     where open ≡-Reasoning
 
-  open import Data.Integer.DivMod using (_div_)
+  lemma+- : (a b : ℚ) → a ≡ a + b - b
+  lemma+- a b = begin
+    a             ≡⟨ sym (+-identityʳ a) ⟩
+    a + 0ℚ        ≡⟨ cong (_+_ a) (sym (+-inverseʳ b)) ⟩
+    a + (b - b)   ≡⟨ sym (+-assoc a b (- b)) ⟩
+    a + b + (- b) ∎
+    where open ≡-Reasoning
 
-  floor : ℚ → ℤ
-  floor x = (↥ x) div (↧ x)
+  lemma-+ : (a b : ℚ) → a ≡ a - b + b
+  lemma-+ a b =  begin
+    a             ≡⟨ sym (+-identityʳ a) ⟩
+    a + 0ℚ        ≡⟨ cong (_+_ a) (sym (+-inverseˡ b)) ⟩
+    a + (- b + b) ≡⟨ sym (+-assoc a (- b) b) ⟩
+    a + (- b) + b ∎
+    where open ≡-Reasoning
 
-  ceil : ℚ → ℤ
-  ceil x = - floor (- x)
+  ∣a∣-∣b∣≤∣a-b∣ : (a b : ℚ) → ∣ a ∣ - ∣ b ∣ ≤ ∣ a - b ∣
+  ∣a∣-∣b∣≤∣a-b∣ a b = begin
+    ∣ a ∣ - ∣ b ∣             ≡⟨ cong (λ x → ∣ x ∣ - ∣ b ∣) (lemma-+ a b) ⟩
+    ∣ a - b + b ∣ - ∣ b ∣     ≤⟨ +-monoˡ-≤ (- ∣ b ∣) (∣p+q∣≤∣p∣+∣q∣ (a - b) b) ⟩
+    ∣ a - b ∣ + ∣ b ∣ - ∣ b ∣ ≡⟨ sym (lemma+- ∣ a - b ∣ ∣ b ∣) ⟩
+    ∣ a - b ∣                 ∎
+    where open ≤-Reasoning
+
 

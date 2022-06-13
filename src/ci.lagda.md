@@ -2,7 +2,19 @@
 ```agda
 -- (c) Davide Peressoni 2022
 
-{-# OPTIONS --safe #-}
+-- Copyright 2022 Davide Peressoni
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--     http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
 
 open import Data.N
 open import Data.Int
@@ -15,6 +27,7 @@ open ≡-Reasoning
 open import Even
 open import Data.Empty
 open import Data.Product hiding(_×_)
+open import Data.PostulatedReals renaming (Properties to ℝp)
 ```
 -->
 
@@ -93,7 +106,7 @@ module RingℤC where
   +-identityˡ : (z : ℤC) → additive-zero + z ≡ z
   +-identityˡ _ = lemma-sum-zero
   +-identityʳ : (z : ℤC) → z + additive-zero ≡ z
-  +-identityʳ z rewrite (+-comm z additive-zero) = +-identityˡ z
+  +-identityʳ z rewrite +-comm z additive-zero = +-identityˡ z
 
   +-inverseˡ : (z : ℤC) → (- z) + z ≡ additive-zero
   +-inverseˡ [ v , p ] = cong₂ [_,_] (ℤp.+-inverseˡ v) (𝔽₂p.⊕-self p)
@@ -115,19 +128,19 @@ module RingℤC where
   ·-identityˡ : (z : ℤC) → unit · z ≡ z
   ·-identityˡ _ = lemma-unit
   ·-identityʳ : (z : ℤC) → z · unit ≡ z
-  ·-identityʳ z rewrite (·-comm z unit) = ·-identityˡ z
+  ·-identityʳ z rewrite ·-comm z unit = ·-identityˡ z
 
   ·-distribʳ-+ : (c a b : ℤC) → (a + b) · c ≡ a · c + b · c
   ·-distribʳ-+ [ vc , pc ] [ va , pa ] [ vb , pb ] =
     cong₂ [_,_] (ℤp.*-distribʳ-+ vc va vb) (𝔽₂p.∧-distribʳ-⊕ pc pa pb)
   ·-distribˡ-+ : (c a b : ℤC) → c · (a + b) ≡ c · a + c · b
-  ·-distribˡ-+ c a b rewrite (·-comm c (a + b)) rewrite  (·-distribʳ-+ c a b)=
+  ·-distribˡ-+ c a b rewrite ·-comm c (a + b) | ·-distribʳ-+ c a b =
     (cong₂ _+_  (·-comm a c) (·-comm b c))
 
   ·-zeroˡ : (a : ℤC) → additive-zero · a ≡ additive-zero
   ·-zeroˡ [ v , p ] = cong₂ [_,_] (ℤp.*-zeroˡ v)  (𝔽₂p.∧-zeroˡ p)
   ·-zeroʳ : (a : ℤC) → a · additive-zero ≡ additive-zero
-  ·-zeroʳ a rewrite (·-comm a additive-zero) = ·-zeroˡ a
+  ·-zeroʳ a rewrite ·-comm a additive-zero = ·-zeroˡ a
 
   ----------------
   -- Structures --
@@ -493,7 +506,7 @@ Let us define the set of dis-integers as
 
 ```agda
 ℤD : Set
-ℤD = Σ[ ([ v , p ]) ∈ ℤC ] p ≡ par v → ⊥
+ℤD = Σ[ ([ v , p ]) ∈ ℤC ] p ≡ ¬ (par v)
 ```
 :::
 
@@ -571,16 +584,96 @@ More precisely we will write, with an abuse of notation, $\bZ'=\bZ$ and $[v,
 \Par(v)] = v$ meaning respectively $\bZ'=f_{\bZ}(\bZ)$ and $[v, \Par(v)] =
 f_{\bZ}(v)$.
 
-## Behaviours induced by parity
+### Dis-integers
 
 We said in the introduction that dis-integers are the dual of integers along
 parity, in fact in $\bZ_D$ we have $[0,1]$ which has null value and odd parity,
 $[1,0]$ which has unitary value, but even parity, and in general $[v,p]$ where
 the parity $p$ is not the parity of the integer $v$.
 
-We now will show how this parity is not a mere binary flag, but induces the same
-properties of even and odd numbers into $\bZ_C$: complete integers with even
-parity act like even numbers and those with odd parity like odd numbers.
+::: {.definition name="Odd zero"}
+Let's call $o \coloneqq [0,1]$ the _odd zero_, since it has null value and
+odd parity.
+
+```agda
+o : ℤC
+o = [ 0ℤ , one ]
+```
+:::
+
+::: {.lemma name="Swap parity"}
+Summing the odd zero to a complete integer its parity changes.
+:::
+::: {.proof}
+\
+```agda
+swap-parity : (z : ℤC) → par z ≡ ¬ (par (z + o))
+swap-parity [ _ , zero ] = refl
+swap-parity [ _ , one  ] = refl
+```
+:::
+
+::: {.definition name="Even unit"}
+Let's call $l \coloneqq [1,0]$ the _even unit_, since it has unitary value and
+even parity.
+
+```agda
+l : ℤC
+l = [ 1ℤ , zero ]
+```
+:::
+
+::: {.lemma name="Change only value"}
+Summing the even unit to a complete integer only it's value changes, not its
+parity.
+:::
+::: {.proof}
+\
+```agda
+par[z+l] : (z : ℤC) → par (z + l) ≡ par z
+par[z+l] [ _ , zero ] = refl
+par[z+l] [ _ , one  ] = refl
+
+val[z+l] : (z : ℤC) → val (z + l) ≡ val z + 1ℤ
+val[z+l] [ v , _ ] = refl
+
+par[z-l] : (z : ℤC) → par (z - l) ≡ par z
+par[z-l] [ _ , zero ] = refl
+par[z-l] [ _ , one  ] = refl
+
+val[z-l] : (z : ℤC) → val (z - l) ≡ val z - 1ℤ
+val[z-l] [ v , _ ] = refl
+```
+:::
+
+::: {.lemma #ZD-from-Z name="Dis-integer as integer plus odd unit"}
+Each dis-integer can be written as the sum of an integer with $l$.
+:::
+::: {.proof}
+\
+```agda
+ℤD-from-ℤ+l : ((a , _) : ℤD) → Σ[ (b , _) ∈ ℤ' ] a ≡ b + l
+ℤD-from-ℤ+l (a , q) = (a - l , help₁ (a , q)) , help₂ a
+  where
+  help₁ : ((z , _) : ℤD) → par (z - l) ≡ par (val (z - l))
+  help₁ (z@([ v , _ ]) , refl) rewrite par[z-l] z
+    | th-par-linearity-ℤ {v} { - 1ℤ} with par v
+  ... | zero = refl
+  ... | one  = refl
+  help₂ : (z : ℤC) → z ≡ (z - l) + l
+  help₂ z rewrite val[z-l] z | par[z-l] z | val[z+l] (z - l) | par[z+l] (z - l) =
+    cong₂ [_,_] (sym (trans (ℤp.+-assoc (val z) (- 1ℤ) 1ℤ)
+                            (ℤp.+-identityʳ (val z))))
+                (𝔽₂p.⊕-comm zero (par z))
+```
+:::
+
+## Behaviours induced by parity
+
+We now will show how the parity of a complete integer is not a mere binary flag,
+but induces the same properties of even and odd numbers into $\bZ_C$: complete
+integers with even parity act like even numbers and those with odd parity like
+odd numbers.
 
 ```agda
 data ℤC-Even : ℤC → Set where
@@ -597,18 +690,18 @@ the same for integer numbers.
 ::: {.proof}
 \
 ```agda
-evenℤ→evenℤC : {z : ℤ} → Even z → ℤC-Even (proj₁ (fℤ z))
-evenℤ→evenℤC p = even (parity-even p)
+evenℤ⇒evenℤC : {z : ℤ} → Even z → ℤC-Even (proj₁ (fℤ z))
+evenℤ⇒evenℤC p = even (parity-even p)
 
-oddℤ→oddℤC : {z : ℤ} → Odd z → ℤC-Odd (proj₁ (fℤ z))
-oddℤ→oddℤC p = odd (parity-odd p)
+oddℤ⇒oddℤC : {z : ℤ} → Odd z → ℤC-Odd (proj₁ (fℤ z))
+oddℤ⇒oddℤC p = odd (parity-odd p)
 
-evenℤC→evenℤ : {z : ℤ'} → ℤC-Even (proj₁ z) → Even (fℤ⁻¹ z)
-evenℤC→evenℤ {z} (even _) rewrite proj₂ z with even-or-odd (fℤ⁻¹ z)
+evenℤC⇒evenℤ : {z : ℤ'} → ℤC-Even (proj₁ z) → Even (fℤ⁻¹ z)
+evenℤC⇒evenℤ {z} (even _) rewrite proj₂ z with even-or-odd (fℤ⁻¹ z)
 ... | even q = q
 
-oddℤC→oddℤ : {z : ℤ'} → ℤC-Odd (proj₁ z) → Odd (fℤ⁻¹ z)
-oddℤC→oddℤ {z} (odd _) rewrite proj₂ z with even-or-odd (fℤ⁻¹ z)
+oddℤC⇒oddℤ : {z : ℤ'} → ℤC-Odd (proj₁ z) → Odd (fℤ⁻¹ z)
+oddℤC⇒oddℤ {z} (odd _) rewrite proj₂ z with even-or-odd (fℤ⁻¹ z)
 ... | odd q = q
 ```
 :::
@@ -661,14 +754,6 @@ mul-ℤC-odd-odd (odd refl) (odd refl) = odd refl
 
 ## Exponential of complete integers
 
-Let's call $l \coloneqq [1,0]$ the even unit, since it has unitary value and
-even parity.
-
-```agda
-l : ℤC
-l = [ 1ℤ , zero ]
-```
-
 If we pick an $x \in \bR$ we can intuitively say that $x^l$ should be equal to
 $|x|$ because:
 
@@ -676,4 +761,6 @@ $|x|$ because:
 2. being the value of $l$ one, $x^l$ should be a somewhat linear function of $x$.
 
 We can now use this intuition to define
+
+TODO \@ref(lem:ZD-from-Z)
 
