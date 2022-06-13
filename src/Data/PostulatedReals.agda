@@ -62,4 +62,6 @@ module Data.PostulatedReals where
     +-identityˡ = lemma-+-identityˡ
     *-identityˡ = lemma-*-identityˡ
 
+    postulate
+      *-idenityʳ : (x : ℝ) → x · 1ℝ ≡ x
 

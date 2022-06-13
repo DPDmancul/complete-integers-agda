@@ -17,7 +17,7 @@
 -- limitations under the License.
 
 open import Data.N
-open import Data.Int
+open import Data.Int hiding (∣_∣)
 import Data.Integer.Properties as ℤp
 open import Data.F2
 import Data.F2.Properties as 𝔽₂p
@@ -27,7 +27,7 @@ open ≡-Reasoning
 open import Even
 open import Data.Empty
 open import Data.Product hiding(_×_)
-open import Data.PostulatedReals renaming (Properties to ℝp)
+open import Data.PostulatedReals renaming (module Properties to ℝp)
 ```
 -->
 
@@ -578,7 +578,8 @@ module isomorphism-fℤ where
 :::
 
 Since $\bZ'$ is isomorphic to $\bZ$, and so the two cannot be distinguished, we
-won't write $\bZ'$ anymore and we will use the notation $[v, \Par(v)]$ to denote elements in $\bZ$ too.
+won't write $\bZ'$ anymore and we will use the notation $[v, \Par(v)]$ to denote
+elements in $\bZ$ too.
 
 More precisely we will write, with an abuse of notation, $\bZ'=\bZ$ and $[v,
 \Par(v)] = v$ meaning respectively $\bZ'=f_{\bZ}(\bZ)$ and $[v, \Par(v)] =
@@ -752,15 +753,61 @@ mul-ℤC-odd-odd (odd refl) (odd refl) = odd refl
 ```
 :::
 
-## Exponential of complete integers
+## Reals exponentiation to the power of complete integers
+
+In this section we will define an exponentiation function with real bases and
+complete integer exponents.
+
+To help us come up with a good definition we can split on the exponent $z$:
+
+1. If $z$ is an integer, this operation is already defined as $x^z$ for
+   $x\in\bR$;
+2. If $z$ is a dis-integer, we know from lemma \@ref(lem:ZD-from-Z) that there
+   exist an integer $y = z - l$ s.t. $z = y + l$; supposing that our function
+   respects power laws (which we will prove in theorem \@ref(th:power-laws)), we
+   can write $x^z = z^{y+l} = z^y \cdot z^l$.
+
+So all we have to do is to define the value of $x^l$.
 
 If we pick an $x \in \bR$ we can intuitively say that $x^l$ should be equal to
 $|x|$ because:
 
 1. being the parity of $l$ even, $x^l$ should be an even function of $x$;
-2. being the value of $l$ one, $x^l$ should be a somewhat linear function of $x$.
+2. being the value of $l$ one, $x^l$ should be a somewhat linear function.
 
-We can now use this intuition to define
+So our definition, for $x\in\bR$ and $z\in\bZ_C$, would be:
+\[x^z = \begin{cases}\text{usual }x^z & z\in\bZ \\
+  x^y \cdot x^l = x^y \cdot |x| & z\in\bZ_D \end{cases}\]
+with $y = z - l \in\bZ$
 
-TODO \@ref(lem:ZD-from-Z)
+We will instead use another definition, and later prove they are equal.
+
+::: {.definition  name="Real exponentiation to complete integers"}
+For $x\in\bR$ and $z\in\bZ_C$, we define
+\[x^z = x^{\val(z) + k} |x|^k\]
+with $k = \Par\left(\val(z)\right) \oplus \Par(z)$.
+
+```agda
+𝔽₂-to-ℤ : 𝔽₂ → ℤ
+𝔽₂-to-ℤ zero = 0ℤ
+𝔽₂-to-ℤ one  = 1ℤ
+
+instance
+  CIPowℝ : Pow ℝ ℤC {ℝ}
+  _^_ ⦃ CIPowℝ ⦄ x [ v , p ] = let k = 𝔽₂-to-ℤ (par v ⊕ p) in
+    x ^ (v + k) · ∣ x ∣ ^ k
+```
+:::
+::: {.proof}
+\
+```agda
+pow-def-eq-ℤ : (z : ℤ) → (x : ℝ) → x ^ proj₁ (fℤ z) ≡ x ^ z
+pow-def-eq-ℤ z x rewrite 𝔽₂p.⊕-self (par z) | ℤp.+-identityʳ z =
+  ℝp.*-idenityʳ (x ^ z)
+
+-- TODO
+```
+:::
+
+TODO prove power laws
 
