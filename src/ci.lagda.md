@@ -764,8 +764,8 @@ To help us come up with a good definition we can split on the exponent $z$:
    $x\in\bR$;
 2. If $z$ is a dis-integer, we know from lemma \@ref(lem:ZD-from-Z) that there
    exist an integer $y = z - l$ s.t. $z = y + l$; supposing that our function
-   respects power laws (which we will prove in theorem \@ref(th:power-laws)), we
-   can write $x^z = z^{y+l} = z^y \cdot z^l$.
+   respects exponent rules (which we will prove in theorem
+   \@ref(th:exponent-rules)), we can write $x^z = z^{y+l} = z^y \cdot z^l$.
 
 So all we have to do is to define the value of $x^l$.
 
@@ -782,9 +782,9 @@ with $y = z - l \in\bZ$
 
 We will instead use another definition, and later prove they are equal.
 
-::: {.definition  name="Real exponentiation to complete integers"}
+::: {.definition #real-powers name="Real exponentiation to complete integers"}
 For $x\in\bR$ and $z\in\bZ_C$, we define
-\[x^z = x^{\val(z) + k} |x|^k\]
+\[x^z = x^{\val(z) - k} |x|^k\]
 with $k = \Par\left(\val(z)\right) \oplus \Par(z)$.
 
 ```agda
@@ -795,7 +795,7 @@ with $k = \Par\left(\val(z)\right) \oplus \Par(z)$.
 instance
   CIPowℝ : Pow ℝ ℤC {ℝ}
   _^_ ⦃ CIPowℝ ⦄ x [ v , p ] = let k = 𝔽₂-to-ℤ (par v ⊕ p) in
-    x ^ (v + k) · ∣ x ∣ ^ k
+    x ^ (v - k) · ∣ x ∣ ^ k
 ```
 :::
 ::: {.proof}
@@ -803,11 +803,44 @@ instance
 ```agda
 pow-def-eq-ℤ : (z : ℤ) → (x : ℝ) → x ^ proj₁ (fℤ z) ≡ x ^ z
 pow-def-eq-ℤ z x rewrite 𝔽₂p.⊕-self (par z) | ℤp.+-identityʳ z =
-  ℝp.*-idenityʳ (x ^ z)
+  ℝp.*-identityʳ (x ^ z)
 
--- TODO
+pow-def-eq-ℤD : (z : ℤD) → (x : ℝ) → let y = fℤ⁻¹ (proj₁ (ℤD-from-ℤ+l z)) in
+  x ^ proj₁ z ≡ x ^ y · ∣ x ∣
+pow-def-eq-ℤD ([ v , _ ] , refl) x rewrite sym (𝔽₂p.¬-distribʳ-⊕ (par v) (par v))
+  |  𝔽₂p.⊕-self (par v) = cong (_·_ (x ^ (v - 1ℤ))) (ℝp.*-identityʳ ∣ x ∣)
 ```
 :::
 
-TODO prove power laws
+::: {.theorem #exponent-rules name="Exponent rules"}
+Definition \@ref(def:real-powers) respects exponent rules, i.e. for $x,y\in\bR$
+and $z,w\in\bZ_C$
+\[x^{z+w}=x^z\cdot x^w;\quad (x^z)^w = x^{zw};\quad (x\cdot y)^z=x^z\cdot y^z\]
+:::
+::: {.proof}
+\
+```agda
+k-of-sum : (z w : ℤC) → par (val (z + w)) ⊕ par (z + w) ≡ let
+  kz = par (val z) ⊕ par z; kw = par (val w) ⊕ par w in kz ⊕ kw
+k-of-sum z w rewrite th-par-linearity-ℤ {val z} {val w}
+   = 𝔽₂p.⊕-comm-middle (par (val z)) (par (val w)) (par z) (par w)
+
+-- sum-exp : (x : ℝ) {_ : x ≡ 0ℝ → ⊥} → (z w : ℤC) → x ^ (z + w) ≡ x ^ z · x ^ w
+-- sum-exp x {p} z w rewrite k-of-sum z w with par (val z) ⊕ par z
+--   | par (val w) ⊕ par w
+-- ... | zero | zero rewrite ℤp.+-identityʳ (val z + val w) | ℤp.+-identityʳ (val z)
+--   | ℤp.+-identityʳ (val w) | ℝp.*-identityʳ (x ^ (val z + val w))
+--   | ℝp.*-identityʳ (x ^ val z) | ℝp.*-identityʳ (x ^ val w)
+--   = ℝp.sum-exp x {p} (val z) (val w)
+-- ... | zero | one  = {!   !}
+-- ... | one  | zero = {!   !}
+-- ... | one  | one  = {!   !}
+
+-- double-exp : (x : ℝ) → (z w : ℤC) → (x ^ z) ^ w ≡ x ^ (z · w)
+-- double-exp x z w = {!   !}
+
+-- mul-base : (x y : ℝ) → (z : ℤC) → (x · y) ^ z ≡ x ^ z · y ^ z
+-- mul-base x y z = {!   !}
+```
+:::
 
