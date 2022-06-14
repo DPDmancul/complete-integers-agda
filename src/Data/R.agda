@@ -1,7 +1,10 @@
 
 -- (c) Davide Peressoni 2022
 
-{-# OPTIONS --safe --without-K #-}
+-- {-# OPTIONS --safe --without-K #-}
+
+-- To allow generating HTML output even if not complete
+{-# OPTIONS --allow-unsolved-metas --without-K #-}
 
 ------------------
 -- Real numbers --

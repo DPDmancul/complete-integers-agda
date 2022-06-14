@@ -765,7 +765,7 @@ To help us come up with a good definition we can split on the exponent $z$:
 2. If $z$ is a dis-integer, we know from lemma \@ref(lem:ZD-from-Z) that there
    exist an integer $y = z - l$ s.t. $z = y + l$; supposing that our function
    respects exponent rules (which we will prove in theorem
-   \@ref(th:exponent-rules)), we can write $x^z = z^{y+l} = z^y \cdot z^l$.
+   \@ref(thm:exponent-rules)), we can write $x^z = z^{y+l} = z^y \cdot z^l$.
 
 So all we have to do is to define the value of $x^l$.
 
