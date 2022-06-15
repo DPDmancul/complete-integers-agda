@@ -15,10 +15,10 @@ module Data.PostulatedReals where
 
   open import Relation.Binary.PropositionalEquality
   open ≡-Reasoning
-  open import Data.N
+  open import Data.N hiding (_<_ ; _≤_ ; _>_ ; _≥_)
   open ℕ
   import Data.Nat.Properties as ℕp
-  open import Data.Int hiding (∣_∣ ; suc)
+  open import Data.Int hiding (∣_∣ ; suc ; _<_ ; _≤_ ; _>_ ; _≥_)
   open ℤ
   import Data.Int.Properties as ℤp
   open import Data.Empty
@@ -34,9 +34,22 @@ module Data.PostulatedReals where
     negℝ : ℝ → ℝ
     mulℝ : ℝ → ℝ → ℝ
     _/_ : ℝ → ℝ → ℝ
-    ∣_∣ : ℝ → ℝ
+
+    _<_ : ℝ → ℝ → Set
 
     1≢0 : 1ℝ ≡ 0ℝ → ⊥
+
+  data _≤_ : ℝ → ℝ → Set where
+    *≤* : (x y : ℝ) → x ≡ y ⊎ x < y → x ≤ y
+
+  _>_ : ℝ → ℝ → Set
+  x > y = y < x
+
+  _≥_ : ℝ → ℝ → Set
+  x ≥ y = y ≤ x
+
+  postulate
+    pos-neg : (x : ℝ) → x < 0ℝ ⊎ x ≥ 0ℝ
 
   open import Ops
 
@@ -62,6 +75,18 @@ module Data.PostulatedReals where
     _^_ ⦃ IntPowℝ ⦄ b (ℤ.pos n) = b ^ n
     _^_ ⦃ IntPowℝ ⦄ b -[1+ n ]  = unit / (b ^ ℕ.suc n)
 
+  -1ℝ : ℝ
+  -1ℝ = - unit
+
+  ∣_∣ : ℝ → ℝ
+  ∣ x ∣ with pos-neg x
+  ... | inj₁ x<0 = x
+  ... | inj₂ x≥0 = negℝ x
+
+  sgn : (x : ℝ) {_ : x ≡ 0ℝ → ⊥} → ℝ
+  sgn x with pos-neg x
+  ... | inj₁ x<0 = -1ℝ
+  ... | inj₂ x≥0 =  1ℝ
 
   ----------------
   -- Properties --
@@ -80,6 +105,9 @@ module Data.PostulatedReals where
       *-comm : (x y : ℝ) → x · y ≡ y · x
       *-assoc : (x y z : ℝ) → (x · y) · z ≡ x · (y · z)
 
+      *-neg-identityˡ : (x : ℝ) → -1ℝ · x ≡ - x
+      -1² : -1ℝ · -1ℝ ≡ unit
+
     +-identityʳ : (x : ℝ) → x + additive-zero ≡ x
     +-identityʳ x rewrite +-comm x additive-zero = +-identityˡ x
 
@@ -97,6 +125,10 @@ module Data.PostulatedReals where
 
     *-comm-middle : (a b c d : ℝ) → (a · b) · (c · d) ≡ (a · c) · (b · d)
     *-comm-middle = •-comm-middle _·_ *-comm *-assoc-middle
+
+    *-cancel-neg : (x y : ℝ) → - x · - y ≡ x · y
+    *-cancel-neg x y rewrite sym (*-neg-identityˡ x) | sym (*-neg-identityˡ y)
+      | *-comm-middle -1ℝ x -1ℝ y | -1² = *-identityˡ (x · y)
 
     postulate
       x/x : (x : ℝ) {_ : x ≡ 0ℝ → ⊥} → x / x ≡ unit
@@ -121,11 +153,14 @@ module Data.PostulatedReals where
       | sym (x/x x {p}) | /-mul x x (x / x) ((x / x) / x) | x/x x {p}
       | 1/1/x-help x {p} | sym (/-coef x 1ℝ 1ℝ) | x/1 1ℝ = *-identityʳ x
 
-    postulate
-      ∣x∣² : (x : ℝ) → ∣ x ∣ ^ 2 ≡ x ^ 2
-
     ∣x∣∣x∣ : (x : ℝ) → ∣ x ∣ · ∣ x ∣ ≡ x ^ 2
-    ∣x∣∣x∣ x = trans (cong (_·_ ∣ x ∣) (sym (*-identityʳ ∣ x ∣))) (∣x∣² x)
+    ∣x∣∣x∣ x rewrite *-identityʳ x with pos-neg x
+    ... | inj₁ x<0 = refl
+    ... | inj₂ x≥0 = *-cancel-neg x x
+
+    postulate
+      ∣x∣∣y∣ : (x y : ℝ) → ∣ x ∣ · ∣ y ∣ ≡ ∣ x · y ∣
+
 
     --------------------
     -- Exponent rules --

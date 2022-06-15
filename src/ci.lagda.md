@@ -855,8 +855,12 @@ sum-exp x {p} z w rewrite k-of-sum z w with par (val z) ⊕ par z
     (sym (ℝp.sum-exp x {p} ((val z + val w) + -[1+ 1 ]) 2ℤ))
     (cong (_^_ x) (ℤp.+-assoc (val z + val w) -[1+ 1 ] 2ℤ)))
 
--- mul-base : (x y : ℝ) → (z : ℤC) → (x · y) ^ z ≡ x ^ z · y ^ z
--- mul-base x y z = {!   !}
+mul-base : (x y : ℝ) → (z : ℤC) → (x · y) ^ z ≡ x ^ z · y ^ z
+mul-base x y z with par (val z) ⊕ par z
+... | zero rewrite ℤp.+-identityʳ (val z) | ℝp.*-identityʳ (x ^ val z)
+  | ℝp.*-identityʳ (y ^ val z) | ℝp.*-identityʳ ((x · y) ^ val z) =
+    ℝp.mul-base x y (val z)
+... | one  = {!   !}
 
 -- double-exp : (x : ℝ) → (z w : ℤC) → (x ^ z) ^ w ≡ x ^ (z · w)
 -- double-exp x z w = {!   !}
