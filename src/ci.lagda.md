@@ -18,7 +18,7 @@
 
 open import Data.N
 open import Data.Int hiding (∣_∣)
-import Data.Integer.Properties as ℤp
+import Data.Int.Properties as ℤp
 open import Data.F2
 import Data.F2.Properties as 𝔽₂p
 open import Algebra
@@ -27,6 +27,7 @@ open ≡-Reasoning
 open import Even
 open import Data.Empty
 open import Data.Product hiding(_×_)
+open import Data.PostulatedReals renaming (module Properties to ℝp)
 open import Data.PostulatedReals renaming (module Properties to ℝp)
 ```
 -->
@@ -815,7 +816,7 @@ pow-def-eq-ℤD ([ v , _ ] , refl) x rewrite sym (𝔽₂p.¬-distribʳ-⊕ (par
 ::: {.theorem #exponent-rules name="Exponent rules"}
 Definition \@ref(def:real-powers) respects exponent rules, i.e. for $x,y\in\bR$
 and $z,w\in\bZ_C$
-\[x^{z+w}=x^z\cdot x^w;\quad (x^z)^w = x^{zw};\quad (x\cdot y)^z=x^z\cdot y^z\]
+\[x^{z+w}=x^z\cdot x^w;\quad (x\cdot y)^z=x^z\cdot y^z;\quad (x^z)^w = x^{zw}\]
 :::
 ::: {.proof}
 \
@@ -825,22 +826,40 @@ k-of-sum : (z w : ℤC) → par (val (z + w)) ⊕ par (z + w) ≡ let
 k-of-sum z w rewrite th-par-linearity-ℤ {val z} {val w}
    = 𝔽₂p.⊕-comm-middle (par (val z)) (par (val w)) (par z) (par w)
 
--- sum-exp : (x : ℝ) {_ : x ≡ 0ℝ → ⊥} → (z w : ℤC) → x ^ (z + w) ≡ x ^ z · x ^ w
--- sum-exp x {p} z w rewrite k-of-sum z w with par (val z) ⊕ par z
---   | par (val w) ⊕ par w
--- ... | zero | zero rewrite ℤp.+-identityʳ (val z + val w) | ℤp.+-identityʳ (val z)
---   | ℤp.+-identityʳ (val w) | ℝp.*-identityʳ (x ^ (val z + val w))
---   | ℝp.*-identityʳ (x ^ val z) | ℝp.*-identityʳ (x ^ val w)
---   = ℝp.sum-exp x {p} (val z) (val w)
--- ... | zero | one  = {!   !}
--- ... | one  | zero = {!   !}
--- ... | one  | one  = {!   !}
+private
+  sum-exp-helper : (x : ℝ) {_ : x ≡ 0ℝ → ⊥} → (z w : ℤ) →
+    x ^ ((z + w) + -[1+ 0 ]) · (∣ x ∣ · 1ℝ) ≡
+      (x ^ (z + 0ℤ) · 1ℝ) · (x ^ (w + -[1+ 0 ]) · (∣ x ∣ · 1ℝ))
+  sum-exp-helper x {p} z w rewrite ℤp.+-identityʳ z | ℝp.*-identityʳ (x ^ z)
+    | sym (ℝp.*-assoc (x ^ z) (x ^ (w + -[1+ 0 ])) (∣ x ∣ · 1ℝ))
+    | ℤp.+-assoc z w -[1+ 0 ] =
+    cong (_· (∣ x ∣ · 1ℝ)) (ℝp.sum-exp x {p} z (w + -[1+ 0 ]))
 
--- double-exp : (x : ℝ) → (z w : ℤC) → (x ^ z) ^ w ≡ x ^ (z · w)
--- double-exp x z w = {!   !}
+sum-exp : (x : ℝ) {_ : x ≡ 0ℝ → ⊥} → (z w : ℤC) → x ^ (z + w) ≡ x ^ z · x ^ w
+sum-exp x {p} z w rewrite k-of-sum z w with par (val z) ⊕ par z
+  | par (val w) ⊕ par w
+... | zero | zero rewrite ℤp.+-identityʳ (val z + val w) | ℤp.+-identityʳ (val z)
+  | ℤp.+-identityʳ (val w) | ℝp.*-identityʳ (x ^ (val z + val w))
+  | ℝp.*-identityʳ (x ^ val z) | ℝp.*-identityʳ (x ^ val w)
+  = ℝp.sum-exp x {p} (val z) (val w)
+... | zero | one  = sum-exp-helper x {p} (val z) (val w)
+... | one  | zero rewrite ℤp.+-comm (val z) (val w)
+  | ℝp.*-comm (x ^ (val z + -[1+ 0 ]) · (∣ x ∣ · 1ℝ)) (x ^ (val w + 0ℤ) · 1ℝ) =
+  sum-exp-helper x {p} (val w) (val z)
+... | one  | one  rewrite ℝp.*-identityʳ ∣ x ∣
+  | ℝp.*-comm-middle (x ^ (val z + -[1+ 0 ])) (∣ x ∣)
+                     (x ^ (val w + -[1+ 0 ])) ∣ x ∣
+  | ℝp.∣x∣∣x∣ x | sym (ℝp.sum-exp x {p} (val z + -[1+ 0 ]) (val w + -[1+ 0 ]))
+  | ℤp.+-comm-middle (val z) -[1+ 0 ] (val w) -[1+ 0 ]
+  | ℝp.*-identityʳ (x ^ ((val z + val w) + 0ℤ)) = sym (trans
+    (sym (ℝp.sum-exp x {p} ((val z + val w) + -[1+ 1 ]) 2ℤ))
+    (cong (_^_ x) (ℤp.+-assoc (val z + val w) -[1+ 1 ] 2ℤ)))
 
 -- mul-base : (x y : ℝ) → (z : ℤC) → (x · y) ^ z ≡ x ^ z · y ^ z
 -- mul-base x y z = {!   !}
+
+-- double-exp : (x : ℝ) → (z w : ℤC) → (x ^ z) ^ w ≡ x ^ (z · w)
+-- double-exp x z w = {!   !}
 ```
 :::
 

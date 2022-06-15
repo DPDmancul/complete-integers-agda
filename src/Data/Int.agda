@@ -31,4 +31,7 @@ module Data.Int where
     unit ⦃ Mulℤ ⦄ = 1ℤ
     lemma-unit ⦃ Mulℤ ⦄ = *-identityˡ _
 
+  2ℤ : ℤ
+  2ℤ = 1ℤ + 1ℤ
+
 

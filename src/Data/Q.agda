@@ -14,6 +14,7 @@ module Data.Q where
   open import Data.N as ℕ using (ℕ ; suc)
   open import Data.Int as ℤ using (ℤ ; 1ℤ)
   import Data.Integer.Properties as ℤp
+  open import Utils
 
   ℤtoℚ : ℤ → ℚ
   ℤtoℚ z = z / 1
@@ -96,19 +97,10 @@ module Data.Q where
   --------------------
 
   +-assoc-middle : (a b c d : ℚ) → (a + b) + (c + d) ≡ a + (b + c) + d
-  +-assoc-middle a b c d = begin
-    a + b + (c + d) ≡⟨ sym (+-assoc (a + b) c d) ⟩
-    (a + b + c) + d ≡⟨ cong (_+ d) (+-assoc a b c) ⟩
-    a + (b + c) + d ∎
-    where open ≡-Reasoning
+  +-assoc-middle = •-assoc-middle _+_ +-assoc
 
   +-comm-middle : (a b c d : ℚ) → (a + b) + (c + d) ≡ (a + c) + (b + d)
-  +-comm-middle a b c d = begin
-    (a + b) + (c + d) ≡⟨ +-assoc-middle a b c d ⟩
-    a + (b + c) + d   ≡⟨ cong (λ x → a + x + d) (+-comm b c) ⟩
-    a + (c + b) + d   ≡⟨ sym (+-assoc-middle a c b d) ⟩
-    (a + c) + (b + d) ∎
-    where open ≡-Reasoning
+  +-comm-middle = •-comm-middle _+_ +-comm +-assoc-middle
 
   lemma+- : (a b : ℚ) → a ≡ a + b - b
   lemma+- a b = begin

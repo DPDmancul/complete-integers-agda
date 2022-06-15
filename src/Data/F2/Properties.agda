@@ -11,9 +11,9 @@ module Data.F2.Properties where
   open import Data.Bool.Properties public
 
   open import Relation.Binary.PropositionalEquality
-  open ≡-Reasoning
   open import Data.F2
   open import Data.N
+  open import Utils
   open import Ops
 
   ¬-double : (a : 𝔽₂) → ¬ (¬ a) ≡ a
@@ -32,18 +32,10 @@ module Data.F2.Properties where
   ⊕-comm one  one  = refl
 
   ⊕-assoc-middle : (a b c d : 𝔽₂) → (a ⊕ b) ⊕ (c ⊕ d) ≡ a ⊕ (b ⊕ c) ⊕ d
-  ⊕-assoc-middle a b c d =  begin
-    (a ⊕ b) ⊕ (c ⊕ d) ≡⟨ ⊕-assoc a b (c ⊕ d) ⟩
-    a ⊕ (b ⊕ (c ⊕ d)) ≡⟨ cong (_⊕_ a) (sym (⊕-assoc b c d)) ⟩
-    a ⊕ ((b ⊕ c) ⊕ d) ≡⟨ sym (⊕-assoc a (b ⊕ c) d) ⟩
-    a ⊕ (b ⊕ c) ⊕ d    ∎
+  ⊕-assoc-middle = •-assoc-middle _⊕_ ⊕-assoc
 
   ⊕-comm-middle : (a b c d : 𝔽₂) → (a ⊕ b) ⊕ (c ⊕ d) ≡ (a ⊕ c) ⊕ (b ⊕ d)
-  ⊕-comm-middle a b c d =  begin
-    (a ⊕ b) ⊕ (c ⊕ d) ≡⟨ ⊕-assoc-middle a b c d ⟩
-    a ⊕ (b ⊕ c) ⊕ d   ≡⟨ cong (λ x → a ⊕ x ⊕ d) (⊕-comm b c) ⟩
-    a ⊕ (c ⊕ b) ⊕ d   ≡⟨ sym (⊕-assoc-middle a c b d) ⟩
-    (a ⊕ c) ⊕ (b ⊕ d) ∎
+  ⊕-comm-middle = •-comm-middle _⊕_ ⊕-comm ⊕-assoc-middle
 
   ⊕-self : (a : 𝔽₂) → a ⊕ a ≡ zero
   ⊕-self zero = refl

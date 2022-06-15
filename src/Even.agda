@@ -19,9 +19,6 @@ module Even where
   open import Relation.Binary.PropositionalEquality
   open ≡-Reasoning
 
-  2ℤ : ℤ
-  2ℤ = 1ℤ + 1ℤ
-
   data Even : ℤ → Set where
     base : Even 0ℤ
     step : {n : ℕ} → Even (ℤ.pos n) → Even (+[1+ ℕ.suc n ])
