@@ -95,7 +95,7 @@ module Ops where
   ------------------------------
   record Pow (B E : Set) {R : Set} : Set where
 
-    infixl 8 _^_
+    infixr 8 _^_
     field _^_ : B → E → R
 
   open Pow ⦃ ... ⦄ public

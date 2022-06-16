@@ -104,17 +104,17 @@ module Data.Q where
 
   lemma+- : (a b : ℚ) → a ≡ a + b - b
   lemma+- a b = begin
-    a             ≡⟨ sym (+-identityʳ a) ⟩
+    a             ≡˘⟨ +-identityʳ a ⟩
     a + 0ℚ        ≡⟨ cong (_+_ a) (sym (+-inverseʳ b)) ⟩
-    a + (b - b)   ≡⟨ sym (+-assoc a b (- b)) ⟩
+    a + (b - b)   ≡˘⟨ +-assoc a b (- b) ⟩
     a + b + (- b) ∎
     where open ≡-Reasoning
 
   lemma-+ : (a b : ℚ) → a ≡ a - b + b
   lemma-+ a b =  begin
-    a             ≡⟨ sym (+-identityʳ a) ⟩
+    a             ≡˘⟨ +-identityʳ a ⟩
     a + 0ℚ        ≡⟨ cong (_+_ a) (sym (+-inverseˡ b)) ⟩
-    a + (- b + b) ≡⟨ sym (+-assoc a (- b) b) ⟩
+    a + (- b + b) ≡˘⟨ +-assoc a (- b) b ⟩
     a + (- b) + b ∎
     where open ≡-Reasoning
 
@@ -122,7 +122,7 @@ module Data.Q where
   ∣a∣-∣b∣≤∣a-b∣ a b = begin
     ∣ a ∣ - ∣ b ∣             ≡⟨ cong (λ x → ∣ x ∣ - ∣ b ∣) (lemma-+ a b) ⟩
     ∣ a - b + b ∣ - ∣ b ∣     ≤⟨ +-monoˡ-≤ (- ∣ b ∣) (∣p+q∣≤∣p∣+∣q∣ (a - b) b) ⟩
-    ∣ a - b ∣ + ∣ b ∣ - ∣ b ∣ ≡⟨ sym (lemma+- ∣ a - b ∣ ∣ b ∣) ⟩
+    ∣ a - b ∣ + ∣ b ∣ - ∣ b ∣ ≡˘⟨ lemma+- ∣ a - b ∣ ∣ b ∣ ⟩
     ∣ a - b ∣                 ∎
     where open ≤-Reasoning
 

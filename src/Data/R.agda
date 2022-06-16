@@ -128,7 +128,7 @@ module Data.R where
       helper : (n : ℕ) → (2 · suc n)⁻¹ + (2 · suc n)⁻¹ ≡ (suc n)⁻¹
       helper n = begin
         (2 · suc n)⁻¹ + (2 · suc n)⁻¹ ≡⟨ cong (λ x → x + x) (help-helper n) ⟩
-        ½ · (suc n)⁻¹ + ½ · (suc n)⁻¹ ≡⟨ sym (*-distribʳ-+ ((suc n)⁻¹) ½ ½) ⟩
+        ½ · (suc n)⁻¹ + ½ · (suc n)⁻¹ ≡˘⟨ *-distribʳ-+ ((suc n)⁻¹) ½ ½ ⟩
         1ℚ · (suc n)⁻¹                ≡⟨ *-identityˡ ((suc n)⁻¹) ⟩
         (suc n)⁻¹                     ∎
         where
@@ -200,7 +200,7 @@ module Data.R where
           ≡⟨ cong₂ (λ w z → (a · c + w) + (b · c + z))
             (sym (neg-distribˡ-* b c)) (sym (neg-distribʳ-* b d)) ⟩
         (a · c - b · c) + (b · c - b · d)
-          ≡⟨ sym (+-assoc (a · c  - b · c) (b · c) (- (b · d))) ⟩
+          ≡˘⟨ +-assoc (a · c  - b · c) (b · c) (- (b · d)) ⟩
         a · c - b · c + b · c - b · d
           ≡⟨ cong (_- b · d) (+-assoc (a · c) (- (b · c)) (b · c)) ⟩
         a · c + (- (b · c) + b · c) - b · d

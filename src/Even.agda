@@ -98,7 +98,7 @@ module Even where
   private
     1+-1 : (x y : ℤ) → x + y ≡ 1ℤ + ((-1ℤ + x) + y)
     1+-1 x y =  begin
-      x + y                ≡⟨ sym (ℤp.+-identityˡ (x + y)) ⟩
+      x + y                ≡˘⟨ ℤp.+-identityˡ (x + y) ⟩
       0ℤ + (x + y)         ≡⟨ ℤp.+-assoc 1ℤ -1ℤ (x + y) ⟩
       1ℤ + (-1ℤ + (x + y)) ≡⟨ cong (_+_ 1ℤ) (sym (ℤp.+-assoc -1ℤ x y)) ⟩
       1ℤ + ((-1ℤ + x) + y) ∎
@@ -139,7 +139,7 @@ module Even where
   private
     -[1+n]·y≡-[2y+ny] : (n : ℕ) → (y : ℤ) → -[1+ ℕ.suc n ] · y ≡ -(2ℤ · y + (ℤ.pos n) · y )
     -[1+n]·y≡-[2y+ny] n y = begin
-      -[1+ ℕ.suc n ] · y         ≡⟨ sym (ℤp.neg-distribˡ-* +[1+ ℕ.suc n ] y) ⟩
+      -[1+ ℕ.suc n ] · y         ≡˘⟨ ℤp.neg-distribˡ-* +[1+ ℕ.suc n ] y ⟩
       -(+[1+ ℕ.suc n ] · y)      ≡⟨ cong -_ (ℤp.*-distribʳ-+ y +[1+ 1 ] (ℤ.pos n)) ⟩
       -(2ℤ · y + (ℤ.pos n) · y ) ∎
 
