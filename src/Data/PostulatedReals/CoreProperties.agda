@@ -14,9 +14,9 @@ module Data.PostulatedReals.CoreProperties where
   open import Data.PostulatedReals.Ring public
   open import Relation.Binary.PropositionalEquality
   open ≡-Reasoning
-  -- open import Data.N hiding (_<_ ; _≤_ ; _>_ ; _≥_)
-  -- open ℕ
-  -- import Data.Nat.Properties as ℕp
+  open import Data.N hiding (_<_ ; _≤_ ; _>_ ; _≥_)
+  open ℕ
+  import Data.Nat.Properties as ℕp
   -- open import Data.Int hiding (∣_∣ ; suc ; _<_ ; _≤_ ; _>_ ; _≥_)
   -- open ℤ
   -- import Data.Int.Properties as ℤp
@@ -47,7 +47,7 @@ module Data.PostulatedReals.CoreProperties where
     | *-comm-middle -1ℝ x -1ℝ y | -1² = *-identityˡ (x · y)
 
   postulate
-    *-inverse : (x : ℝ\0) → (ℝ∪0 x) · x ⁻¹ ≡ unit
+    *-inverse : {x : ℝ} → (p : x ≢0) → x · (x≢0 x {p}) ⁻¹ ≡ unit
 
   x·y≡0 : (x y : ℝ) → x · y ≡ 0ℝ → x ≡ 0ℝ ⊎ y ≡ 0ℝ
   x·y≡0 x y p with isZero x
@@ -56,7 +56,7 @@ module Data.PostulatedReals.CoreProperties where
   ... | inj₁ y≡0 = inj₂ y≡0
   ... | inj₂ r   = helper $ r $ begin
     y                ≡˘⟨ *-identityˡ y ⟩
-    1ℝ · y           ≡˘⟨ cong (_· y) (*-inverse x₀) ⟩
+    1ℝ · y           ≡˘⟨ cong (_· y) (*-inverse q) ⟩
     (x / x₀) · y     ≡⟨ *-assoc x (x₀ ⁻¹) y ⟩
     x · (x₀ ⁻¹ · y)  ≡⟨ cong (_·_ x) (*-comm (x₀ ⁻¹) y) ⟩
     x · (y · x₀ ⁻¹)  ≡˘⟨ *-assoc x y (x₀ ⁻¹) ⟩
@@ -80,14 +80,19 @@ module Data.PostulatedReals.CoreProperties where
     x + - x ≡⟨ -‿inverseʳ x ⟩
     0ℝ ∎
 
+  ⁻¹-distrib-* : {x y : ℝ} → (p : x ≢0) → (q : y ≢0) →
+    (x≢0 (x · y) {x·y≢0 p q})⁻¹ ≡ (x≢0 x {p}) ⁻¹ · (x≢0 y {q}) ⁻¹
+  ⁻¹-distrib-* {x} {y} p q = ?
+
   -- /-mul : (a b c d : ℝ) {p : b ≢0} {q : d ≢0} → let
   --   b₀ = x≢0 b {p}
   --   d₀ = x≢0 d {q}
   --   in a / b₀ · c / d₀ ≡ (a · c) / x≢0 (b · d) {x·y≢0 p q}
   -- /-mul a b c d = {!   !}
 
-  -- x/1 : (x : ℝ) → x / x≢0 unit {1≢0} ≡ x
-  -- x/1 x = {!   !}
+  x/1 : (x : ℝ) → x / x≢0 unit {1≢0} ≡ x
+  x/1 x rewrite sym (*-identityˡ ((x≢0 unit {1≢0})⁻¹)) | *-inverse 1≢0 =
+    *-identityʳ x
 
   -- /-simplˡ : (x y z : ℝ) {p : x ≢0} {q : z ≢0} →
   --   (x · y) / x≢0 (x · z) {{!   !}} ≡ y / x≢0 z {q}
@@ -123,10 +128,10 @@ module Data.PostulatedReals.CoreProperties where
 
   -- import Data.Integer.Properties as ℤp
 
-  -- sum-exp-ℕ : (x : ℝ) → (n m : ℕ) → x ^ (n + m) ≡ x ^ n · x ^ m
-  -- sum-exp-ℕ x zero      m = sym (*-identityˡ (x ^ m))
-  -- sum-exp-ℕ x (ℕ.suc n) m rewrite *-assoc x (x ^ n) (x ^ m) =
-  --   cong (_·_ x) (sum-exp-ℕ x n m)
+  sum-exp-ℕ : (x : ℝ) → (n m : ℕ) → x ^ (n + m) ≡ x ^ n · x ^ m
+  sum-exp-ℕ x zero      m = sym (*-identityˡ (x ^ m))
+  sum-exp-ℕ x (ℕ.suc n) m rewrite *-assoc x (x ^ n) (x ^ m) =
+    cong (_·_ x) (sum-exp-ℕ x n m)
 
   -- private
   --   sum-exp-help : (x : ℝ) {_ : x ≢0} → (n m : ℕ) →
@@ -150,28 +155,28 @@ module Data.PostulatedReals.CoreProperties where
   --   | *-assoc x (x ^ n) (x ^ m) =
   --   cong (λ y →  1ℝ / (x · (x · y))) (sum-exp-ℕ x n m)
 
-  -- mul-base-ℕ : (x y : ℝ) → (n : ℕ) → (x · y) ^ n ≡ x ^ n · y ^ n
-  -- mul-base-ℕ x y 0       = sym (*-identityʳ 1ℝ)
-  -- mul-base-ℕ x y (suc n) rewrite *-comm-middle x (x ^ n) y (y ^ n) =
-  --   cong (_·_ (x · y)) (mul-base-ℕ x y n)
+  mul-base-ℕ : (x y : ℝ) → (n : ℕ) → (x · y) ^ n ≡ x ^ n · y ^ n
+  mul-base-ℕ x y 0       = sym (*-identityʳ 1ℝ)
+  mul-base-ℕ x y (suc n) rewrite *-comm-middle x (x ^ n) y (y ^ n) =
+    cong (_·_ (x · y)) (mul-base-ℕ x y n)
 
   -- mul-base : (x y : ℝ) → (z : ℤ) → (x · y) ^ z ≡ x ^ z · y ^ z
   -- mul-base x y (pos n)  = mul-base-ℕ x y n
   -- mul-base x y -[1+ n ] rewrite /-mul 1ℝ (x ^ suc n) 1ℝ (y ^ suc n)
   --   | *-identityˡ 1ℝ = cong (_/_ 1ℝ) (mul-base-ℕ x y (suc n))
 
-  -- 1^n : (n : ℕ) → 1ℝ ^ n ≡ 1ℝ
-  -- 1^n 0       = refl
-  -- 1^n (suc n) rewrite 1^n n = *-identityˡ 1ℝ
+  1^n : (n : ℕ) → 1ℝ ^ n ≡ 1ℝ
+  1^n 0       = refl
+  1^n (suc n) rewrite 1^n n = *-identityˡ 1ℝ
 
-  -- double-exp-ℕ : (x : ℝ) → (n m : ℕ) → (x ^ n) ^ m ≡ x ^ (n · m)
-  -- double-exp-ℕ x 0       m = 1^n m
-  -- double-exp-ℕ x (suc n) m rewrite mul-base-ℕ x (x ^ n) m
-  --   | double-exp-ℕ x n m = sym (sum-exp-ℕ x m (n · m))
+  double-exp-ℕ : (x : ℝ) → (n m : ℕ) → (x ^ n) ^ m ≡ x ^ (n · m)
+  double-exp-ℕ x 0       m = 1^n m
+  double-exp-ℕ x (suc n) m rewrite mul-base-ℕ x (x ^ n) m
+    | double-exp-ℕ x n m = sym (sum-exp-ℕ x m (n · m))
 
-  -- x^nm=x^mn : (x : ℝ) → (n m : ℕ) → (x ^ n) ^ m ≡ (x ^ m) ^ n
-  -- x^nm=x^mn x n m rewrite double-exp-ℕ x n m | ℕp.*-comm n m =
-  --   sym (double-exp-ℕ x m n)
+  x^nm=x^mn : (x : ℝ) → (n m : ℕ) → (x ^ n) ^ m ≡ (x ^ m) ^ n
+  x^nm=x^mn x n m rewrite double-exp-ℕ x n m | ℕp.*-comm n m =
+    sym (double-exp-ℕ x m n)
 
   -- private
   --   double-exp-help : (x : ℝ) → (n m : ℕ) →
@@ -201,25 +206,25 @@ module Data.PostulatedReals.CoreProperties where
   --     | sym (/-coef (x ^ n) 1ℝ (y ^ n)) | sym ([1/x]^n y {p} n)
   --     | sym (mul-base-ℕ x (1ℝ / y) n) | /-coef x 1ℝ y = refl
 
-  --   double-exp : (x : ℝ) {_ : x ≢0} → (z w : ℤ) → (x ^ z) ^ w ≡ x ^ (z · w)
-  --   double-exp x     (pos n)  (pos m)  rewrite ℤp.pos-mul n m =
-  --     double-exp-ℕ x n m
-  --   double-exp x     (pos n)  -[1+ m ] = double-exp-help x n m
-  --   double-exp x {p} -[1+ n ] (pos m)
-  --     rewrite [1/x]^n (x ^ suc n) {x^n≢0 x {p} (suc n)} m
-  --     | x^nm=x^mn x (suc n) m | ℤp.*-comm -[1+ n ] (pos m) =
-  --     double-exp-help x m n
-  --   double-exp x {p} -[1+ n ] -[1+ m ]
-  --     rewrite [1/x]^n (x ^ suc n) {x^n≢0 x {p} (suc n)} m
-  --     | /-mul 1ℝ (x ^ suc n) 1ℝ ((x ^ suc n) ^ m) | *-identityˡ 1ℝ
-  --     | double-exp-ℕ x (suc n) m | sym (sum-exp-ℕ x (suc n) (m + n · m))
-  --     | 1/1/x (x ^ suc (n + (m + (n · m))))
-  --     {x^n≢0 x {p} (suc (n + (m + (n · m))))} =
-  --     cong (λ y → x ^ suc y) (helper n m)
-  --     where
-  --     helper : (n m : ℕ) → n + (m + n · m) ≡ m + (n · suc m)
-  --     helper n m rewrite ℕp.*-comm n (suc m) | ℕp.*-comm m n = begin
-  --       (n + (m + n · m)) ≡˘⟨ ℕp.+-assoc n m (n · m) ⟩
-  --       ((n + m) + n · m) ≡⟨ cong (_+ n · m) (ℕp.+-comm n m) ⟩
-  --       ((m + n) + n · m) ≡⟨ ℕp.+-assoc m n (n · m) ⟩
-  --       (m + (n + n · m)) ∎
+--   double-exp : (x : ℝ) {_ : x ≢0} → (z w : ℤ) → (x ^ z) ^ w ≡ x ^ (z · w)
+--   double-exp x     (pos n)  (pos m)  rewrite ℤp.pos-mul n m =
+--     double-exp-ℕ x n m
+--   double-exp x     (pos n)  -[1+ m ] = double-exp-help x n m
+--   double-exp x {p} -[1+ n ] (pos m)
+--     rewrite [1/x]^n (x ^ suc n) {x^n≢0 x {p} (suc n)} m
+--     | x^nm=x^mn x (suc n) m | ℤp.*-comm -[1+ n ] (pos m) =
+--     double-exp-help x m n
+--   double-exp x {p} -[1+ n ] -[1+ m ]
+--     rewrite [1/x]^n (x ^ suc n) {x^n≢0 x {p} (suc n)} m
+--     | /-mul 1ℝ (x ^ suc n) 1ℝ ((x ^ suc n) ^ m) | *-identityˡ 1ℝ
+--     | double-exp-ℕ x (suc n) m | sym (sum-exp-ℕ x (suc n) (m + n · m))
+--     | 1/1/x (x ^ suc (n + (m + (n · m))))
+--     {x^n≢0 x {p} (suc (n + (m + (n · m))))} =
+--     cong (λ y → x ^ suc y) (helper n m)
+--     where
+--     helper : (n m : ℕ) → n + (m + n · m) ≡ m + (n · suc m)
+--     helper n m rewrite ℕp.*-comm n (suc m) | ℕp.*-comm m n = begin
+--       (n + (m + n · m)) ≡˘⟨ ℕp.+-assoc n m (n · m) ⟩
+--       ((n + m) + n · m) ≡⟨ cong (_+ n · m) (ℕp.+-comm n m) ⟩
+--       ((m + n) + n · m) ≡⟨ ℕp.+-assoc m n (n · m) ⟩
+--       (m + (n + n · m)) ∎

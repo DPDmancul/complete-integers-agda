@@ -112,7 +112,7 @@ module Data.PostulatedReals.Ring where
       ; *-comm = *-comm
       }
 
-  open IsCommutativeRing ℝ-isCommRing hiding (sym) public
+  open IsCommutativeRing ℝ-isCommRing hiding (sym ; refl ; trans) public
   open Algebra.Properties.Ring record
     { Carrier = ℝ
     ; _≈_ = _≡_
