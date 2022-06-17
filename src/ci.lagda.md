@@ -823,11 +823,11 @@ and $z,w\in\bZ_C$
 ::: {.proof}
 \
 ```agda
--- k-of-sum : (z w : ℤC) → par (val (z + w)) ⊕ par (z + w) ≡ let
---   kz = par (val z) ⊕ par z; kw = par (val w) ⊕ par w in kz ⊕ kw
--- k-of-sum z w rewrite th-par-linearity-ℤ {val z} {val w}
---    = 𝔽₂p.⊕-comm-middle (par (val z)) (par (val w)) (par z) (par w)
---
+k-of-sum : (z w : ℤC) → par (val (z + w)) ⊕ par (z + w) ≡ let
+  kz = par (val z) ⊕ par z; kw = par (val w) ⊕ par w in kz ⊕ kw
+k-of-sum z w rewrite th-par-linearity-ℤ {val z} {val w}
+   = 𝔽₂p.⊕-comm-middle (par (val z)) (par (val w)) (par z) (par w)
+
 -- private
 --   sum-exp-helper : (x : ℝ) {_ : x ≡ 0ℝ → ⊥} → (z w : ℤ) →
 --     x ^ ((z + w) + -[1+ 0 ]) · (∣ x ∣ · 1ℝ) ≡
