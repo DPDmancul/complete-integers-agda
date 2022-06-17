@@ -19,6 +19,7 @@ module Data.PostulatedReals where
   open import Data.Int hiding (∣_∣ ; suc ; _<_ ; _≤_ ; _>_ ; _≥_)
   open ℤ
   open import Data.Sum
+  open import Utils
   open import Ops
 
   open import Data.PostulatedReals.Core public
@@ -26,23 +27,26 @@ module Data.PostulatedReals where
 
   ∣_∣ : ℝ → ℝ
   ∣ x ∣ with ≤-total x 0ℝ
-  ... | inj₁ x≤0 = x
-  ... | inj₂ x≥0 = - x
+  ... | inj₁ x≤0 = - x
+  ... | inj₂ x≥0 = x
+
+  ∣x∣≢0 : {x : ℝ} → x ≢0 → ∣ x ∣ ≢0
+  ∣x∣≢0 {x} p  with ≤-total x 0ℝ
+  ... | inj₁ x≤0 = -x≢0 p
+  ... | inj₂ x≥0 = p
 
   ∣_∣₀ : ℝ\0 → ℝ\0
-  ∣ (x₀@(x≢0 x {p})) ∣₀ with ≤-total x 0ℝ
-  ... | inj₁ x≤0 = x₀
-  ... | inj₂ x≥0 = x≢0 (- x) { -x≢0 p}
+  ∣ (x≢0 x {p}) ∣₀ = x≢0 ∣ x ∣ {∣x∣≢0 p}
 
   sgn : ℝ\0 → ℝ\0
   sgn (x≢0 x) with ≤-total x 0ℝ
   ... | inj₁ x≤0 = x≢0 -1ℝ { -x≢0 1≢0}
   ... | inj₂ x≥0 = x≢0 1ℝ {1≢0}
 
-  x^n≢0 : {x : ℝ} → x ≢0 → (n : ℕ) → x ^ n ≢0
+  x^n≢0 : {x : ℝ} → .(x ≢0) → (n : ℕ) → x ^ n ≢0
   x^n≢0     _ 0       q = 1≢0 q
   x^n≢0 {x} p (suc n) q  with x·y≡0 x (x ^ n) q
-  ... | inj₁ x≡0   = p x≡0
+  ... | inj₁ x≡0   = ⊥-irrelevant (p x≡0)
   ... | inj₂ x^n≡0 with x^n≢0 p n
   ... | s = s x^n≡0
 

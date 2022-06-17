@@ -17,12 +17,8 @@ module Data.PostulatedReals.CoreProperties where
   open import Data.N hiding (_<_ ; _≤_ ; _>_ ; _≥_)
   open ℕ
   import Data.Nat.Properties as ℕp
-  -- open import Data.Int hiding (∣_∣ ; suc ; _<_ ; _≤_ ; _>_ ; _≥_)
-  -- open ℤ
-  -- import Data.Int.Properties as ℤp
   open import Data.Empty
   open import Data.Sum
-  -- open import Data.Product
   open import Utils
   open import Function.Base
   open import Ops
@@ -47,7 +43,13 @@ module Data.PostulatedReals.CoreProperties where
     | *-comm-middle -1ℝ x -1ℝ y | -1² = *-identityˡ (x · y)
 
   postulate
-    *-inverse : {x : ℝ} → (p : x ≢0) → x · (x≢0 x {p}) ⁻¹ ≡ unit
+    *-inverseʳ : {x : ℝ} → .(p : x ≢0) → x · (x≢0 x {p}) ⁻¹ ≡ unit
+
+  *-inverseˡ : {x : ℝ} → .(p : x ≢0) → (x≢0 x {p}) ⁻¹ · x ≡ unit
+  *-inverseˡ {x} p rewrite *-comm ((x≢0 x {p}) ⁻¹) x = *-inverseʳ p
+
+  1⁻¹ : (x≢0 unit {1≢0})⁻¹ ≡ unit
+  1⁻¹ rewrite sym (*-identityˡ ((x≢0 unit {1≢0})⁻¹)) = *-inverseʳ 1≢0
 
   x·y≡0 : (x y : ℝ) → x · y ≡ 0ℝ → x ≡ 0ℝ ⊎ y ≡ 0ℝ
   x·y≡0 x y p with isZero x
@@ -56,7 +58,7 @@ module Data.PostulatedReals.CoreProperties where
   ... | inj₁ y≡0 = inj₂ y≡0
   ... | inj₂ r   = helper $ r $ begin
     y                ≡˘⟨ *-identityˡ y ⟩
-    1ℝ · y           ≡˘⟨ cong (_· y) (*-inverse q) ⟩
+    1ℝ · y           ≡˘⟨ cong (_· y) (*-inverseʳ q) ⟩
     (x / x₀) · y     ≡⟨ *-assoc x (x₀ ⁻¹) y ⟩
     x · (x₀ ⁻¹ · y)  ≡⟨ cong (_·_ x) (*-comm (x₀ ⁻¹) y) ⟩
     x · (y · x₀ ⁻¹)  ≡˘⟨ *-assoc x y (x₀ ⁻¹) ⟩
@@ -68,92 +70,156 @@ module Data.PostulatedReals.CoreProperties where
     helper : ⊥ → x ≡ 0ℝ ⊎ y ≡ 0ℝ
     helper ()
 
-  x·y≢0 : {x y : ℝ} → x ≢0 → y ≢0 → x · y ≢0
+  x·y≢0 : {x y : ℝ} → .(x ≢0) → .(y ≢0) → x · y ≢0
   x·y≢0 {x} {y} p q xy≡0 with x·y≡0 x y xy≡0
-  ... | inj₁ x≡0 = p x≡0
-  ... | inj₂ y≡0 = q y≡0
+  ... | inj₁ x≡0 = ⊥-irrelevant (p x≡0)
+  ... | inj₂ y≡0 = ⊥-irrelevant (q y≡0)
 
-  -x≢0 : {x : ℝ} → x ≢0 → - x ≢0
-  -x≢0 {x} p -x≡0 = p $ begin
+  private
+    ℝ\0≡-help : {x y : ℝ} → x ≢0 → x ≡ y → y ≢0
+    ℝ\0≡-help p refl = p
+
+  ℝ\0≡ : {x y : ℝ} → .(p : x ≢0) → (q : x ≡ y) →
+    x≢0 x {p} ≡ x≢0 y {ℝ\0≡-help p q}
+  ℝ\0≡ _ refl = refl
+
+  -x≢0 : {x : ℝ} → .(x ≢0) → - x ≢0
+  -x≢0 {x} p -x≡0 = ⊥-irrelevant (p $ begin
     x       ≡˘⟨ +-identityʳ x ⟩
     x + 0ℝ  ≡˘⟨ cong (_+_ x) -x≡0 ⟩
     x + - x ≡⟨ -‿inverseʳ x ⟩
-    0ℝ ∎
+    0ℝ ∎)
 
-  ⁻¹-distrib-* : {x y : ℝ} → (p : x ≢0) → (q : y ≢0) →
-    (x≢0 (x · y) {x·y≢0 p q})⁻¹ ≡ (x≢0 x {p}) ⁻¹ · (x≢0 y {q}) ⁻¹
-  ⁻¹-distrib-* {x} {y} p q = ?
+  x⁻¹≢0 : {x : ℝ} → .(p : x ≢0) → (x≢0 x {p}) ⁻¹ ≢0
+  x⁻¹≢0 {x} p x⁻¹≡0 = ⊥-irrelevant (p $ begin
+    x                     ≡˘⟨ *-identityʳ x ⟩
+    x · 1ℝ                ≡˘⟨ cong (_·_ x) (*-inverseʳ p) ⟩
+    x · (x / (x≢0 x {p})) ≡⟨ cong (λ y → x · (x · y)) x⁻¹≡0 ⟩
+    x · (x · 0ℝ)          ≡⟨ cong (_·_ x) (zeroʳ x) ⟩
+    x · 0ℝ                ≡⟨ zeroʳ x ⟩
+    0ℝ ∎)
 
-  -- /-mul : (a b c d : ℝ) {p : b ≢0} {q : d ≢0} → let
-  --   b₀ = x≢0 b {p}
-  --   d₀ = x≢0 d {q}
-  --   in a / b₀ · c / d₀ ≡ (a · c) / x≢0 (b · d) {x·y≢0 p q}
-  -- /-mul a b c d = {!   !}
+  ⁻¹-distrib-* : {x y : ℝ} → .(p : x ≢0) → .(q : y ≢0) →
+    (x≢0 (x · y) {x·y≢0 p q})⁻¹ ≡ (x≢0 x {p})⁻¹ · (x≢0 y {q})⁻¹
+  ⁻¹-distrib-* {x} {y} p q = sym $ begin
+      x⁻¹y⁻¹                      ≡˘⟨ *-identityʳ x⁻¹y⁻¹ ⟩
+      x⁻¹y⁻¹ · unit               ≡˘⟨ cong (_·_ x⁻¹y⁻¹) (*-inverseʳ pq) ⟩
+      x⁻¹y⁻¹ · ((x · y) · xy₀ ⁻¹) ≡˘⟨ *-assoc x⁻¹y⁻¹ (x · y) (xy₀ ⁻¹) ⟩
+      (x⁻¹y⁻¹ · (x · y)) · xy₀ ⁻¹
+        ≡⟨ cong (_· xy₀ ⁻¹) (*-comm-middle (x₀ ⁻¹) (y₀ ⁻¹) x y) ⟩
+      (x₀ ⁻¹ · x) · (y₀ ⁻¹ · y) · xy₀ ⁻¹
+        ≡⟨ cong₂ (λ a b → a · b · xy₀ ⁻¹) (*-inverseˡ p) (*-inverseˡ q) ⟩
+      unit · unit · xy₀ ⁻¹        ≡⟨ cong (_· xy₀ ⁻¹) (*-identityˡ unit) ⟩
+      unit · xy₀ ⁻¹               ≡⟨ *-identityˡ (xy₀ ⁻¹) ⟩
+      xy₀ ⁻¹ ∎
+      where
+      x₀ = x≢0 x {p}
+      y₀ = x≢0 y {q}
+      xy₀ = x≢0 (x · y) {x·y≢0 p q}
+      pq = x·y≢0 p q
+      x⁻¹y⁻¹ = x₀ ⁻¹ · y₀ ⁻¹
+
+  /-mul : (a b c d : ℝ) .{p : b ≢0} .{q : d ≢0} → let
+    b₀ = x≢0 b {p}
+    d₀ = x≢0 d {q}
+    in a / b₀ · c / d₀ ≡ (a · c) / x≢0 (b · d) {x·y≢0 p q}
+  /-mul a b c d {p} {q} = begin
+      a / b₀ · c / d₀           ≡⟨ *-comm-middle a (b₀ ⁻¹) c (d₀ ⁻¹) ⟩
+      (a · c) · (b₀ ⁻¹ · d₀ ⁻¹) ≡˘⟨ cong (_·_ (a · c))  (⁻¹-distrib-* p q) ⟩
+      (a · c) / bd₀             ∎
+      where
+      b₀ = x≢0 b {p}
+      d₀ = x≢0 d {q}
+      bd₀ = x≢0 (b · d) {x·y≢0 p q}
+
 
   x/1 : (x : ℝ) → x / x≢0 unit {1≢0} ≡ x
-  x/1 x rewrite sym (*-identityˡ ((x≢0 unit {1≢0})⁻¹)) | *-inverse 1≢0 =
+  x/1 x rewrite sym (*-identityˡ ((x≢0 unit {1≢0})⁻¹)) | *-inverseʳ 1≢0 =
     *-identityʳ x
 
-  -- /-simplˡ : (x y z : ℝ) {p : x ≢0} {q : z ≢0} →
-  --   (x · y) / x≢0 (x · z) {{!   !}} ≡ y / x≢0 z {q}
-  -- /-simplˡ x y z {p} {q} rewrite sym (/-mul x x y z) | x/x x {p} =
-  --   {!   !} --*-identityˡ (y / x≢0 z {q})
+  /-simplˡ : (x y z : ℝ) .{p : x ≢0} .{q : z ≢0} →
+    (x · y) / x≢0 (x · z) {x·y≢0 p q} ≡ y / x≢0 z {q}
+  /-simplˡ x y z {p} {q} rewrite sym (/-mul x x y z {p} {q}) | *-inverseʳ p =
+    *-identityˡ (y / x≢0 z {q})
 
-  -- /-coef : (x y z : ℝ) {p : z ≢0} → x · y / x≢0 z {p} ≡ (x · y) / x≢0 z {p}
-  -- /-coef x y z = {!   !} --rewrite sym (x/1 x) | /-mul x 1ℝ y z | x/1 x | *-identityˡ z = refl
+  /-simplʳ : (x y z : ℝ) .{p : x ≢0} .{q : z ≢0} →
+     (y · x) / x≢0 (z · x) {x·y≢0 q p} ≡ y / x≢0 z {q}
+  /-simplʳ x y z {p} {q} = begin
+    (y · x) / zx₀ ≡⟨ cong₂ _/_ (*-comm y x) (ℝ\0≡ (x·y≢0 q p) (*-comm z x)) ⟩
+    (x · y) / xz₀ ≡⟨ /-simplˡ x y z {p} {q} ⟩
+    y / z₀ ∎
+    where
+    zx₀ = x≢0 (z · x) {x·y≢0 q p}
+    xz₀ = x≢0 (x · z) {x·y≢0 p q}
+    z₀ = x≢0 z {q}
 
-  -- /-coef-simplˡ : (x y z : ℝ) {_ : x ≢0} → x · y / (x · z) ≡ y / z
-  -- /-coef-simplˡ x y z {p} rewrite /-coef x y (x · z) = /-simplˡ x y z {p}
 
-  -- private
-  --   1/1/x-help : (x : ℝ) {_ : x ≢0} → x · 1ℝ / x ≡ 1ℝ
-  --   1/1/x-help x {p} rewrite /-coef x 1ℝ x | *-identityʳ x =  x/x x {p}
+  /-coef : (x y z : ℝ) .{p : z ≢0} → x · y / x≢0 z {p} ≡ (x · y) / x≢0 z {p}
+  /-coef x y z {p} rewrite sym (x/1 x) | /-mul x 1ℝ y z {1≢0} {p} | x/1 x
+    | ⁻¹-distrib-* 1≢0 p | 1⁻¹ | *-identityˡ ((x≢0 z {p})⁻¹) = refl
 
-  -- 1/1/x : (x : ℝ) {_ : x ≢0} → unit / (unit / x) ≡ x
-  -- 1/1/x x {p} rewrite sym (*-identityˡ (1ℝ / (1ℝ / x)))
-  --   | sym (x/x x {p}) | /-mul x x (x / x) ((x / x) / x) | x/x x {p}
-  --   | 1/1/x-help x {p} | sym (/-coef x 1ℝ 1ℝ) | x/1 1ℝ = *-identityʳ x
+  /-coef-simplˡ : (x y z : ℝ) .{p : x ≢0} .{q : z ≢0} →
+    x · y / (x≢0 (x · z) {x·y≢0 p q}) ≡ y / (x≢0 z {q})
+  /-coef-simplˡ x y z {p} {q} rewrite /-coef x y (x · z) {x·y≢0 p q} =
+    /-simplˡ x y z {p} {q}
 
-  -- ∣x∣∣x∣ : (x : ℝ) → ∣ x ∣ · ∣ x ∣ ≡ x ^ 2
-  -- ∣x∣∣x∣ x rewrite *-identityʳ x with ≤-total x 0ℝ
-  -- ... | inj₁ x≤0 = refl
-  -- ... | inj₂ x≥0 = *-cancel-neg x x
+  private
+    1/1/x-help : (x : ℝ) .{p : x ≢0} → x · 1ℝ / (x≢0 x {p}) ≡ 1ℝ
+    1/1/x-help x {p} rewrite /-coef x 1ℝ x {p} | *-identityʳ x =
+      *-inverseʳ p
 
-  -- ∣x∣∣y∣ : (x y : ℝ) → ∣ x ∣ · ∣ y ∣ ≡ ∣ x · y ∣
-  -- ∣x∣∣y∣ x y = ?
+  1/1/x : (x : ℝ) .{p : x ≢0} → let
+    x₀ = x≢0 x {p}
+    1/x = x≢0 (unit / x₀) {x·y≢0 1≢0 (x⁻¹≢0 p)}
+    in unit / 1/x ≡ x
+  1/1/x x {p} = begin
+    1ℝ / 1/x           ≡˘⟨ cong (_· (1/x)⁻¹) (*-inverseʳ p) ⟩
+    (x / x₀) / 1/x     ≡⟨ /-simplʳ (x₀ ⁻¹) x 1ℝ {x⁻¹≢0 p} {1≢0} ⟩
+    x / (x≢0 1ℝ {1≢0}) ≡⟨ x/1 x ⟩
+    x ∎
+    where
+    x₀ = x≢0 x {p}
+    1/x = x≢0 (unit / x₀) {x·y≢0 1≢0 (x⁻¹≢0 p)}
 
-  -- --------------------
-  -- -- Exponent rules --
-  -- --------------------
+  ------------------
+  -- Inequalities --
+  ------------------
 
-  -- import Data.Integer.Properties as ℤp
+  postulate
+    ≤-refl : (x : ℝ) → x ≤ x
+    ≤-antisym : {x y : ℝ} → x ≤ y → x ≥ y → x ≡ y
+    ≤-trans : {x y z : ℝ} → x ≤ y → y ≤ z → x ≤ z
+    ≤-total : (x y : ℝ) → x ≤ y ⊎ x ≥ y
+    +-monoʳ-≤ : {x y : ℝ} → x ≤ y → (z : ℝ) → x + z ≤ y + z
+    *-mono-≥0 : {x y : ℝ} → x ≥ 0ℝ → y ≥ 0ℝ → x · y ≥ 0ℝ
+
+  ≥-neg : {x : ℝ} → x ≥ 0ℝ → - x ≤ 0ℝ
+  ≥-neg {x} 0≤x with +-monoʳ-≤ 0≤x (- x)
+  ... | 0-x≤x-x rewrite +-identityˡ (- x) | -‿inverseʳ x = 0-x≤x-x
+
+  ≤-neg : {x : ℝ} → x ≤ 0ℝ → - x ≥ 0ℝ
+  ≤-neg {x} x≤0 with +-monoʳ-≤ x≤0 (- x)
+  ... | x-x≤0-x rewrite +-identityˡ (- x) | -‿inverseʳ x = x-x≤0-x
+
+  *-mono-≤0 : {x y : ℝ} → x ≤ 0ℝ → y ≤ 0ℝ → x · y ≥ 0ℝ
+  *-mono-≤0 {x} {y} x≤0 y≤0 rewrite sym (*-cancel-neg x y) =
+    *-mono-≥0 (≤-neg x≤0) (≤-neg y≤0)
+
+  *-≤0-≥0 : {x y : ℝ} → x ≤ 0ℝ → y ≥ 0ℝ → x · y ≤ 0ℝ
+  *-≤0-≥0 {x} {y} x≤0 y≥0 rewrite sym (-‿involutive (x · y)) | -‿distribˡ-* x y =
+   ≥-neg (*-mono-≥0 (≤-neg x≤0) y≥0)
+
+  *-≥0-≤0 : {x y : ℝ} → x ≥ 0ℝ → y ≤ 0ℝ → x · y ≤ 0ℝ
+  *-≥0-≤0 {x} {y} x≥0 y≤0 rewrite *-comm x y = *-≤0-≥0 y≤0 x≥0
+
+  --------------------
+  -- Exponent rules --
+  --------------------
 
   sum-exp-ℕ : (x : ℝ) → (n m : ℕ) → x ^ (n + m) ≡ x ^ n · x ^ m
   sum-exp-ℕ x zero      m = sym (*-identityˡ (x ^ m))
   sum-exp-ℕ x (ℕ.suc n) m rewrite *-assoc x (x ^ n) (x ^ m) =
     cong (_·_ x) (sum-exp-ℕ x n m)
-
-  -- private
-  --   sum-exp-help : (x : ℝ) {_ : x ≢0} → (n m : ℕ) →
-  --     x ^ (pos n  + -[1+ m ]) ≡ x ^ pos n · x ^ -[1+ m ]
-  --   sum-exp-help x     0       m = sym (*-identityˡ  (1ℝ / (x · x ^ m)))
-  --   sum-exp-help x {p} (suc n) 0 rewrite *-comm x (x ^ n)
-  --     | *-assoc (x ^ n) x (1ℝ / (x · 1ℝ)) | /-coef-simplˡ x 1ℝ 1ℝ {p}
-  --     | x/x 1ℝ {1≢0} = sym (*-identityʳ (x ^ n))
-  --   sum-exp-help x {p} (suc n) (suc m) rewrite ℤp.[1+m]⊖[1+n]≡m⊖n n (suc m)
-  --     | *-comm x (x ^ n) | *-assoc (x ^ n) x (1ℝ / (x · (x · x ^ m)))
-  --     | /-coef-simplˡ x 1ℝ (x · x ^ m) {p} = sum-exp-help x {p} n m
-
-  -- sum-exp : (x : ℝ) {_ : x ≢0} → (z w : ℤ) → x ^ (z + w) ≡ x ^ z · x ^ w
-  -- sum-exp x     (pos n)  (pos m)  = sum-exp-ℕ x n m
-  -- sum-exp x {p} (pos n)  -[1+ m ] = sum-exp-help x {p} n m
-  -- sum-exp x {p} -[1+ n ] (pos m)  rewrite *-comm (1ℝ / (x · x ^ n)) (x ^ m) =
-  --   sum-exp-help x {p} m n
-  -- sum-exp x {p} -[1+ n ] -[1+ m ] rewrite /-mul 1ℝ (x · x ^ n) 1ℝ (x · x ^ m)
-  --   | *-identityˡ 1ℝ | *-assoc x (x ^ n) (x · x ^ m)
-  --   | sym (*-assoc (x ^ n) x (x ^ m)) | *-comm (x ^ n) x
-  --   | *-assoc x (x ^ n) (x ^ m) =
-  --   cong (λ y →  1ℝ / (x · (x · y))) (sum-exp-ℕ x n m)
 
   mul-base-ℕ : (x y : ℝ) → (n : ℕ) → (x · y) ^ n ≡ x ^ n · y ^ n
   mul-base-ℕ x y 0       = sym (*-identityʳ 1ℝ)

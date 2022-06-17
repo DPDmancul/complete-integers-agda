@@ -26,7 +26,7 @@ module Data.PostulatedReals.Core where
   x ≢0 = x ≡ 0ℝ → ⊥
 
   data ℝ\0 : Set where
-    x≢0 : (x : ℝ) → {_ : x ≢0} → ℝ\0
+    x≢0 : (x : ℝ) → .{_ : x ≢0} → ℝ\0
 
   ℝ∪0 : ℝ\0 → ℝ
   ℝ∪0 (x≢0 x) = x
@@ -53,12 +53,6 @@ module Data.PostulatedReals.Core where
 
   _≥_ : ℝ → ℝ → Set
   x ≥ y = y ≤ x
-
-  postulate
-    ≤-refl : (x : ℝ) → x ≤ x
-    ≤-antisym : (x y : ℝ) → x ≤ y → x ≥ y → x ≡ y
-    ≤-trans : (x y z : ℝ) → x ≤ y → y ≤ z → x ≤ z
-    ≤-total : (x y : ℝ) → x ≤ y ⊎ x ≥ y
 
   open import Ops
 

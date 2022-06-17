@@ -10,6 +10,7 @@
 module Utils where
   open import Relation.Binary.PropositionalEquality
   open ≡-Reasoning
+  open import Data.Empty
 
   transport : {A : Set} {x y : A} → (f : A → Set) → x ≡ y → f x → f y
   transport f refl s = s
@@ -32,3 +33,7 @@ module Utils where
     (a • (b • c)) • d ≡⟨ cong (λ x → (a • x) • d) (•-comm b c) ⟩
     (a • (c • b)) • d ≡˘⟨ •-assoc-middle a c b d ⟩
     (a • c) • (b • d) ∎
+
+  ⊥-irrelevant : .⊥ → ⊥
+  ⊥-irrelevant ()
+

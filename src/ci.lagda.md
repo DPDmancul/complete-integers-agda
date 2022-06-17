@@ -24,6 +24,7 @@ import Data.F2.Properties as 𝔽₂p
 open import Algebra
 open import Relation.Binary.PropositionalEquality hiding ([_])
 open ≡-Reasoning
+open import Function.Base
 open import Even
 open import Data.Empty
 open import Data.Product hiding(_×_)
@@ -213,7 +214,7 @@ module RingℤC where
 lemma-ℤC-powers : {z : ℤC} {n : ℕ}
   → z ^ n ≡ [ (ℤC.val z) ^ n , (ℤC.par z) ^ n ]
 lemma-ℤC-powers {n = zero}    = refl
-lemma-ℤC-powers {z} {ℕ.suc n} = cong (_·_ z) (lemma-ℤC-powers {n = n})
+lemma-ℤC-powers {z} {ℕ.suc n} = cong (_·_ z) $ lemma-ℤC-powers {n = n}
 
 lemma-ℤC-powers-succ : {z : ℤC} {n : ℕ}
   → z ^ ℕ.suc n ≡ [ (ℤC.val z) ^ ℕ.suc n , ℤC.par z ]
@@ -287,10 +288,10 @@ th-val-homogeneityℕ-ℤC {n = zero}    = refl
 th-val-homogeneityℕ-ℤC {x} {ℕ.suc n} = begin
   val (ℕ.suc n × x)            ≡⟨⟩
   val (x + n × x)              ≡⟨ th-val-linearity-ℤC {x} {n × x} ⟩
-  val x + val (n × x)          ≡⟨ cong (_+_ (val x))
-                                  (th-val-homogeneityℕ-ℤC {x} {n}) ⟩
-  val x + ℤ.pos n · val x      ≡⟨ cong (_+ ℤ.pos n · val x)
-                                       (sym (ℤp.*-identityˡ (val  x))) ⟩
+  val x + val (n × x)          ≡⟨ cong (_+_ (val x)) $
+                                  th-val-homogeneityℕ-ℤC {x} {n} ⟩
+  val x + ℤ.pos n · val x      ≡⟨ cong (_+ ℤ.pos n · val x) $
+                                       sym (ℤp.*-identityˡ (val  x)) ⟩
   1ℤ · val x + ℤ.pos n · val x ≡˘⟨ ℤp.*-distribʳ-+ (val x) 1ℤ (ℤ.pos n) ⟩
   (1ℤ + ℤ.pos n) · val x       ≡⟨⟩
   ℤ.pos (ℕ.suc n) · val x      ∎
@@ -300,7 +301,7 @@ th-val-homogeneity-ℤC {z = ℤ.pos n}  = cong val (th-val-homogeneityℕ-ℤC 
 th-val-homogeneity-ℤC {x} { -[1+ n ]} = begin
   val (-[1+ n ] × x)        ≡⟨⟩
   val (- (ℕ.suc n × x))     ≡⟨⟩
-  - val (ℕ.suc n × x)       ≡⟨ cong (-_) (th-val-homogeneityℕ-ℤC {n = ℕ.suc n}) ⟩
+  - val (ℕ.suc n × x)       ≡⟨ cong (-_) $ th-val-homogeneityℕ-ℤC {n = ℕ.suc n} ⟩
   - (+[1+ n ] · val x)      ≡⟨ ℤp.neg-distribˡ-* +[1+ n ] (val x) ⟩
   (- +[1+ n ]) · val x      ≡⟨⟩
   -[1+ n ] · val x          ∎
@@ -400,10 +401,10 @@ th-par-even-ℤC = refl
 ```agda
 th-par-linearity-ℤ : {x y : ℤ} → par (x + y) ≡ par x ⊕ par y
 th-par-linearity-ℤ {x} {y} with even-or-odd x | even-or-odd y
-... | even p | even q = parity-even (sum-even-even p q)
-... | even p | odd  q = parity-odd  (sum-even-odd  p q)
-... | odd  p | even q = parity-odd  (sum-odd-even  p q)
-... | odd  p | odd  q = parity-even (sum-odd-odd   p q)
+... | even p | even q = parity-even $ sum-even-even p q
+... | even p | odd  q = parity-odd  $ sum-even-odd  p q
+... | odd  p | even q = parity-odd  $ sum-odd-even  p q
+... | odd  p | odd  q = parity-even $ sum-odd-odd   p q
 
 
 th-par-linearity-ℤC : {x y : ℤC} → par (x + y) ≡ par x ⊕ par y
@@ -445,10 +446,10 @@ th-par-mul-unit-ℤC = refl
 
 th-par-mul-ℤ : {x y : ℤ} → par (x · y) ≡ par x · par y
 th-par-mul-ℤ {x} {y} with even-or-odd x | even-or-odd y
-... | even p | even q = parity-even (mul-even-even p q)
-... | even p | odd  q = parity-even (mul-even-odd  p q)
-... | odd  p | even q = parity-even (mul-odd-even  p q)
-... | odd  p | odd  q = parity-odd  (mul-odd-odd   p q)
+... | even p | even q = parity-even $ mul-even-even p q
+... | even p | odd  q = parity-even $ mul-even-odd  p q
+... | odd  p | even q = parity-even $ mul-odd-even  p q
+... | odd  p | odd  q = parity-odd  $ mul-odd-odd   p q
 
 th-par-mul-ℤC : {x y : ℤC} → par (x · y) ≡ par x · par y
 th-par-mul-ℤC = refl
@@ -468,7 +469,7 @@ par-pow-ℤ {z} {0} rewrite ℤp.*-identityʳ z = refl
 par-pow-ℤ {z} {ℕ.suc n}  = begin
   par (z ^ ℕ.suc (ℕ.suc n)) ≡⟨⟩
   par (z · z ^ ℕ.suc n)     ≡⟨ th-par-mul-ℤ {z} {z ^ ℕ.suc n} ⟩
-  par z · par (z ^ ℕ.suc n) ≡⟨ cong (_·_ (par z)) (par-pow-ℤ {z} {n}) ⟩
+  par z · par (z ^ ℕ.suc n) ≡⟨ cong (_·_ (par z)) $ par-pow-ℤ {z} {n} ⟩
   par z · par z             ≡⟨ 𝔽₂p.∧-idem (par z) ⟩
   par z                     ∎
 
@@ -477,7 +478,7 @@ par-pow-ℤC {z} {0}       = 𝔽₂p.∧-identityʳ (par z)
 par-pow-ℤC {z} {ℕ.suc n} = begin
   par (z ^ ℕ.suc (ℕ.suc n)) ≡⟨⟩
   par (z · z ^ ℕ.suc n)     ≡⟨ th-par-mul-ℤC {z} {z ^ ℕ.suc n} ⟩
-  par z · par (z ^ ℕ.suc n) ≡⟨ cong (_·_ (par z)) (par-pow-ℤC {z} {n}) ⟩
+  par z · par (z ^ ℕ.suc n) ≡⟨ cong (_·_ (par z)) $ par-pow-ℤC {z} {n} ⟩
   par z · par z             ≡⟨ 𝔽₂p.∧-idem (par z) ⟩
   par z                     ∎
 ```
@@ -540,14 +541,14 @@ instance
     a + b , sym (th-par-linearity-ℤ {val a})
   additive-zero  ⦃ Sumℤ' ⦄ = additive-zero , refl
   lemma-sum-zero ⦃ Sumℤ' ⦄ {[ v , _ ] , refl} =
-    ℤ'-eq (cong [_, par v ] (lemma-sum-zero {ℤ}))
+    ℤ'-eq (cong [_, par v ] $ lemma-sum-zero {ℤ})
 
   Mulℤ' : Mul ℤ'
   _·_ ⦃ Mulℤ' ⦄ (a , refl) (b , refl) =
     a · b , sym (th-par-mul-ℤ {val a})
   unit       ⦃ Mulℤ' ⦄ = unit , refl
   lemma-unit ⦃ Mulℤ' ⦄ {[ v , _ ] , refl} =
-    ℤ'-eq (cong [_, par v ] (lemma-unit {ℤ}))
+    ℤ'-eq (cong [_, par v ] $ lemma-unit {ℤ})
 ```
 
 ```agda
@@ -558,10 +559,10 @@ module isomorphism-fℤ where
   ---------------------
 
   addition : {a b : ℤ} → fℤ (a + b) ≡ fℤ a + fℤ b
-  addition {a} {b} rewrite sym (th-par-linearity-ℤ {a} {b}) = refl
+  addition {a} {b} rewrite sym $ th-par-linearity-ℤ {a} {b} = refl
 
   multiplication : {a b : ℤ} → fℤ (a · b) ≡ fℤ a · fℤ b
-  multiplication {a} {b} rewrite sym (th-par-mul-ℤ {a} {b}) = refl
+  multiplication {a} {b} rewrite sym $ th-par-mul-ℤ {a} {b} = refl
 
   mul-identity : fℤ unit ≡ unit
   mul-identity = refl
@@ -664,8 +665,8 @@ Each dis-integer can be written as the sum of an integer with $l$.
   ... | one  = refl
   help₂ : (z : ℤC) → z ≡ (z - l) + l
   help₂ z rewrite val[z-l] z | par[z-l] z | val[z+l] (z - l) | par[z+l] (z - l) =
-    cong₂ [_,_] (sym (trans (ℤp.+-assoc (val z) (- 1ℤ) 1ℤ)
-                            (ℤp.+-identityʳ (val z))))
+    cong₂ [_,_] (sym $ trans (ℤp.+-assoc (val z) (- 1ℤ) 1ℤ)
+                             (ℤp.+-identityʳ (val z)))
                 (𝔽₂p.⊕-comm zero (par z))
 ```
 :::
@@ -802,14 +803,15 @@ instance
 ::: {.proof}
 \
 ```agda
--- pow-def-eq-ℤ : (z : ℤ) → (x : ℝ) → x ^ proj₁ (fℤ z) ≡ x ^ z
--- pow-def-eq-ℤ z x rewrite 𝔽₂p.⊕-self (par z) | ℤp.+-identityʳ z =
---   ℝp.*-identityʳ (x ^ z)
---
--- pow-def-eq-ℤD : (z : ℤD) → (x : ℝ) → let y = fℤ⁻¹ (proj₁ (ℤD-from-ℤ+l z)) in
---   x ^ proj₁ z ≡ x ^ y · ∣ x ∣
--- pow-def-eq-ℤD ([ v , _ ] , refl) x rewrite sym (𝔽₂p.¬-distribʳ-⊕ (par v) (par v))
---   |  𝔽₂p.⊕-self (par v) = cong (_·_ (x ^ (v - 1ℤ))) (ℝp.*-identityʳ ∣ x ∣)
+pow-def-eq-ℤ : (z : ℤ) → (x : ℝ\0) → x ^ proj₁ (fℤ z) ≡ x ^ z
+pow-def-eq-ℤ z x rewrite 𝔽₂p.⊕-self (par z) | ℤp.+-identityʳ z
+  | ℝp.ℝ\0^0 ∣ x ∣₀ = ℝp.*-identityʳ (x ^ z)
+
+pow-def-eq-ℤD : (z : ℤD) → (x : ℝ\0) → let y = fℤ⁻¹ (proj₁ (ℤD-from-ℤ+l z)) in
+  x ^ proj₁ z ≡ x ^ y · ∣ ℝ∪0 x ∣
+pow-def-eq-ℤD ([ v , _ ] , refl) x rewrite sym (𝔽₂p.¬-distribʳ-⊕ (par v) (par v))
+  |  𝔽₂p.⊕-self (par v) | ℝp.ℝ\0^1 ∣ x ∣₀ =
+  cong (_·_ (x ^ (v - 1ℤ))) $ ℝp.ℝ∪0∣x∣₀≡∣ℝ∪0x∣ x
 ```
 :::
 

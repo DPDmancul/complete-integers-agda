@@ -18,17 +18,18 @@ module Even where
   open import Utils
   open import Relation.Binary.PropositionalEquality
   open ≡-Reasoning
+  open import Function.Base
 
   data Even : ℤ → Set where
     base : Even 0ℤ
-    step : {n : ℕ} → Even (ℤ.pos n) → Even (+[1+ ℕ.suc n ])
-    pets : {n : ℕ} → Even (ℤ.pos n) → Even (-[1+ ℕ.suc n ])
+    step : {n : ℕ} → Even (ℤ.pos n) → Even +[1+ ℕ.suc n ]
+    pets : {n : ℕ} → Even (ℤ.pos n) → Even -[1+ ℕ.suc n ]
 
   data Odd : ℤ → Set where
     base : Odd 1ℤ
     esab : Odd (- 1ℤ)
-    step : {n : ℕ} → Odd (ℤ.pos n) → Odd (+[1+ ℕ.suc n ])
-    pets : {n : ℕ} → Odd (ℤ.pos n) → Odd (-[1+ ℕ.suc n ])
+    step : {n : ℕ} → Odd (ℤ.pos n) → Odd +[1+ ℕ.suc n ]
+    pets : {n : ℕ} → Odd (ℤ.pos n) → Odd -[1+ ℕ.suc n ]
 
   data EvenOrOdd (z : ℤ) : Set where
     even : Even z → EvenOrOdd z
@@ -52,10 +53,10 @@ module Even where
   private
     helper-suc : (n : ℕ) → (A : ℤ → Set) →
       A (2ℤ + (1ℤ + ℤ.pos n)) → A (1ℤ + (2ℤ + ℤ.pos n))
-    helper-suc n A = transport A
-      (trans (sym (ℤp.+-assoc 2ℤ 1ℤ (ℤ.pos n)))
-             (trans (cong (λ z → z + ℤ.pos n) (ℤp.+-comm 2ℤ 1ℤ))
-                    (ℤp.+-assoc 1ℤ 2ℤ (ℤ.pos n))))
+    helper-suc n A = transport A $
+      trans (sym $ ℤp.+-assoc 2ℤ 1ℤ $ ℤ.pos n)
+             (trans (cong (λ z → z + ℤ.pos n) $ ℤp.+-comm 2ℤ 1ℤ)
+                    (ℤp.+-assoc 1ℤ 2ℤ $ ℤ.pos n))
 
   suc-even : {z : ℤ} → Even z → Odd (1ℤ + z)
   suc-even base         = base
@@ -202,16 +203,16 @@ module Even where
   assert-evenness { -[1+ 0 ] } (odd esab)  = refl
   assert-evenness {+[1+ ℕ.suc n ]} (even (step p))
     rewrite assert-evenness {+[1+ n ]} (odd (suc-even p)) =
-      cong even (uniq-cert-even (suc-odd (suc-even p)) (step p))
+      cong even $ uniq-cert-even (suc-odd (suc-even p)) (step p)
   assert-evenness {+[1+ ℕ.suc n ]} (odd (step p))
     rewrite assert-evenness {+[1+ n ]} (even (suc-odd p)) =
-      cong odd (uniq-cert-odd (suc-even (suc-odd p)) (step p))
+      cong odd $ uniq-cert-odd (suc-even (suc-odd p)) (step p)
   assert-evenness { -[1+ ℕ.suc n ] } (even (pets p))
     rewrite assert-evenness { -[1+ n ] } (odd (neg-odd (suc-even p))) =
-      cong even (uniq-cert-even (pred-odd (neg-odd (suc-even p))) (pets p))
+      cong even $ uniq-cert-even (pred-odd (neg-odd (suc-even p))) (pets p)
   assert-evenness { -[1+ ℕ.suc n ] } (odd (pets p))
     rewrite assert-evenness { -[1+ n ] } (even (neg-even (suc-odd p))) =
-      cong odd (uniq-cert-odd (pred-even (neg-even (suc-odd p))) (pets p))
+      cong odd $ uniq-cert-odd (pred-even (neg-even (suc-odd p))) (pets p)
 
   lemma-even : {z : ℤ} → (p : Even z) → even-or-odd z ≡ even p
   lemma-even p = assert-evenness (even p)
