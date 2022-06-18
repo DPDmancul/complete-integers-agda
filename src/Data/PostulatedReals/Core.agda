@@ -14,6 +14,7 @@ module Data.PostulatedReals.Core where
   open import Data.Empty
   open import Data.Sum
   open import Data.Product
+  open import Utils
   open import Function.Base
 
   postulate
@@ -25,11 +26,22 @@ module Data.PostulatedReals.Core where
   _≢0 : ℝ → Set
   x ≢0 = x ≡ 0ℝ → ⊥
 
-  data ℝ\0 : Set where
-    x≢0 : (x : ℝ) → .{_ : x ≢0} → ℝ\0
+  postulate
+    1≢0 : 1ℝ ≢0
+    isZero : (x : ℝ) → x ≡ 0ℝ ⊎ x ≢0
 
-  ℝ∪0 : ℝ\0 → ℝ
-  ℝ∪0 (x≢0 x) = x
+  record NonZero (x : ℝ) : Set where
+    field nonZero : x ≢0
+
+  instance
+    1-nonZero : NonZero 1ℝ
+    1-nonZero = record {nonZero = 1≢0}
+
+  ≢-nonZero : {x : ℝ} → (x ≢0) → NonZero x
+  ≢-nonZero p = record {nonZero = p}
+
+  ≢-nonZero⁻¹ : {x : ℝ} → .(NonZero x) → x ≢0
+  ≢-nonZero⁻¹ nz x≡0 = ⊥-irrelevant (NonZero.nonZero nz x≡0)
 
   infix 8 _⁻¹
   infix 4 _≤_ _≥_ _<_ _>_
@@ -38,15 +50,9 @@ module Data.PostulatedReals.Core where
     addℝ : ℝ → ℝ → ℝ
     negℝ : ℝ → ℝ
     mulℝ : ℝ → ℝ → ℝ
-    _⁻¹₀ : (x : ℝ\0) → ℝ\0
+    _⁻¹ : (x : ℝ) .⦃ _ : NonZero x ⦄ → ℝ
 
     _≤_ : ℝ → ℝ → Set
-
-    1≢0 : 1ℝ ≢0
-    isZero : (x : ℝ) → x ≡ 0ℝ ⊎ x ≢0
-
-  1ℝ\0 : ℝ\0
-  1ℝ\0 = x≢0 1ℝ {1≢0}
 
   data _<_ : ℝ → ℝ → Set where
     *<* : (x y : ℝ) → x ≤ y × (x ≡ y → ⊥) → x < y
@@ -77,10 +83,7 @@ module Data.PostulatedReals.Core where
     unit ⦃ Mulℝ ⦄ = 1ℝ
     lemma-unit ⦃ Mulℝ ⦄ {x} = lemma-*-identityˡ x
 
-  _⁻¹ : (x : ℝ\0) → ℝ
-  x ⁻¹ = ℝ∪0 (x ⁻¹₀)
-
-  _/_ : (x : ℝ) → (y : ℝ\0) → ℝ
+  _/_ : (x : ℝ) → (y : ℝ) .⦃ _ : NonZero y ⦄ → ℝ
   x / y = x · y ⁻¹
 
   -1ℝ : ℝ

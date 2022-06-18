@@ -10,6 +10,7 @@
 module Ops where
 
   open import Agda.Builtin.Equality
+  open import Function.Base
 
   ---------
   -- Sum --
@@ -93,21 +94,24 @@ module Ops where
   ------------------------------
   -- Pow (Mul exponentiation) --
   ------------------------------
-  record Pow (B E : Set) {R : Set} : Set where
+  record Pow (B E : Set) {C : B → Set} {R : Set} : Set where
+    -- C could be used to certificate the base be different of zero
+    -- if not required insert a type with an instance for all values of base
 
     infixr 8 _^_
-    field _^_ : B → E → R
+    field _^_ : (b : B) → E → .⦃ C b ⦄ → R
 
   open Pow ⦃ ... ⦄ public
 
   -- Power with natural exponents
   instance
     open import Agda.Builtin.Nat
-    NatPow : {A : Set} ⦃ _ : Mul A ⦄ → Pow A Nat {A}
+    -- Sum A is a naïve certificate, implied by Mul A
+    NatPow : {A : Set} ⦃ _ : Mul A ⦄ → Pow A Nat {const $ Sum A} {A}
     _^_ ⦃ NatPow ⦄ = helper
       where
-      helper : {A : Set} ⦃ _ : Mul A ⦄ → A → Nat → A
-      helper ⦃ NatPow ⦄ _ zero    = unit
-      helper ⦃ NatPow ⦄ b (suc e) = b · helper b e
+      helper : {A : Set} ⦃ _ : Mul A ⦄ → A → Nat → .⦃ _ : Sum A ⦄ → A
+      helper _ zero    = unit
+      helper b (suc e) = b · helper b e
 
 

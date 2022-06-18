@@ -15,10 +15,10 @@ module Data.PostulatedReals.Properties where
 
   open import Relation.Binary.PropositionalEquality
   open ≡-Reasoning
-  open import Data.N hiding (_<_ ; _≤_ ; _>_ ; _≥_)
+  open import Data.N hiding (_<_ ; _≤_ ; _>_ ; _≥_ ; NonZero ; ≢-nonZero)
   open ℕ
   import Data.Nat.Properties as ℕp
-  open import Data.Int hiding (∣_∣ ; suc ; _<_ ; _≤_ ; _>_ ; _≥_)
+  open import Data.Int hiding (∣_∣ ; suc ; _<_ ; _≤_ ; _>_ ; _≥_ ; NonZero ; ≢-nonZero)
   open ℤ
   import Data.Int.Properties as ℤp
   -- open import Data.Empty
@@ -48,67 +48,58 @@ module Data.PostulatedReals.Properties where
     (*-mono-≥0 x≥0 y≥0) = sym -0#≈0#
   ... | inj₂ x≥0 | inj₂ y≥0 | inj₂ xy≥0 = refl
 
-  ℝ∪0∣x∣₀≡∣ℝ∪0x∣ : (x : ℝ\0) → ℝ∪0 ∣ x ∣₀ ≡ ∣ ℝ∪0 x ∣
-  ℝ∪0∣x∣₀≡∣ℝ∪0x∣ (x≢0 x) = refl
-
-  ∣x∣∣y∣₀ : (x y : ℝ\0) → ∣ x ∣₀ · ∣ y ∣₀ ≡ ∣ x · y ∣₀
-  ∣x∣∣y∣₀ (x≢0 x {p}) (x≢0 y {q}) = ℝ\0≡ (x·y≢0 (∣x∣≢0 p) (∣x∣≢0 q)) (∣x∣∣y∣ x y)
+  ^-cong : {x y : ℝ} .⦃ _ : NonZero x ⦄ .⦃ _ : NonZero y ⦄ → {z w : ℤ} →
+    x ≡ y → z ≡ w → x ^ z ≡ y ^ w
+  ^-cong refl refl = refl
 
   -- --------------------
   -- -- Exponent rules --
   -- --------------------
-
-  ℝ\0^0 : (x : ℝ\0) → x ^₀ 0 ≡ 1ℝ\0
-  ℝ\0^0 (x≢0 _ {p}) = ℝ\0≡ (x^n≢0 p 0) refl
-
-  ℝ\0^1 : (x : ℝ\0) → x ^₀ 1 ≡ x
-  ℝ\0^1 (x≢0 x {p}) = ℝ\0≡ (x^n≢0 p 1) (*-identityʳ x)
-
   private
-    sum-exp-help : {x : ℝ} .(p : x ≢0) → (n m : ℕ) → let
-      x₀ = x≢0 x {p}
-      in x₀ ^ (pos n  + -[1+ m ]) ≡ x₀ ^ pos n · x₀ ^ -[1+ m ]
-    sum-exp-help {x} p 0       m = sym $ *-identityˡ
-       ((x≢0 (x ^ suc m) {x^n≢0 p (suc m)})⁻¹)
-    sum-exp-help {x} p (suc n) 0 rewrite /-simplˡ x (x ^ n) 1ℝ {p} {1≢0}
+    sum-exp-help : {x : ℝ} .⦃ _ : NonZero x ⦄ → (n m : ℕ) →
+      x ^ (pos n  + -[1+ m ]) ≡ x ^ pos n · x ^ -[1+ m ]
+    sum-exp-help {x} ⦃ p ⦄ 0       m = sym $ *-identityˡ (((x ^ suc m)⁻¹) ⦃ _ ⦄)
+    sum-exp-help {x} ⦃ p ⦄ (suc n) 0 rewrite /-simplˡ x (x ^ n) 1ℝ ⦃ p ⦄ ⦃ 1-nonZero ⦄
       | 1⁻¹ = sym $ *-identityʳ (x ^ n)
-    sum-exp-help {x} p (suc n) (suc m) rewrite ℤp.[1+m]⊖[1+n]≡m⊖n n (suc m)
-      | *-assoc (x ^ n) x (1ℝ / (x≢0 (x ^ suc (suc m)) {x^n≢0 p (suc (suc m))}))
-      | /-simplˡ x (x ^ n) (x ^ suc m) {p} {x^n≢0 p (suc m)} =
-        sum-exp-help p n m
+    sum-exp-help {x} ⦃ p ⦄ (suc n) (suc m) rewrite ℤp.[1+m]⊖[1+n]≡m⊖n n (suc m)
+      | *-assoc (x ^ n) x (((x ^ suc (suc m))⁻¹) ⦃ x^n-nonZero ⦃ p ⦄ {suc (suc m)} ⦄)
+      | /-simplˡ x (x ^ n) (x ^ suc m) ⦃ p ⦄ ⦃ _ ⦄ =
+        sum-exp-help n m
 
-  sum-exp : (x : ℝ\0) → (z w : ℤ) →  x ^ (z + w) ≡ x ^ z · x ^ w
-  sum-exp (x≢0 x)     (pos n)  (pos m)  = sum-exp-ℕ x n m
-  sum-exp (x≢0 _ {p}) (pos n)  -[1+ m ] = sum-exp-help p n m
-  sum-exp (x≢0 x {p}) -[1+ n ] (pos m)
-    rewrite *-comm ((x≢0 (x ^ suc n) {x^n≢0 p (suc n)})⁻¹) (x ^ m) =
-    sum-exp-help p m n
-  sum-exp (x≢0 x {p}) -[1+ n ] -[1+ m ] rewrite /-mul 1ℝ (x ^ suc n) 1ℝ
-    (x · x ^ m) {x^n≢0 p (suc n)} {x^n≢0 p (suc m)}
-    | *-identityˡ 1ℝ | *-assoc x (x ^ n) (x ^ suc m)
-    | sym (*-assoc (x ^ n) x (x ^ m)) | *-comm (x ^ n) x
-    | *-assoc x (x ^ n) (x ^ m)
-    | sym $ ⁻¹-distrib-* (x^n≢0 p (suc n)) (x^n≢0 p (suc m)) =
-    cong _⁻¹ $ ℝ\0≡ (x^n≢0 p (suc (suc (n + m)))) $ begin
-    x ^ suc (suc (n + m)) ≡˘⟨ cong (λ n → x ^ suc n) (ℕp.+-suc n m) ⟩
-    x ^ (suc n + suc m)   ≡⟨ sum-exp-ℕ x (suc n) (suc m) ⟩
-    x ^ suc n · x ^ suc m ∎
+  sum-exp : (x : ℝ) .⦃ _ : NonZero x ⦄ → (z w : ℤ) →  x ^ (z + w) ≡ x ^ z · x ^ w
+  sum-exp x (pos n)  (pos m)  = sum-exp-ℕ x n m
+  sum-exp _ (pos n)  -[1+ m ] = sum-exp-help n m
+  sum-exp x -[1+ n ] (pos m)
+    rewrite *-comm (((x ^ suc n)⁻¹) ⦃ _ ⦄) (x ^ m) =
+    sum-exp-help m n
+  sum-exp x -[1+ n ] -[1+ m ] = trans (⁻¹-cong ⦃ _ ⦄ ⦃ _ ⦄ $ help x n m)
+    (⁻¹-distrib-* (x ^ suc n) (x ^ suc m) ⦃ _ ⦄ ⦃ _ ⦄)
+    where
+    help : (x : ℝ) → (n m : ℕ) → x ^ suc (suc (n + m)) ≡ x ^ suc n · x ^ suc m
+    help x n m = begin
+      x ^ suc (suc (n + m)) ≡˘⟨ cong (λ n → x ^ suc n) (ℕp.+-suc n m) ⟩
+      x ^ (suc n + suc m)   ≡⟨ sum-exp-ℕ x (suc n) (suc m) ⟩
+      x ^ suc n · x ^ suc m ∎
 
-  mul-base : (x y : ℝ\0) → (z : ℤ) → (x · y) ^ z ≡ x ^ z · y ^ z
-  mul-base (x≢0 x)     (x≢0 y)     (pos n)  = mul-base-ℕ x y n
-  mul-base (x≢0 x {p}) (x≢0 y {q}) -[1+ n ]
-    rewrite sym $ ⁻¹-distrib-* (x^n≢0 p (suc n)) (x^n≢0 q (suc n)) =
-    cong _⁻¹ $ ℝ\0≡ (x^n≢0 (x·y≢0 p q) (suc n)) (mul-base-ℕ x y (suc n))
+  mul-base : (x y : ℝ) .⦃ p : NonZero x ⦄ .⦃ q : NonZero y ⦄ → (z : ℤ) → let
+    r = x·y-nonZero ⦃ p ⦄ ⦃ q ⦄
+    in ((x · y) ^ z) ⦃ r ⦄ ≡ x ^ z · y ^ z
+  mul-base x y             (pos n)  = mul-base-ℕ x y n
+  mul-base x y ⦃ p ⦄ ⦃ q ⦄ -[1+ n ]
+    rewrite sym $ ⁻¹-distrib-* (x ^ (suc n)) (y ^ (suc n))
+    ⦃ x^n-nonZero ⦃ p ⦄ {suc n} ⦄ ⦃ x^n-nonZero ⦃ q ⦄ {suc n} ⦄ =
+    ⁻¹-cong ⦃ x^n-nonZero ⦃ x·y-nonZero ⦃ p ⦄ ⦃ q ⦄ ⦄ {suc n} ⦄ ⦃ _ ⦄ $
+      mul-base-ℕ x y (suc n)
 
-  private
-    double-exp-help : (x : ℝ\0) → (n m : ℕ) →
-      ((x ^₀ n) ^₀ suc m)⁻¹ ≡ x ^ (pos n · -[1+ m ])
-    double-exp-help x 0       m rewrite ℝ\0^0 x = trans
-      (cong _⁻¹ $ ℝ\0≡ (x·y≢0 1≢0 (x^n≢0 1≢0 m)) $
-        trans (*-identityˡ (1ℝ ^ m)) (1^n m)) 1⁻¹
-    double-exp-help (x≢0 x {p}) (suc n) m = cong _⁻¹ $ ℝ\0≡
-      (x·y≢0 (x^n≢0 p (suc n)) (x^n≢0 (x^n≢0 p (suc n)) m))
-      (double-exp-ℕ x (suc n) (suc  m))
+  -- private
+  --   double-exp-help : (x : ℝ\0) → (n m : ℕ) →
+  --     ((x ^₀ n) ^₀ suc m)⁻¹ ≡ x ^ (pos n · -[1+ m ])
+  --   double-exp-help x 0       m rewrite ℝ\0^0 x = trans
+  --     (cong _⁻¹ $ ℝ\0≡ (x·y≢0 1≢0 (x^n≢0 1≢0 m)) $
+  --       trans (*-identityˡ (1ℝ ^ m)) (1^n m)) 1⁻¹
+  --   double-exp-help (x≢0 x {p}) (suc n) m = cong _⁻¹ $ ℝ\0≡
+  --     (x·y≢0 (x^n≢0 p (suc n)) (x^n≢0 (x^n≢0 p (suc n)) m))
+  --     (double-exp-ℕ x (suc n) (suc  m))
 
   -- mutual
   --   [1/x]^n : (x : ℝ\0) → (n : ℕ) → (x ⁻¹) ^ n ≡ (x ^₀ n)⁻¹

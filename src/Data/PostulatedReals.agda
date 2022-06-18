@@ -14,12 +14,13 @@
 module Data.PostulatedReals where
 
   open import Relation.Binary.PropositionalEquality
-  open import Data.N hiding (_<_ ; _≤_ ; _>_ ; _≥_)
+  open import Data.N hiding (_<_ ; _≤_ ; _>_ ; _≥_ ; NonZero ; ≢-nonZero)
   open ℕ
-  open import Data.Int hiding (∣_∣ ; suc ; _<_ ; _≤_ ; _>_ ; _≥_)
+  open import Data.Int hiding (∣_∣ ; suc ; _<_ ; _≤_ ; _>_ ; _≥_ ; NonZero ; ≢-nonZero)
   open ℤ
   open import Data.Sum
   open import Utils
+  open import Function.Base
   open import Ops
 
   open import Data.PostulatedReals.Core public
@@ -35,37 +36,29 @@ module Data.PostulatedReals where
   ... | inj₁ x≤0 = -x≢0 p
   ... | inj₂ x≥0 = p
 
-  ∣_∣₀ : ℝ\0 → ℝ\0
-  ∣ (x≢0 x {p}) ∣₀ = x≢0 ∣ x ∣ {∣x∣≢0 p}
-
-  sgn : ℝ\0 → ℝ\0
-  sgn (x≢0 x) with ≤-total x 0ℝ
-  ... | inj₁ x≤0 = x≢0 -1ℝ { -x≢0 1≢0}
-  ... | inj₂ x≥0 = 1ℝ\0
-
   instance
-    Mulℝ\0 : Mul ℝ\0
-    _·_ ⦃ Mulℝ\0 ⦄ (x≢0 x {p}) (x≢0 y {q}) = (x≢0 (x · y) {x·y≢0 p q})
-    unit ⦃ Mulℝ\0 ⦄ = 1ℝ\0
-    lemma-unit ⦃ Mulℝ\0 ⦄ {x≢0 x {p}} = ℝ\0≡ (x·y≢0 1≢0 p) (*-identityˡ x)
+    ∣x∣-nonZero : {x : ℝ} .⦃ _ : NonZero x ⦄ → NonZero (∣ x ∣)
+    ∣x∣-nonZero ⦃ p ⦄ = ≢-nonZero $ ∣x∣≢0 (≢-nonZero⁻¹ p)
 
-  x^n≢0 : {x : ℝ} → .(x ≢0) → (n : ℕ) → x ^ n ≢0
+  sgn : (x : ℝ) .⦃ _ : NonZero x ⦄ → ℝ
+  sgn x with ≤-total x 0ℝ
+  ... | inj₁ x≤0 = -1ℝ
+  ... | inj₂ x≥0 = 1ℝ
+
+  x^n≢0 : {x : ℝ} → x ≢0 → (n : ℕ) → x ^ n ≢0
   x^n≢0     _ 0       q = 1≢0 q
   x^n≢0 {x} p (suc n) q  with x·y≡0 x (x ^ n) q
-  ... | inj₁ x≡0   = ⊥-irrelevant (p x≡0)
+  ... | inj₁ x≡0   = p x≡0
   ... | inj₂ x^n≡0 with x^n≢0 p n
   ... | s = s x^n≡0
 
   instance
-    NatPowℝ\0 : Pow ℝ\0 ℕ {ℝ\0}
-    _^_ ⦃ NatPowℝ\0 ⦄ (x≢0 b {p}) n = x≢0 (b ^ n) {x^n≢0 p n}
-    _^₀_ = _^_ ⦃ NatPowℝ\0 ⦄
+    x^n-nonZero : {x : ℝ} .⦃ _ : NonZero x ⦄ → {n : ℕ} → NonZero (x ^ n)
+    x^n-nonZero ⦃ p ⦄ {n} = ≢-nonZero $ x^n≢0 (≢-nonZero⁻¹ p) n
 
-    IntPowℝ\0 : Pow ℝ\0 ℤ {ℝ\0}
-    _^_ ⦃ IntPowℝ\0 ⦄ b (pos n) = b ^₀ n
-    _^_ ⦃ IntPowℝ\0 ⦄ b -[1+ n ]  = (b ^₀ (suc n)) ⁻¹₀
-    _^₀z_ =  _^_ ⦃ IntPowℝ\0 ⦄
+    IntPowℝ : Pow ℝ ℤ {NonZero} {ℝ}
+    _^_ ⦃ IntPowℝ ⦄ b (pos n)        = b ^ n
+    _^_ ⦃ IntPowℝ ⦄ b -[1+ n ] ⦃ p ⦄ = ((b ^ (suc n)) ⁻¹)
+      ⦃ x^n-nonZero ⦃ p ⦄ {suc n} ⦄
 
-    IntPowℝ : Pow ℝ\0 ℤ {ℝ}
-    _^_ ⦃ IntPowℝ ⦄ b e = ℝ∪0 (b ^₀z e)
 
