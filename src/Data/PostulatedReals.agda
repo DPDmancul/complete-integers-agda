@@ -41,7 +41,13 @@ module Data.PostulatedReals where
   sgn : ℝ\0 → ℝ\0
   sgn (x≢0 x) with ≤-total x 0ℝ
   ... | inj₁ x≤0 = x≢0 -1ℝ { -x≢0 1≢0}
-  ... | inj₂ x≥0 = x≢0 1ℝ {1≢0}
+  ... | inj₂ x≥0 = 1ℝ\0
+
+  instance
+    Mulℝ\0 : Mul ℝ\0
+    _·_ ⦃ Mulℝ\0 ⦄ (x≢0 x {p}) (x≢0 y {q}) = (x≢0 (x · y) {x·y≢0 p q})
+    unit ⦃ Mulℝ\0 ⦄ = 1ℝ\0
+    lemma-unit ⦃ Mulℝ\0 ⦄ {x≢0 x {p}} = ℝ\0≡ (x·y≢0 1≢0 p) (*-identityˡ x)
 
   x^n≢0 : {x : ℝ} → .(x ≢0) → (n : ℕ) → x ^ n ≢0
   x^n≢0     _ 0       q = 1≢0 q
@@ -53,8 +59,13 @@ module Data.PostulatedReals where
   instance
     NatPowℝ\0 : Pow ℝ\0 ℕ {ℝ\0}
     _^_ ⦃ NatPowℝ\0 ⦄ (x≢0 b {p}) n = x≢0 (b ^ n) {x^n≢0 p n}
+    _^₀_ = _^_ ⦃ NatPowℝ\0 ⦄
 
-    IntPowℝ\0 : Pow ℝ\0 ℤ {ℝ}
-    _^_ ⦃ IntPowℝ\0 ⦄ b (pos n) = ℝ∪0 (_^_ ⦃ NatPowℝ\0 ⦄ b n)
-    _^_ ⦃ IntPowℝ\0 ⦄ b -[1+ n ]  = (_^_ ⦃ NatPowℝ\0 ⦄ b (suc n)) ⁻¹
+    IntPowℝ\0 : Pow ℝ\0 ℤ {ℝ\0}
+    _^_ ⦃ IntPowℝ\0 ⦄ b (pos n) = b ^₀ n
+    _^_ ⦃ IntPowℝ\0 ⦄ b -[1+ n ]  = (b ^₀ (suc n)) ⁻¹₀
+    _^₀z_ =  _^_ ⦃ IntPowℝ\0 ⦄
+
+    IntPowℝ : Pow ℝ\0 ℤ {ℝ}
+    _^_ ⦃ IntPowℝ ⦄ b e = ℝ∪0 (b ^₀z e)
 

@@ -175,7 +175,7 @@ module Data.PostulatedReals.CoreProperties where
   1/1/x x {p} = begin
     1ℝ / 1/x           ≡˘⟨ cong (_· (1/x)⁻¹) (*-inverseʳ p) ⟩
     (x / x₀) / 1/x     ≡⟨ /-simplʳ (x₀ ⁻¹) x 1ℝ {x⁻¹≢0 p} {1≢0} ⟩
-    x / (x≢0 1ℝ {1≢0}) ≡⟨ x/1 x ⟩
+    x / 1ℝ\0 ≡⟨ x/1 x ⟩
     x ∎
     where
     x₀ = x≢0 x {p}
@@ -226,11 +226,6 @@ module Data.PostulatedReals.CoreProperties where
   mul-base-ℕ x y (suc n) rewrite *-comm-middle x (x ^ n) y (y ^ n) =
     cong (_·_ (x · y)) (mul-base-ℕ x y n)
 
-  -- mul-base : (x y : ℝ) → (z : ℤ) → (x · y) ^ z ≡ x ^ z · y ^ z
-  -- mul-base x y (pos n)  = mul-base-ℕ x y n
-  -- mul-base x y -[1+ n ] rewrite /-mul 1ℝ (x ^ suc n) 1ℝ (y ^ suc n)
-  --   | *-identityˡ 1ℝ = cong (_/_ 1ℝ) (mul-base-ℕ x y (suc n))
-
   1^n : (n : ℕ) → 1ℝ ^ n ≡ 1ℝ
   1^n 0       = refl
   1^n (suc n) rewrite 1^n n = *-identityˡ 1ℝ
@@ -244,53 +239,3 @@ module Data.PostulatedReals.CoreProperties where
   x^nm=x^mn x n m rewrite double-exp-ℕ x n m | ℕp.*-comm n m =
     sym (double-exp-ℕ x m n)
 
-  -- private
-  --   double-exp-help : (x : ℝ) → (n m : ℕ) →
-  --     1ℝ / ((x ^ n) ^ suc m) ≡ x ^ (pos n · -[1+ m ])
-  --   double-exp-help x 0       m rewrite 1^n m | *-identityˡ 1ℝ = x/1 1ℝ
-  --   double-exp-help x (suc n) m = cong (_/_ 1ℝ) (double-exp-ℕ x (suc n) (suc  m))
-
-  -- mutual
-  --   [1/x]^n : (x : ℝ) {_ : x ≢0} → (n : ℕ) → (1ℝ / x) ^ n ≡ 1ℝ / (x ^ n)
-  --   [1/x]^n x {p} n = begin
-  --     (1ℝ / x) ^ pos n ≡⟨ cong (λ x → (1ℝ / x) ^ n) (sym (*-identityʳ x)) ⟩
-  --     (x ^ -[1+ 0 ]) ^ pos n ≡⟨ helper x n ⟩
-  --     x ^ (-[1+ 0 ] · pos n) ≡⟨ cong (_^_ x) (ℤp.*-comm -[1+ 0 ] (pos n)) ⟩
-  --     x ^ (pos n · -[1+ 0 ]) ≡˘⟨ (double-exp x {p} (pos n) -[1+ 0 ] ⟩
-  --     (x ^ n) ^ -[1+ 0 ]     ≡⟨ cong (_/_ 1ℝ) (*-identityʳ (x ^ n)) ⟩
-  --     1ℝ / (x ^ n)           ∎
-  --     where
-  --     helper : (x : ℝ) → (n : ℕ) → (1ℝ / (x · 1ℝ)) ^ n ≡ x ^ (-[1+ 0 ] · pos n)
-  --     helper x 0             = refl
-  --     helper x (suc n) rewrite helper x n | ℕp.+-identityʳ n | *-identityʳ x
-  --       with n
-  --     ... | 0     rewrite *-identityʳ x | *-identityʳ (1ℝ / x) = refl
-  --     ... | suc n rewrite /-mul 1ℝ x 1ℝ (x ^ suc n) | *-identityˡ 1ℝ = refl
-
-  --   [x/y]^n : (x y : ℝ) {_ : y ≢0} → (n : ℕ) → (x / y) ^ n ≡ (x ^ n) / (y ^ n)
-  --   [x/y]^n x y {p} n rewrite sym (*-identityʳ x) | mul-base-ℕ x 1ℝ n | 1^n n
-  --     | sym (/-coef (x ^ n) 1ℝ (y ^ n)) | sym ([1/x]^n y {p} n)
-  --     | sym (mul-base-ℕ x (1ℝ / y) n) | /-coef x 1ℝ y = refl
-
---   double-exp : (x : ℝ) {_ : x ≢0} → (z w : ℤ) → (x ^ z) ^ w ≡ x ^ (z · w)
---   double-exp x     (pos n)  (pos m)  rewrite ℤp.pos-mul n m =
---     double-exp-ℕ x n m
---   double-exp x     (pos n)  -[1+ m ] = double-exp-help x n m
---   double-exp x {p} -[1+ n ] (pos m)
---     rewrite [1/x]^n (x ^ suc n) {x^n≢0 x {p} (suc n)} m
---     | x^nm=x^mn x (suc n) m | ℤp.*-comm -[1+ n ] (pos m) =
---     double-exp-help x m n
---   double-exp x {p} -[1+ n ] -[1+ m ]
---     rewrite [1/x]^n (x ^ suc n) {x^n≢0 x {p} (suc n)} m
---     | /-mul 1ℝ (x ^ suc n) 1ℝ ((x ^ suc n) ^ m) | *-identityˡ 1ℝ
---     | double-exp-ℕ x (suc n) m | sym (sum-exp-ℕ x (suc n) (m + n · m))
---     | 1/1/x (x ^ suc (n + (m + (n · m))))
---     {x^n≢0 x {p} (suc (n + (m + (n · m))))} =
---     cong (λ y → x ^ suc y) (helper n m)
---     where
---     helper : (n m : ℕ) → n + (m + n · m) ≡ m + (n · suc m)
---     helper n m rewrite ℕp.*-comm n (suc m) | ℕp.*-comm m n = begin
---       (n + (m + n · m)) ≡˘⟨ ℕp.+-assoc n m (n · m) ⟩
---       ((n + m) + n · m) ≡⟨ cong (_+ n · m) (ℕp.+-comm n m) ⟩
---       ((m + n) + n · m) ≡⟨ ℕp.+-assoc m n (n · m) ⟩
---       (m + (n + n · m)) ∎

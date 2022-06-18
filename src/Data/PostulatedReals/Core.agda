@@ -45,6 +45,9 @@ module Data.PostulatedReals.Core where
     1≢0 : 1ℝ ≢0
     isZero : (x : ℝ) → x ≡ 0ℝ ⊎ x ≢0
 
+  1ℝ\0 : ℝ\0
+  1ℝ\0 = x≢0 1ℝ {1≢0}
+
   data _<_ : ℝ → ℝ → Set where
     *<* : (x y : ℝ) → x ≤ y × (x ≡ y → ⊥) → x < y
 

@@ -828,41 +828,45 @@ k-of-sum : (z w : ℤC) → par (val (z + w)) ⊕ par (z + w) ≡ let
 k-of-sum z w rewrite th-par-linearity-ℤ {val z} {val w}
    = 𝔽₂p.⊕-comm-middle (par (val z)) (par (val w)) (par z) (par w)
 
--- private
---   sum-exp-helper : (x : ℝ) {_ : x ≡ 0ℝ → ⊥} → (z w : ℤ) →
---     x ^ ((z + w) + -[1+ 0 ]) · (∣ x ∣ · 1ℝ) ≡
---       (x ^ (z + 0ℤ) · 1ℝ) · (x ^ (w + -[1+ 0 ]) · (∣ x ∣ · 1ℝ))
---   sum-exp-helper x {p} z w rewrite ℤp.+-identityʳ z | ℝp.*-identityʳ (x ^ z)
---     | sym (ℝp.*-assoc (x ^ z) (x ^ (w + -[1+ 0 ])) (∣ x ∣ · 1ℝ))
---     | ℤp.+-assoc z w -[1+ 0 ] =
---     cong (_· (∣ x ∣ · 1ℝ)) (ℝp.sum-exp x {p} z (w + -[1+ 0 ]))
---
--- sum-exp : (x : ℝ) {_ : x ≡ 0ℝ → ⊥} → (z w : ℤC) → x ^ (z + w) ≡ x ^ z · x ^ w
--- sum-exp x {p} z w rewrite k-of-sum z w with par (val z) ⊕ par z
---   | par (val w) ⊕ par w
--- ... | zero | zero rewrite ℤp.+-identityʳ (val z + val w) | ℤp.+-identityʳ (val z)
---   | ℤp.+-identityʳ (val w) | ℝp.*-identityʳ (x ^ (val z + val w))
---   | ℝp.*-identityʳ (x ^ val z) | ℝp.*-identityʳ (x ^ val w)
---   = ℝp.sum-exp x {p} (val z) (val w)
--- ... | zero | one  = sum-exp-helper x {p} (val z) (val w)
--- ... | one  | zero rewrite ℤp.+-comm (val z) (val w)
---   | ℝp.*-comm (x ^ (val z + -[1+ 0 ]) · (∣ x ∣ · 1ℝ)) (x ^ (val w + 0ℤ) · 1ℝ) =
---   sum-exp-helper x {p} (val w) (val z)
--- ... | one  | one  rewrite ℝp.*-identityʳ ∣ x ∣
---   | ℝp.*-comm-middle (x ^ (val z + -[1+ 0 ])) (∣ x ∣)
---                      (x ^ (val w + -[1+ 0 ])) ∣ x ∣
---   | ℝp.∣x∣∣x∣ x | sym (ℝp.sum-exp x {p} (val z + -[1+ 0 ]) (val w + -[1+ 0 ]))
---   | ℤp.+-comm-middle (val z) -[1+ 0 ] (val w) -[1+ 0 ]
---   | ℝp.*-identityʳ (x ^ ((val z + val w) + 0ℤ)) = sym (trans
---     (sym (ℝp.sum-exp x {p} ((val z + val w) + -[1+ 1 ]) 2ℤ))
---     (cong (_^_ x) (ℤp.+-assoc (val z + val w) -[1+ 1 ] 2ℤ)))
---
--- mul-base : (x y : ℝ) → (z : ℤC) → (x · y) ^ z ≡ x ^ z · y ^ z
--- mul-base x y z with par (val z) ⊕ par z
--- ... | zero rewrite ℤp.+-identityʳ (val z) | ℝp.*-identityʳ (x ^ val z)
---   | ℝp.*-identityʳ (y ^ val z) | ℝp.*-identityʳ ((x · y) ^ val z) =
---     ℝp.mul-base x y (val z)
--- ... | one  = {!   !}
+private
+  sum-exp-helper : (x : ℝ\0) → (z w : ℤ) →
+    x ^ ((z + w) + -[1+ 0 ]) · (∣ ℝ∪0 x ∣ · 1ℝ) ≡
+      (x ^ (z + 0ℤ) · 1ℝ) · (x ^ (w + -[1+ 0 ]) · (∣ ℝ∪0 x ∣ · 1ℝ))
+  sum-exp-helper x₀@(x≢0 x) z w rewrite ℤp.+-identityʳ z
+    | ℝp.*-identityʳ (x₀ ^ z)
+    | sym (ℝp.*-assoc (x₀ ^ z) (x₀ ^ (w + -[1+ 0 ])) (∣ x ∣ · 1ℝ))
+    | ℤp.+-assoc z w -[1+ 0 ] =
+    cong (_· (∣ x ∣ · 1ℝ)) (ℝp.sum-exp x₀ z (w + -[1+ 0 ]))
+
+sum-exp : (x : ℝ\0) → (z w : ℤC) → x ^ (z + w) ≡ x ^ z · x ^ w
+sum-exp x₀@(x≢0 x) z w rewrite k-of-sum z w with par (val z) ⊕ par z
+  | par (val w) ⊕ par w
+... | zero | zero rewrite ℤp.+-identityʳ (val z + val w) | ℤp.+-identityʳ (val z)
+  | ℤp.+-identityʳ (val w) | ℝp.*-identityʳ (x₀ ^ (val z + val w))
+  | ℝp.*-identityʳ (x₀ ^ val z) | ℝp.*-identityʳ (x₀ ^ val w)
+  = ℝp.sum-exp x₀ (val z) (val w)
+... | zero | one  = sum-exp-helper x₀ (val z) (val w)
+... | one  | zero rewrite ℤp.+-comm (val z) (val w)
+  | ℝp.*-comm (x₀ ^ (val z + -[1+ 0 ]) · (∣ x ∣ · 1ℝ)) (x₀ ^ (val w + 0ℤ) · 1ℝ) =
+  sum-exp-helper x₀ (val w) (val z)
+... | one  | one  rewrite ℝp.*-identityʳ ∣ x ∣
+  | ℝp.*-comm-middle (x₀ ^ (val z + -[1+ 0 ])) (∣ x ∣)
+                     (x₀ ^ (val w + -[1+ 0 ])) (∣ x ∣)
+  | ℝp.∣x∣∣x∣ x | sym $ ℝp.sum-exp x₀ (val z + -[1+ 0 ]) (val w + -[1+ 0 ])
+  | ℤp.+-comm-middle (val z) -[1+ 0 ] (val w) -[1+ 0 ]
+  | ℝp.*-identityʳ (x₀ ^ ((val z + val w) + 0ℤ)) = sym $ trans
+    (sym $ ℝp.sum-exp x₀ ((val z + val w) + -[1+ 1 ]) 2ℤ)
+    (cong (_^_ x₀) $ ℤp.+-assoc (val z + val w) -[1+ 1 ] 2ℤ)
+
+mul-base : (x y : ℝ\0) → (z : ℤC) → (x · y) ^ z ≡ x ^ z · y ^ z
+mul-base x₀@(x≢0 x) y₀@(x≢0 y) z with par (val z) ⊕ par z
+... | zero rewrite ℤp.+-identityʳ (val z) | ℝp.*-identityʳ (x₀ ^ val z)
+  | ℝp.*-identityʳ (y₀ ^ val z) | ℝp.*-identityʳ ((x₀ · y₀) ^ val z) =
+    ℝp.mul-base x₀ y₀ (val z)
+... | one  rewrite ℝp.*-identityʳ ∣ x ∣ | ℝp.*-identityʳ ∣ y ∣
+  | ℝp.*-identityʳ ∣ x · y ∣ | ℝp.*-comm-middle (x₀ ^ (val z - 1ℤ)) (∣ x ∣)
+  (y₀ ^ (val z - 1ℤ)) ∣ y ∣ | ℝp.∣x∣∣y∣ x y = cong (_· ∣ x · y ∣) $
+    ℝp.mul-base x₀ y₀ (val z - 1ℤ)
 
 -- double-exp : (x : ℝ) → (z w : ℤC) → (x ^ z) ^ w ≡ x ^ (z · w)
 -- double-exp x z w = {!   !}
