@@ -124,6 +124,26 @@ module Data.PostulatedReals.CoreProperties where
       where
         xy⁻¹ = (x · y)⁻¹
 
+  ⁻¹-involutive : (x : ℝ) → .⦃ _ : NonZero x ⦄ → (x ⁻¹)⁻¹ ≡ x
+  ⁻¹-involutive x = begin
+    (x ⁻¹)⁻¹                   ≡˘⟨ *-identityˡ ((x ⁻¹)⁻¹) ⟩
+    1ℝ · (x ⁻¹)⁻¹              ≡˘⟨ (cong (_· (x ⁻¹)⁻¹) $ *-inverseʳ (x ⁻¹)) ⟩
+    x ⁻¹ · (x ⁻¹)⁻¹ · (x ⁻¹)⁻¹ ≡˘⟨ *-identityˡ (x ⁻¹ · (x ⁻¹)⁻¹ · (x ⁻¹)⁻¹) ⟩
+    1ℝ · (x ⁻¹ · (x ⁻¹)⁻¹ · (x ⁻¹)⁻¹)
+      ≡˘⟨ ((cong (_· (x ⁻¹ · (x ⁻¹)⁻¹ · (x ⁻¹)⁻¹)) $ *-inverseʳ x )) ⟩
+    (x · x ⁻¹) · (x ⁻¹ · (x ⁻¹)⁻¹ · (x ⁻¹)⁻¹)
+      ≡⟨ *-assoc x (x ⁻¹) (x ⁻¹ · (x ⁻¹)⁻¹ · (x ⁻¹)⁻¹) ⟩
+    x · (x ⁻¹ · (x ⁻¹ · (x ⁻¹)⁻¹ · (x ⁻¹)⁻¹))
+      ≡⟨ (cong (λ y → x · (x ⁻¹ · y)) $ *-assoc (x ⁻¹) ((x ⁻¹)⁻¹) ((x ⁻¹)⁻¹)) ⟩
+    x · (x ⁻¹ · (x ⁻¹ · ((x ⁻¹)⁻¹ · (x ⁻¹)⁻¹)))
+      ≡˘⟨ (cong (_·_ x) $ *-assoc (x ⁻¹) (x ⁻¹) ((x ⁻¹)⁻¹ · (x ⁻¹)⁻¹)) ⟩
+    x · ((x ⁻¹ · x ⁻¹) · ((x ⁻¹)⁻¹ · (x ⁻¹)⁻¹))
+      ≡⟨ (cong (_·_ x) $ *-comm-middle (x ⁻¹) (x ⁻¹) ((x ⁻¹)⁻¹) ((x ⁻¹)⁻¹)) ⟩
+    x · ((x ⁻¹ · (x ⁻¹)⁻¹) · (x ⁻¹ · (x ⁻¹)⁻¹))
+      ≡⟨ ((cong (_·_ x) $ cong₂ _·_ (*-inverseʳ (x ⁻¹)) (*-inverseʳ (x ⁻¹)))) ⟩
+    x · (1ℝ · 1ℝ) ≡⟨ trans (cong (_·_ x) $ *-identityʳ 1ℝ) (*-identityʳ x) ⟩
+    x ∎
+
   /-mul : (a b c d : ℝ) .⦃ p : NonZero b ⦄ .⦃ q : NonZero d ⦄ →
     a / b · c / d ≡ ((a · c) / (b · d)) ⦃ x·y-nonZero ⦃ p ⦄ ⦃ q ⦄ ⦄
   /-mul a b c d ⦃ p ⦄ ⦃ q ⦄ = begin
@@ -162,18 +182,6 @@ module Data.PostulatedReals.CoreProperties where
     x · (y / (x · z)) ⦃ x·y-nonZero ⦃ p ⦄ ⦃ q ⦄ ⦄ ≡ y / z
   /-coef-simplˡ x y z rewrite /-coef x y (x · z) ⦃ _ ⦄ =
     /-simplˡ x y z
-
-  private
-    1/1/x-help : (x : ℝ) .⦃ p : NonZero x ⦄ → x · 1ℝ / x ≡ 1ℝ
-    1/1/x-help x rewrite /-coef x 1ℝ x ⦃ _ ⦄ | *-identityʳ x =
-      *-inverseʳ x
-
-  1/1/x : (x : ℝ) .⦃ p : NonZero x ⦄ → unit / (unit / x) ≡ x
-  1/1/x x ⦃ p ⦄ = begin
-    1ℝ / (1ℝ / x)      ≡˘⟨ cong (_· (1ℝ / x)⁻¹) (*-inverseʳ x) ⟩
-    (x / x) / (1ℝ / x) ≡⟨ /-simplʳ (x ⁻¹) x 1ℝ  ⟩
-    x / 1ℝ             ≡⟨ x/1 x ⟩
-    x ∎
 
   -- ------------------
   -- -- Inequalities --

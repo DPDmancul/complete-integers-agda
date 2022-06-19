@@ -871,7 +871,18 @@ mul-base x y z with par (val z) ⊕ par z
   (y ^ (val z - 1ℤ)) ∣ y ∣ | ℝp.∣x∣∣y∣ x y = cong (_· ∣ x · y ∣) $
     ℝp.mul-base x y (val z - 1ℤ)
 
--- double-exp : (x : ℝ) → (z w : ℤC) → (x ^ z) ^ w ≡ x ^ (z · w)
+x^zc≢0 : {x : ℝ} → (q : x ≢0) → (z : ℤC) → (x ^ z) ⦃ ≢-nonZero q ⦄ ≢0
+x^zc≢0 {x} q [ v , p ] = ℝp.x·y≢0 (ℝp.x^z≢0  q (v - k)) (ℝp.x^z≢0 (∣x∣≢0 q) k)
+  where
+  k = 𝔽₂-to-ℤ (par v ⊕ p)
+
+instance
+  x^zc-nonZero : {x : ℝ} .⦃ _ : NonZero x ⦄ → {z : ℤC} → NonZero (x ^ z)
+  x^zc-nonZero ⦃ p ⦄ {z} = ≢-nonZero $ x^zc≢0 (≢-nonZero⁻¹ p) z
+
+-- double-exp : (x : ℝ) .⦃ p : NonZero x ⦄ → (z w : ℤC) → let
+--   q = x^zc-nonZero ⦃ p ⦄ {z}
+--   in ((x ^ z) ^ w) ⦃ q ⦄ ≡ x ^ (z · w)
 -- double-exp x z w = {!   !}
 ```
 :::
