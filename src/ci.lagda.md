@@ -795,7 +795,7 @@ with $k = \Par\left(\val(z)\right) \oplus \Par(z)$.
 𝔽₂-to-ℤ one  = 1ℤ
 
 instance
-  CIPowℝ\0 : Pow ℝ ℤC {NonZero} {ℝ}
+  CIPowℝ\0 : CertPow ℝ ℤC {NonZero} {ℝ}
   _^_ ⦃ CIPowℝ\0 ⦄ x [ v , p ] = let k = 𝔽₂-to-ℤ (par v ⊕ p) in
     x ^ (v - k) · ∣ x ∣ ^ k
 ```

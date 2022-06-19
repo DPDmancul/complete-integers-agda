@@ -56,7 +56,7 @@ module Data.PostulatedReals where
     x^n-nonZero : {x : ℝ} .⦃ _ : NonZero x ⦄ → {n : ℕ} → NonZero (x ^ n)
     x^n-nonZero ⦃ p ⦄ {n} = ≢-nonZero $ x^n≢0 (≢-nonZero⁻¹ p) n
 
-    IntPowℝ : Pow ℝ ℤ {NonZero} {ℝ}
+    IntPowℝ : CertPow ℝ ℤ {NonZero} {ℝ}
     _^_ ⦃ IntPowℝ ⦄ b (pos n)        = b ^ n
     _^_ ⦃ IntPowℝ ⦄ b -[1+ n ] ⦃ p ⦄ = ((b ^ (suc n)) ⁻¹)
       ⦃ x^n-nonZero ⦃ p ⦄ {suc n} ⦄
