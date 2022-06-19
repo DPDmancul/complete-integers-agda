@@ -880,10 +880,49 @@ instance
   x^zc-nonZero : {x : ℝ} .⦃ _ : NonZero x ⦄ → {z : ℤC} → NonZero (x ^ z)
   x^zc-nonZero ⦃ p ⦄ {z} = ≢-nonZero $ x^zc≢0 (≢-nonZero⁻¹ p) z
 
--- double-exp : (x : ℝ) .⦃ p : NonZero x ⦄ → (z w : ℤC) → let
---   q = x^zc-nonZero ⦃ p ⦄ {z}
---   in ((x ^ z) ^ w) ⦃ q ⦄ ≡ x ^ (z · w)
--- double-exp x z w = {!   !}
+double-exp : (x : ℝ) .⦃ q : NonZero x ⦄ → (z w : ℤC) → let
+  r = x^zc-nonZero ⦃ q ⦄ {z}
+  in ((x ^ z) ^ w) ⦃ r ⦄ ≡ x ^ (z · w)
+double-exp x z@([ v₁ , p₁ ]) w@([ v₂ , p₂ ]) = begin
+  ((x ^ (v₁ - k₁) · ∣ x ∣ ^ k₁) ^ w) ⦃ _ ⦄
+    ≡⟨ mul-base (x ^ (v₁ - k₁)) (∣ x ∣ ^ k₁) ⦃ _ ⦄ ⦃ _ ⦄ w ⟩
+  ((x ^ (v₁ - k₁)) ^ w) ⦃ _ ⦄ · ((∣ x ∣ ^ k₁) ^ w) ⦃ _ ⦄
+    ≡⟨ cong₂ _·_ (help x (v₁ - k₁) w) (help ∣ x ∣ k₁ w) ⟩
+  (x ^ ([ v₁ - k₁ , p ] · w)) · (∣ x ∣ ^ ([ k₁ , par k₁ ] · w))
+    ≡⟨⟩
+  x ^ [ v₃ , p · p₂ ] · ∣ x ∣ ^ [ v₄ , p₄ ]
+    ≡⟨⟩
+  (x ^ (v₃ - k₃) · ∣ x ∣ ^ k₃) · (∣ x ∣ ^ (v₄ - k₄) · ∣ ∣ x ∣ ∣ ^ k₄)
+    ≡⟨ (cong (λ y → (x ^ (v₃ - k₃) · ∣ x ∣ ^ k₃) ·
+      (∣ x ∣ ^ (v₄ - k₄) · y ^ k₄)) $ {!   !}) ⟩
+  (x ^ (v₃ - k₃) · ∣ x ∣ ^ k₃) · (∣ x ∣ ^ (v₄ - k₄) · ∣ x ∣ ^ k₄)
+    ≡⟨ (cong (_·_ (x ^ (v₃ - k₃) · ∣ x ∣ ^ k₃)) $
+      trans (sym $ ℝp.sum-exp ∣ x ∣ (v₄ - k₄) k₄)
+            (cong (λ (e : ℤ) → ∣ x ∣ ^ e) (trans (ℤp.+-assoc v₄ (- k₄) k₄)
+                                                 {!   !}))) ⟩
+  (x ^ (v₃ - k₃) · ∣ x ∣ ^ k₃) · ∣ x ∣ ^ v₄
+    ≡⟨ ℝp.*-assoc (x ^ (v₃ - k₃)) (∣ x ∣ ^ k₃) (∣ x ∣ ^ v₄) ⟩
+  x ^ (v₃ - k₃) · (∣ x ∣ ^ k₃ · ∣ x ∣ ^ v₄)
+    ≡˘⟨ (cong (_·_ (x ^ (v₃ - k₃))) $ ℝp.sum-exp ∣ x ∣ k₃ v₄) ⟩
+  x ^ (v₃ - k₃) · ∣ x ∣ ^ (k₃ + v₄)
+    ≡⟨ cong₂ (λ a b → x ^ a · ∣ x ∣ ^ b ) {!   !} {!   !} ⟩
+  x ^ (v₁₂ - k₁₂) · ∣ x ∣ ^ k₁₂ ∎
+  where
+  k₁ = 𝔽₂-to-ℤ (par v₁ ⊕ p₁)
+  k₂ = 𝔽₂-to-ℤ (par v₂ ⊕ p₂)
+  p = par (v₁ - k₁)
+  v₁₂ = v₁ · v₂
+  p₁₂ = p₁ · p₂
+  k₁₂ = 𝔽₂-to-ℤ (par v₁₂ ⊕ p₁₂)
+  v₃ = (v₁ - k₁) · v₂
+  p₃ = p · p₂
+  k₃ =  𝔽₂-to-ℤ (par v₃ ⊕ p₃)
+  v₄ = k₁ · v₂
+  p₄ = par k₁ · p₂
+  k₄ =  𝔽₂-to-ℤ (par v₄ ⊕ p₄)
+  help : (x : ℝ) .⦃ q : NonZero x ⦄ → (z : ℤ) → (w : ℤC) → let
+    r = ℝp.x^z-nonZero ⦃ q ⦄ {z}
+    in ((x ^ z) ^ w) ⦃ r ⦄ ≡ x ^ (proj₁ (fℤ z) · w)
 ```
 :::
 
