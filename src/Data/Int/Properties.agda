@@ -24,6 +24,9 @@ module Data.Int.Properties where
   +-comm-middle : (a b c d : ℤ) → (a + b) + (c + d) ≡ (a + c) + (b + d)
   +-comm-middle = •-comm-middle _+_ +-comm +-assoc-middle
 
+  +-inverse-middleˡ : (a b c : ℤ) → (a - b) + (b + c) ≡ a + c
+  +-inverse-middleˡ = •-inverse-middleˡ _+_ -_ 0ℤ +-assoc +-inverseˡ +-identityʳ
+
   pos-mul : (n m : ℕ) → pos n · pos m ≡ pos (n · m)
   pos-mul n m with n · m
   ... | 0     = refl

@@ -372,6 +372,12 @@ parity-even p rewrite lemma-even p = refl
 
 parity-odd : {z : ℤ} → Odd z → par z ≡ one
 parity-odd p rewrite lemma-odd p = refl
+
+parity-even⁻¹ : {z : ℤ} → par z ≡ zero → Even z
+parity-even⁻¹ {z} parz≡0 with even-or-odd z
+... | even p = p
+... | odd p with parz≡0
+... | ()
 ```
 
 ::: {.theorem name="Properties of parity"}
@@ -858,7 +864,9 @@ sum-exp x z w rewrite k-of-sum z w with par (val z) ⊕ par z
   | ℝp.*-identityʳ (x ^ ((val z + val w) + 0ℤ)) = sym $ trans
     (sym $ ℝp.sum-exp x ((val z + val w) + -[1+ 1 ]) 2ℤ)
     (ℝp.^-cong refl $ ℤp.+-assoc (val z + val w) -[1+ 1 ] 2ℤ)
+```
 
+```agda
 mul-base : (x y : ℝ) .⦃ p : NonZero x ⦄ .⦃ q : NonZero y ⦄ → (z : ℤC) → let
   r = ℝp.x·y-nonZero ⦃ p ⦄ ⦃ q ⦄
   in ((x · y) ^ z) ⦃ r ⦄ ≡ x ^ z · y ^ z
@@ -870,7 +878,9 @@ mul-base x y z with par (val z) ⊕ par z
   | ℝp.*-identityʳ ∣ x · y ∣ | ℝp.*-comm-middle (x ^ (val z - 1ℤ)) (∣ x ∣)
   (y ^ (val z - 1ℤ)) ∣ y ∣ | ℝp.∣x∣∣y∣ x y = cong (_· ∣ x · y ∣) $
     ℝp.mul-base x y (val z - 1ℤ)
+```
 
+```agda
 x^zc≢0 : {x : ℝ} → (q : x ≢0) → (z : ℤC) → (x ^ z) ⦃ ≢-nonZero q ⦄ ≢0
 x^zc≢0 {x} q [ v , p ] = ℝp.x·y≢0 (ℝp.x^z≢0  q (v - k)) (ℝp.x^z≢0 (∣x∣≢0 q) k)
   where
@@ -887,25 +897,28 @@ double-exp x z@([ v₁ , p₁ ]) w@([ v₂ , p₂ ]) = begin
   ((x ^ (v₁ - k₁) · ∣ x ∣ ^ k₁) ^ w) ⦃ _ ⦄
     ≡⟨ mul-base (x ^ (v₁ - k₁)) (∣ x ∣ ^ k₁) ⦃ _ ⦄ ⦃ _ ⦄ w ⟩
   ((x ^ (v₁ - k₁)) ^ w) ⦃ _ ⦄ · ((∣ x ∣ ^ k₁) ^ w) ⦃ _ ⦄
-    ≡⟨ cong₂ _·_ (help x (v₁ - k₁) w) (help ∣ x ∣ k₁ w) ⟩
+    ≡⟨ cong₂ _·_ (help₁ x (v₁ - k₁) w) (help₁ ∣ x ∣ k₁ w) ⟩
   (x ^ ([ v₁ - k₁ , p ] · w)) · (∣ x ∣ ^ ([ k₁ , par k₁ ] · w))
     ≡⟨⟩
   x ^ [ v₃ , p · p₂ ] · ∣ x ∣ ^ [ v₄ , p₄ ]
     ≡⟨⟩
   (x ^ (v₃ - k₃) · ∣ x ∣ ^ k₃) · (∣ x ∣ ^ (v₄ - k₄) · ∣ ∣ x ∣ ∣ ^ k₄)
     ≡⟨ (cong (λ y → (x ^ (v₃ - k₃) · ∣ x ∣ ^ k₃) ·
-      (∣ x ∣ ^ (v₄ - k₄) · y ^ k₄)) $ {!   !}) ⟩
+      (∣ x ∣ ^ (v₄ - k₄) · y ^ k₄)) $ ℝp.∣∣x∣∣ x) ⟩
   (x ^ (v₃ - k₃) · ∣ x ∣ ^ k₃) · (∣ x ∣ ^ (v₄ - k₄) · ∣ x ∣ ^ k₄)
     ≡⟨ (cong (_·_ (x ^ (v₃ - k₃) · ∣ x ∣ ^ k₃)) $
       trans (sym $ ℝp.sum-exp ∣ x ∣ (v₄ - k₄) k₄)
-            (cong (λ (e : ℤ) → ∣ x ∣ ^ e) (trans (ℤp.+-assoc v₄ (- k₄) k₄)
-                                                 {!   !}))) ⟩
+            (cong (λ (e : ℤ) → ∣ x ∣ ^ e) (begin
+              (v₄ - k₄) + k₄   ≡⟨ ℤp.+-assoc v₄ (- k₄) k₄ ⟩
+              v₄ + (- k₄ + k₄) ≡⟨ (cong (_+_ v₄) $ ℤp.+-inverseˡ k₄) ⟩
+              v₄ + 0ℤ          ≡⟨ ℤp.+-identityʳ v₄ ⟩
+              v₄               ∎))) ⟩
   (x ^ (v₃ - k₃) · ∣ x ∣ ^ k₃) · ∣ x ∣ ^ v₄
     ≡⟨ ℝp.*-assoc (x ^ (v₃ - k₃)) (∣ x ∣ ^ k₃) (∣ x ∣ ^ v₄) ⟩
   x ^ (v₃ - k₃) · (∣ x ∣ ^ k₃ · ∣ x ∣ ^ v₄)
     ≡˘⟨ (cong (_·_ (x ^ (v₃ - k₃))) $ ℝp.sum-exp ∣ x ∣ k₃ v₄) ⟩
   x ^ (v₃ - k₃) · ∣ x ∣ ^ (k₃ + v₄)
-    ≡⟨ cong₂ (λ a b → x ^ a · ∣ x ∣ ^ b ) {!   !} {!   !} ⟩
+    ≡⟨ help₄ ⟩
   x ^ (v₁₂ - k₁₂) · ∣ x ∣ ^ k₁₂ ∎
   where
   k₁ = 𝔽₂-to-ℤ (par v₁ ⊕ p₁)
@@ -920,9 +933,90 @@ double-exp x z@([ v₁ , p₁ ]) w@([ v₂ , p₂ ]) = begin
   v₄ = k₁ · v₂
   p₄ = par k₁ · p₂
   k₄ =  𝔽₂-to-ℤ (par v₄ ⊕ p₄)
-  help : (x : ℝ) .⦃ q : NonZero x ⦄ → (z : ℤ) → (w : ℤC) → let
+
+  help₁ : (x : ℝ) .⦃ q : NonZero x ⦄ → (z : ℤ) → (w : ℤC) → let
     r = ℝp.x^z-nonZero ⦃ q ⦄ {z}
     in ((x ^ z) ^ w) ⦃ r ⦄ ≡ x ^ (proj₁ (fℤ z) · w)
+  help₁ x z w = {!   !}
+
+  help-par-𝔽₂-to-ℤ : (x : 𝔽₂) → par (𝔽₂-to-ℤ x) ≡ x
+  help-par-𝔽₂-to-ℤ x with x
+  ... | zero = refl
+  ... | one  = refl
+  help-par-neg : (x : ℤ) → par (- x) ≡ par x
+  help-par-neg x with even-or-odd x
+  ... | even p = parity-even $ neg-even p
+  ... | odd  p = parity-odd $ neg-odd p
+  help-p : p ≡ p₁
+  help-p rewrite th-par-linearity-ℤ {v₁} { - k₁} with par v₁
+  ... | zero rewrite help-par-neg (𝔽₂-to-ℤ p₁) = help-par-𝔽₂-to-ℤ p₁
+  ... | one  rewrite help-par-neg (𝔽₂-to-ℤ (¬ p₁)) | help-par-𝔽₂-to-ℤ (¬ p₁) =
+    𝔽₂p.¬-double p₁
+  help-p₃ : p₃ ≡ p₁₂
+  help-p₃ = cong (_· p₂) help-p
+
+  v₃+v₄≡v₁₂ : v₃ + v₄ ≡ v₁₂
+  v₃+v₄≡v₁₂ with par v₁ ⊕ p₁
+  ... | zero rewrite ℤp.+-identityʳ v₁ = ℤp.+-identityʳ (v₁ · v₂)
+  ... | one  = begin
+    (v₁ - 1ℤ) · v₂ + 1ℤ · v₂ ≡˘⟨ ℤp.*-distribʳ-+ v₂ (v₁ - 1ℤ) 1ℤ ⟩
+    (v₁ - 1ℤ + 1ℤ) · v₂      ≡⟨ (cong (_· v₂) $ ℤp.+-assoc v₁ (- 1ℤ) 1ℤ) ⟩
+    (v₁ + 0ℤ) · v₂           ≡⟨ (cong (_· v₂) $ ℤp.+-identityʳ v₁) ⟩
+    v₁ · v₂                  ∎
+
+  help-even : Even (k₃ + v₄ - k₁₂)
+  help-even = parity-even⁻¹ $ begin
+    par ((k₃ + v₄) - k₁₂) ≡⟨ th-par-linearity-ℤ {k₃ + v₄} { - k₁₂} ⟩
+    par (k₃ + v₄) ⊕ par (- k₁₂)
+      ≡⟨ cong₂ _⊕_ (th-par-linearity-ℤ {k₃} {v₄}) (help-par-neg k₁₂) ⟩
+    (par k₃ ⊕ par v₄) ⊕ par k₁₂
+      ≡⟨ cong₂ (λ a b → (a ⊕ par (v₄)) ⊕ b)
+        (trans (help-par-𝔽₂-to-ℤ (par v₃ ⊕ p₃)) (cong (_⊕_ (par v₃)) help-p₃))
+        (help-par-𝔽₂-to-ℤ (par v₁₂ ⊕ p₁₂)) ⟩
+    ((par v₃ ⊕ p₁₂) ⊕ par v₄) ⊕ (par v₁₂ ⊕ p₁₂)
+      ≡⟨ cong (_⊕ (par v₁₂ ⊕ p₁₂)) helper ⟩
+    ((par v₃ ⊕ par v₄) ⊕ p₁₂) ⊕ (par v₁₂ ⊕ p₁₂)
+      ≡˘⟨ (cong (λ x → (x ⊕ p₁₂) ⊕ (par v₁₂ ⊕ p₁₂)) $
+        th-par-linearity-ℤ {v₃} {v₄}) ⟩
+    (par (v₃ + v₄) ⊕ p₁₂) ⊕ (par v₁₂ ⊕ p₁₂)
+      ≡⟨ cong (λ x → (par x ⊕ p₁₂) ⊕ (par v₁₂ ⊕ p₁₂)) v₃+v₄≡v₁₂ ⟩
+    (par v₁₂ ⊕ p₁₂) ⊕ (par v₁₂ ⊕ p₁₂)
+      ≡⟨ 𝔽₂p.⊕-self (par v₁₂ ⊕ p₁₂) ⟩
+    zero ∎
+    where
+    helper : (par v₃ ⊕ p₁₂) ⊕ par v₄ ≡ (par v₃ ⊕ par v₄) ⊕ p₁₂
+    helper = begin
+      (par v₃ ⊕ p₁₂) ⊕ par v₄ ≡⟨ 𝔽₂p.⊕-assoc (par v₃) p₁₂ (par v₄) ⟩
+      par v₃ ⊕ (p₁₂ ⊕ par v₄) ≡⟨ (cong (_⊕_ (par v₃)) $ 𝔽₂p.⊕-comm p₁₂ (par v₄)) ⟩
+      par v₃ ⊕ (par v₄ ⊕ p₁₂) ≡˘⟨ 𝔽₂p.⊕-assoc (par v₃) (par v₄) p₁₂ ⟩
+      (par v₃ ⊕ par v₄) ⊕ p₁₂ ∎
+
+  help₂ : ∣ x ∣ ^ (k₃ + v₄ - k₁₂) ≡ x ^ (k₃ + v₄ - k₁₂)
+  help₂ with half-even help-even
+  ... | z/2 , 2z/2≡z = begin
+    ∣ x ∣ ^ (k₃ + v₄ - k₁₂) ≡˘⟨ ℝp.^-cong refl 2z/2≡z ⟩
+    ∣ x ∣ ^ (2ℤ · z/2)      ≡⟨ ℝp.∣x∣^2z x z/2 ⟩
+    x ^ (2ℤ · z/2)          ≡⟨ ℝp.^-cong refl 2z/2≡z ⟩
+    x ^ (k₃ + v₄ - k₁₂)     ∎
+
+  help₃ : (v₃ - k₃) + (k₃ + v₄ - k₁₂) ≡ v₁₂ - k₁₂
+  help₃ rewrite ℤp.+-assoc k₃ v₄ (- k₁₂) = begin
+    (v₃ - k₃) + (k₃ + (v₄ - k₁₂)) ≡⟨ ℤp.+-inverse-middleˡ v₃ k₃ (v₄ - k₁₂) ⟩
+    v₃ + (v₄ - k₁₂)               ≡˘⟨ ℤp.+-assoc v₃ v₄ (- k₁₂) ⟩
+    (v₃ + v₄) - k₁₂               ≡⟨ (cong (_- k₁₂) v₃+v₄≡v₁₂) ⟩
+    v₁₂ - k₁₂ ∎
+
+  help₄ : x ^ (v₃ - k₃) · ∣ x ∣ ^ (k₃ + v₄) ≡ x ^ (v₁₂ - k₁₂) · ∣ x ∣ ^ k₁₂
+  help₄ rewrite sym $ ℤp.+-identityʳ (k₃ + v₄) | sym $ ℤp.+-inverseˡ k₁₂
+    | sym $ ℤp.+-assoc (k₃ + v₄) (- k₁₂) k₁₂
+    | ℝp.sum-exp ∣ x ∣ ((k₃ + v₄) - k₁₂) k₁₂ | help₂
+    | sym $ ℝp.*-assoc (x ^ (v₃ - k₃)) (x ^ (k₃ + v₄ - k₁₂)) (∣ x ∣ ^ k₁₂)
+    = cong (_· ∣ x ∣ ^ k₁₂) $ begin
+    x ^ (v₃ - k₃) · x ^ (k₃ + v₄ - k₁₂)
+      ≡˘⟨ ℝp.sum-exp x (v₃ - k₃) (k₃ + v₄ - k₁₂) ⟩
+    x ^ ((v₃ - k₃) + (k₃ + v₄ - k₁₂))
+      ≡⟨ (cong (λ e → x ^ e) $ help₃) ⟩
+    x ^ (v₁₂ - k₁₂) ∎
 ```
 :::
 

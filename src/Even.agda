@@ -9,11 +9,14 @@
 
 module Even where
   open import Data.N
-  open import Data.Int
+  open ℕ
+  open import Data.Int hiding (suc)
+  open ℤ
   import Data.Nat.Properties as ℕp
   import Data.Integer.Properties as ℤp
   open import Data.Bool
   open import Data.Empty
+  open import Data.Product
   open import Ops
   open import Utils
   open import Relation.Binary.PropositionalEquality
@@ -22,14 +25,14 @@ module Even where
 
   data Even : ℤ → Set where
     base : Even 0ℤ
-    step : {n : ℕ} → Even (ℤ.pos n) → Even +[1+ ℕ.suc n ]
-    pets : {n : ℕ} → Even (ℤ.pos n) → Even -[1+ ℕ.suc n ]
+    step : {n : ℕ} → Even (pos n) → Even +[1+ suc n ]
+    pets : {n : ℕ} → Even (pos n) → Even -[1+ suc n ]
 
   data Odd : ℤ → Set where
     base : Odd 1ℤ
     esab : Odd (- 1ℤ)
-    step : {n : ℕ} → Odd (ℤ.pos n) → Odd +[1+ ℕ.suc n ]
-    pets : {n : ℕ} → Odd (ℤ.pos n) → Odd -[1+ ℕ.suc n ]
+    step : {n : ℕ} → Odd (pos n) → Odd +[1+ suc n ]
+    pets : {n : ℕ} → Odd (pos n) → Odd -[1+ suc n ]
 
   data EvenOrOdd (z : ℤ) : Set where
     even : Even z → EvenOrOdd z
@@ -52,11 +55,11 @@ module Even where
 
   private
     helper-suc : (n : ℕ) → (A : ℤ → Set) →
-      A (2ℤ + (1ℤ + ℤ.pos n)) → A (1ℤ + (2ℤ + ℤ.pos n))
+      A (2ℤ + (1ℤ + pos n)) → A (1ℤ + (2ℤ + pos n))
     helper-suc n A = transport A $
-      trans (sym $ ℤp.+-assoc 2ℤ 1ℤ $ ℤ.pos n)
-             (trans (cong (λ z → z + ℤ.pos n) $ ℤp.+-comm 2ℤ 1ℤ)
-                    (ℤp.+-assoc 1ℤ 2ℤ $ ℤ.pos n))
+      trans (sym $ ℤp.+-assoc 2ℤ 1ℤ $ pos n)
+             (trans (cong (λ z → z + pos n) $ ℤp.+-comm 2ℤ 1ℤ)
+                    (ℤp.+-assoc 1ℤ 2ℤ $ pos n))
 
   suc-even : {z : ℤ} → Even z → Odd (1ℤ + z)
   suc-even base         = base
@@ -85,15 +88,15 @@ module Even where
   sum-even-even : {x y : ℤ} → Even x → Even y → Even (x + y)
   sum-even-even {y = y} base q rewrite ℤp.+-identityˡ y = q
   sum-even-even {y = y} (step {n} p) q
-    rewrite ℤp.+-assoc 2ℤ (ℤ.pos n) y | ℤp.+-assoc 1ℤ 1ℤ ((ℤ.pos n) + y) =
+    rewrite ℤp.+-assoc 2ℤ (pos n) y | ℤp.+-assoc 1ℤ 1ℤ ((pos n) + y) =
       suc-odd (suc-even (sum-even-even p q))
   sum-even-even (pets {n} p) base = pets p
   sum-even-even (pets {n} p) (step {m} q)
-    rewrite ℤp.[1+m]⊖[1+n]≡m⊖n (ℕ.suc m) (ℕ.suc n) | ℤp.[1+m]⊖[1+n]≡m⊖n m n
+    rewrite ℤp.[1+m]⊖[1+n]≡m⊖n (suc m) (suc n) | ℤp.[1+m]⊖[1+n]≡m⊖n m n
     | sym (ℤp.-m+n≡n⊖m n m) =
       sum-even-even (neg-even p) q
   sum-even-even (pets {n} p) (pets {m} q)
-    rewrite ℕp.+-comm n (ℕ.suc m) | ℕp.+-comm m n =
+    rewrite ℕp.+-comm n (suc m) | ℕp.+-comm m n =
       pets (step (sum-even-even p q))
 
   private
@@ -120,33 +123,53 @@ module Even where
   ----------------------------------------------------------------------------
 
   private
-    double-even-ℕ : (n : ℕ) → Even (ℤ.pos (n · 2))
+    double-even-ℕ : (n : ℕ) → Even (pos (n · 2))
     double-even-ℕ 0         = base
-    double-even-ℕ (ℕ.suc n) = step (double-even-ℕ n)
+    double-even-ℕ (suc n) = step (double-even-ℕ n)
 
-    neg-double-even-ℕ : (n : ℕ) → Even -[1+ ℕ.suc (n · 2)]
+    neg-double-even-ℕ : (n : ℕ) → Even -[1+ suc (n · 2)]
     neg-double-even-ℕ 0         = pets base
-    neg-double-even-ℕ (ℕ.suc n) = pets (suc-odd (suc-even (double-even-ℕ n)))
+    neg-double-even-ℕ (suc n) = pets (suc-odd (suc-even (double-even-ℕ n)))
 
   double-even : {z : ℤ} → Even (2ℤ · z)
-  double-even {ℤ.pos 0} = base
+  double-even {pos 0} = base
   double-even { +[1+ n ] } rewrite ℤp.*-comm 2ℤ +[1+ n ] =
     step (double-even-ℕ n)
   double-even { -[1+ n ] } rewrite ℤp.*-comm 2ℤ -[1+ n ] =
     neg-double-even-ℕ n
 
+  private
+    half-even-ℕ : {n : ℕ} → Even (pos n) → ∃[ m ] 2 · m ≡ n
+    half-even-ℕ base     = 0 , refl
+    half-even-ℕ (step {n} p) with half-even-ℕ p
+    ... | m , 2m≡n = suc m , (begin
+      suc (m + suc (m + 0))   ≡⟨ cong suc (ℕp.+-suc m (m + 0)) ⟩
+      suc (suc (m + (m + 0))) ≡⟨⟩
+      suc (suc (2 · m))       ≡⟨ cong (λ o → suc (suc o)) 2m≡n ⟩
+      suc (suc n) ∎)
+
+
+  half-even : {z : ℤ} → Even z → ∃[ y ] 2ℤ · y ≡ z
+  half-even base     = 0ℤ , refl
+  half-even (step p) with half-even-ℕ p
+  ... | m , 2m≡n = +[1+ m ] , (cong +[1+_] $
+    trans (ℕp.+-suc m (m + 0)) (cong suc 2m≡n))
+  half-even (pets p) with half-even-ℕ p
+  ... | m , 2m≡n = -[1+ m ] , (cong -[1+_] $
+    trans (ℕp.+-suc m (m + 0)) (cong suc 2m≡n))
+
   ----------------------------------------------------------------------------
 
   private
-    -[1+n]·y≡-[2y+ny] : (n : ℕ) → (y : ℤ) → -[1+ ℕ.suc n ] · y ≡ -(2ℤ · y + (ℤ.pos n) · y )
+    -[1+n]·y≡-[2y+ny] : (n : ℕ) → (y : ℤ) → -[1+ suc n ] · y ≡ -(2ℤ · y + (pos n) · y )
     -[1+n]·y≡-[2y+ny] n y = begin
-      -[1+ ℕ.suc n ] · y         ≡˘⟨ ℤp.neg-distribˡ-* +[1+ ℕ.suc n ] y ⟩
-      -(+[1+ ℕ.suc n ] · y)      ≡⟨ cong -_ (ℤp.*-distribʳ-+ y +[1+ 1 ] (ℤ.pos n)) ⟩
-      -(2ℤ · y + (ℤ.pos n) · y ) ∎
+      -[1+ suc n ] · y         ≡˘⟨ ℤp.neg-distribˡ-* +[1+ suc n ] y ⟩
+      -(+[1+ suc n ] · y)      ≡⟨ cong -_ (ℤp.*-distribʳ-+ y +[1+ 1 ] (pos n)) ⟩
+      -(2ℤ · y + (pos n) · y ) ∎
 
   mul-even-even : {x y : ℤ} → Even x → Even y → Even (x · y)
   mul-even-even base _ = base
-  mul-even-even {y = y} (step {n} p) q rewrite ℤp.*-distribʳ-+ y 2ℤ (ℤ.pos n) =
+  mul-even-even {y = y} (step {n} p) q rewrite ℤp.*-distribʳ-+ y 2ℤ (pos n) =
     sum-even-even (double-even {y}) (mul-even-even p q)
   mul-even-even {y = y} (pets {n} p) q rewrite -[1+n]·y≡-[2y+ny] n y =
     neg-even (sum-even-even (double-even {y}) (mul-even-even p q))
@@ -156,14 +179,14 @@ module Even where
   mul-odd-odd {y = y} esab q
     rewrite sym (ℤp.neg-distribˡ-* 1ℤ y) | ℤp.*-identityˡ y =
       neg-odd q
-  mul-odd-odd {y = y} (step {n} p) q rewrite ℤp.*-distribʳ-+ y 2ℤ (ℤ.pos n) =
+  mul-odd-odd {y = y} (step {n} p) q rewrite ℤp.*-distribʳ-+ y 2ℤ (pos n) =
     sum-even-odd (double-even {y}) (mul-odd-odd p q)
   mul-odd-odd {y = y} (pets {n} p) q rewrite -[1+n]·y≡-[2y+ny] n y =
     neg-odd (sum-even-odd (double-even {y}) (mul-odd-odd p q))
 
   mul-even-odd : {x y : ℤ} → Even x → Odd y → Even (x · y)
   mul-even-odd base q = base
-  mul-even-odd {y = y} (step {n} p) q rewrite ℤp.*-distribʳ-+ y 2ℤ (ℤ.pos n) =
+  mul-even-odd {y = y} (step {n} p) q rewrite ℤp.*-distribʳ-+ y 2ℤ (pos n) =
     sum-even-even (double-even {y}) (mul-even-odd p q)
   mul-even-odd {y = y} (pets {n} p) q rewrite -[1+n]·y≡-[2y+ny] n y =
     neg-even (sum-even-even (double-even {y}) (mul-even-odd p q))
@@ -176,13 +199,13 @@ module Even where
   -- ------------------
 
   even-or-odd : (z : ℤ) → EvenOrOdd z
-  even-or-odd (ℤ.pos 0)  = even base
+  even-or-odd (pos 0)    = even base
   even-or-odd (+[1+ 0 ]) = odd base
-  even-or-odd (+[1+ ℕ.suc n ]) with even-or-odd +[1+ n ]
+  even-or-odd (+[1+ suc n ]) with even-or-odd +[1+ n ]
   ... | even p = odd (suc-even p)
   ... | odd  p = even (suc-odd p)
   even-or-odd -[1+ 0 ] = odd esab
-  even-or-odd -[1+ ℕ.suc n ] with even-or-odd -[1+ n ]
+  even-or-odd -[1+ suc n ] with even-or-odd -[1+ n ]
   ... | even p = odd (pred-even p)
   ... | odd  p = even (pred-odd p)
 
@@ -198,19 +221,19 @@ module Even where
   uniq-cert-odd (pets p) (pets q) = cong pets (uniq-cert-odd p q)
 
   assert-evenness : {z : ℤ} → (p : EvenOrOdd z) → even-or-odd z ≡ p
-  assert-evenness {ℤ.pos 0}    (even base) = refl
+  assert-evenness {pos 0}      (even base) = refl
   assert-evenness { +[1+ 0 ] } (odd base)  = refl
   assert-evenness { -[1+ 0 ] } (odd esab)  = refl
-  assert-evenness {+[1+ ℕ.suc n ]} (even (step p))
+  assert-evenness {+[1+ suc n ]} (even (step p))
     rewrite assert-evenness {+[1+ n ]} (odd (suc-even p)) =
       cong even $ uniq-cert-even (suc-odd (suc-even p)) (step p)
-  assert-evenness {+[1+ ℕ.suc n ]} (odd (step p))
+  assert-evenness {+[1+ suc n ]} (odd (step p))
     rewrite assert-evenness {+[1+ n ]} (even (suc-odd p)) =
       cong odd $ uniq-cert-odd (suc-even (suc-odd p)) (step p)
-  assert-evenness { -[1+ ℕ.suc n ] } (even (pets p))
+  assert-evenness { -[1+ suc n ] } (even (pets p))
     rewrite assert-evenness { -[1+ n ] } (odd (neg-odd (suc-even p))) =
       cong even $ uniq-cert-even (pred-odd (neg-odd (suc-even p))) (pets p)
-  assert-evenness { -[1+ ℕ.suc n ] } (odd (pets p))
+  assert-evenness { -[1+ suc n ] } (odd (pets p))
     rewrite assert-evenness { -[1+ n ] } (even (neg-even (suc-odd p))) =
       cong odd $ uniq-cert-odd (pred-even (neg-even (suc-odd p))) (pets p)
 

@@ -33,6 +33,27 @@ module Data.PostulatedReals.Properties where
   ... | inj₁ x≤0 = *-cancel-neg x x
   ... | inj₂ x≥0 = refl
 
+  ∣x∣² : (x : ℝ) → ∣ x ∣ ^ 2 ≡ x ^ 2
+  ∣x∣² x rewrite *-identityʳ ∣ x ∣ = ∣x∣∣x∣ x
+
+  ∣x∣²≢0 : {x : ℝ} → (p : x ≢0) → ∣ x ∣ ^ 2 ≢0
+  ∣x∣²≢0 {x} p rewrite *-identityʳ ∣ x ∣ = x·y≢0 q q
+    where q = ∣x∣≢0 p
+
+  instance
+    ∣x∣²-nonZero : {x : ℝ} .⦃ _ : NonZero x ⦄ → NonZero (∣ x ∣ ^ 2)
+    ∣x∣²-nonZero {x} ⦃ p ⦄ = ≢-nonZero $ ∣x∣²≢0 $ ≢-nonZero⁻¹ p
+
+  ∣∣x∣∣ : (x : ℝ) → ∣ ∣ x ∣ ∣ ≡ ∣ x ∣
+  ∣∣x∣∣ x  with ≤-total x 0ℝ
+  ... | inj₁ x≤0 with ≤-total (- x) 0ℝ
+  ... | inj₂ -x≥0 = refl
+  ... | inj₁ -x≤0 rewrite ≤-antisym -x≤0 (≤-neg x≤0) = -0#≈0#
+  ∣∣x∣∣ x  | inj₂ x≥0 with ≤-total x 0ℝ
+  ... | inj₂ x≥0 = refl
+  ... | inj₁ x≤0 rewrite ≤-antisym x≤0 x≥0 = -0#≈0#
+
+
   ∣x∣∣y∣ : (x y : ℝ) → ∣ x ∣ · ∣ y ∣ ≡ ∣ x · y ∣
   ∣x∣∣y∣ x y with ≤-total x 0ℝ | ≤-total y 0ℝ | ≤-total (x · y) 0ℝ
   ... | inj₁ x≤0 | inj₁ y≤0 | inj₁ xy≤0  rewrite *-cancel-neg x y
@@ -166,3 +187,9 @@ module Data.PostulatedReals.Properties where
       s = x^n-nonZero ⦃ q ⦄ {suc m}
       t = x⁻¹-nonZero ⦃ s ⦄
 
+  ∣x∣^2z : (x : ℝ) .⦃ p : NonZero x ⦄ → (z : ℤ) → ∣ x ∣ ^ (2ℤ · z) ≡ x ^ (2ℤ · z)
+  ∣x∣^2z x ⦃ p ⦄ z = begin
+    ∣ x ∣ ^ (2ℤ · z)      ≡˘⟨ double-exp ∣ x ∣ 2ℤ z ⟩
+    ((∣ x ∣ ^ 2ℤ) ^ z)    ≡⟨ ^-cong ⦃ ∣x∣²-nonZero ⦃ p ⦄ ⦄ ⦃ _ ⦄ {z} (∣x∣² x) refl ⟩
+    ((x ^ 2ℤ) ^ z) ⦃ _ ⦄  ≡⟨ double-exp x 2ℤ z ⟩
+    x ^ (2ℤ · z)          ∎
