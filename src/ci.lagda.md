@@ -1093,7 +1093,7 @@ double-exp x ⦃ q ⦄ z@([ v₁ , p₁ ]) w@([ v₂ , p₂ ]) = begin
 :::
 
 ::: {.remark name="Absolute value"}
-As defined in \@ref(real-powers), a real elevated to the power of the even unit
+As defined in section \@ref(real-powers), a real elevated to the power of the even unit
 is its absolute value: $x^l=|x|$.
 :::
 ::: {.proof}

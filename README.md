@@ -6,9 +6,11 @@ See [interactive version](https://dpdmancul.gitlab.io/complete-integers-agda/).
 
 <!--README-->
 In this work we will define a superset of integers (the complete integers),
-which contains the dual of integers along parity (e.g. the odd zero, the
-even one, ...). Then we will see how they form a ring and can be used to define
-an TODO (parlare di x^l = |x|)
+which contains the dual of integers along parity (e.g. the odd zero, the even
+one, ...). Then we will see how they form a ring and how they can be used as
+exponents for real numbers powers, in order to write functions which have a
+discontinuity in zero (the function itself or one of its derivates), as for
+example the absolute value and the sign function.
 <!--/README-->
 
 ## Build

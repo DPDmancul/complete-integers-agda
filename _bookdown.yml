@@ -7,4 +7,8 @@ delete_merged_file: true
 rmd_files:
   - index.Rmd
   - src/ci.lagda.md
-  # TODO
+  # src/perenomials.lagda.md
+  # src/hyper_perenomials.lagda.md
+  # src/complete_rationals.md
+  - future_work.Rmd
+  - bib.Rmd

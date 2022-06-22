@@ -1,0 +1,45 @@
+# Future work {-}
+
+## Agda implementation
+
+For what concerns the Agda implementation of the proofs it would be interesting
+to remove all the postulates in [PostulatedReals.agda](Data.PostulatedReals.html)
+defining a type for real numbers in a constructive way. I already started this
+([R.agda](Data.R.html)) following @Bishop, but I had to stop due to the fact
+that it was taking a lot of time only to define the basic operations (addition
+and multiplication).
+
+Then another improvement which could be done is to replace, in the definition of
+real exponentiation to integers and its properties, the witnesses of the base
+being different from zero, with witnesses of the base being non null or the
+exponent be positive. In fact with the actual certificate of the base being non
+zero we are not permitted to compute and prove for $0^z$, whit $z$ positive.
+
+## Functions by cases in a polynomial-like form
+
+The last remark tell us that using complete integers as exponents we can write
+functions with a discontinuity in zero. We can use this fact to define an
+extension of polynomials, which have complete integer exponents. With those
+"polynomials" we could write all functions which are interpolable with a
+polynomial for $x\leqslant0$ and with another for $x\geqslant0$.
+
+We can further extend this concept summing some of those extended "polynomials",
+translated on the x axis (evaluated in $x - \bar{x}$): every of those
+"polynomials" has a different discontinuity point $\bar{x}$. So those hyper
+"polynomials" could represent all functions by cases for which each case can by
+represented with a polynomial.
+
+For example $\frac{(x - a)^o - (x - b)^o}2$ is always zero, except in the
+interval $(a,b)$, and so can be used as a "mask" for that case.
+
+## Complete rationals
+
+As we have defined the commutative ring $\bZ_C=\bZ\times\bF_2$, we can define
+also a commutative ring over $\bQ_H=\bQ\times\bF_2$. In this case however we
+cannot prove $\bQ\subset\bQ_H$. Defining $\bQ_{\bar{H}}=\left\{\frac{q}{l}\colon
+q\in\bQ_H\right\}$ and $\bQ_C=\bQ_H \sqcup \bQ_{\bar{H}}$ we could prove:
+
+1. $\bQ\subset\bQ_C$;
+2. The division of two complete integers is in $\bQ_C$;
+3. $\bQ_C = \{x/y : x,y \in \bZ_C; y\neq0\}$.
+

@@ -8,6 +8,10 @@ url: https://dpdmancul.gitlab.io/complete-integers-agda
 repo.base: https://gitlab.com/DPDmancul/complete-integers-agda
 
 documentclass: book
+
+bibliography: [ref.bib]
+csl: din-1505-2-alphanumeric
+link-citations: true
 ---
 
 # Introduction {-}
@@ -22,6 +26,7 @@ if (knitr::is_latex_output())
 \newcommand\bZ{\mathbb{Z}}
 \newcommand\bF{\mathbb{F}}
 \newcommand\bR{\mathbb{R}}
+\newcommand\bQ{\mathbb{Q}}
 
 \newcommand{\coloneqq}{\mathrel{:=}}
 
@@ -33,9 +38,11 @@ if (knitr::is_latex_output())
 
 
 In this work we will define a superset of integers (the complete integers,
-$\bZ_C$), which contains the dual of integers along parity (e.g. the odd zero, the
-even one, ...). Then we will see how they form a ring and can be used to define
-an TODO (parlare di x^l = |x|)
+$\bZ_C$), which contains the dual of integers along parity (e.g. the odd zero,
+the even one, ...). Then we will see how they form a ring and how they can be
+used as exponents for real numbers powers, in order to write functions which
+have a discontinuity in zero (the function itself or one of its derivates), as
+for example $|x|$ and $\textrm{sgn}(x)$.
 
 
 ## License {-}
