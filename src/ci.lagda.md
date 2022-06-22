@@ -27,6 +27,7 @@ open import Relation.Binary.PropositionalEquality hiding ([_])
 open ≡-Reasoning
 open import Function.Base
 open import Even
+open import Data.Sum hiding ([_,_])
 open import Data.Empty
 open import Data.Product hiding(_×_)
 open import Data.PostulatedReals
@@ -762,7 +763,7 @@ mul-ℤC-odd-odd (odd refl) (odd refl) = odd refl
 ```
 :::
 
-## Reals exponentiation to the power of complete integers
+## Reals exponentiation to the power of complete integers {#real-powers}
 
 In this section we will define an exponentiation function with real bases and
 complete integer exponents.
@@ -972,15 +973,18 @@ double-exp x ⦃ q ⦄ z@([ v₁ , p₁ ]) w@([ v₂ , p₂ ]) = begin
   ... | odd q with pred-odd q
   ... | r rewrite ℝp.*-identityʳ ∣ x ^ z ∣ | ℝp.*-identityʳ ∣ x ∣ = begin
     ((x ^ z) ^ (v - 1ℤ)) ⦃ _ ⦄ · ∣ x ^ z ∣
-      ≡⟨ cong₂ _·_ (ℝp.double-exp x z (v - 1ℤ)) helper ⟩
-    x ^ (z · (v - 1ℤ)) · (x ^ z' · ∣ x ∣) ≡⟨ {!!} ⟩
-    (x ^ (z · (v - 1ℤ)) · x ^ z') · ∣ x ∣ ≡⟨ {!!} ⟩
-    x ^ (z · (v - 1ℤ) + z') · ∣ x ∣       ≡⟨ {!!} ⟩
-    x ^ (z · v - 1ℤ) · ∣ x ∣              ∎
+      ≡⟨ cong₂ _·_ (ℝp.double-exp x z (v - 1ℤ)) helper₁ ⟩
+    x ^ (z · (v - 1ℤ)) · (x ^ z' · ∣ x ∣)
+      ≡˘⟨ ℝp.*-assoc (x ^ (z · (v - 1ℤ))) (x ^ z') ∣ x ∣ ⟩
+    (x ^ (z · (v - 1ℤ)) · x ^ z') · ∣ x ∣
+      ≡˘⟨ (cong (_· ∣ x ∣) $ ℝp.sum-exp x (z · (v - 1ℤ)) z') ⟩
+    x ^ (z · (v - 1ℤ) + z') · ∣ x ∣
+      ≡⟨ (cong (_· ∣ x ∣) $ ℝp.^-cong {x} refl helper₂) ⟩
+    x ^ (z · v - 1ℤ) · ∣ x ∣ ∎
     where
     z' = -1ℤ + z
-    helper : ∣ x ^ z ∣ ≡ x ^ z' · ∣ x ∣
-    helper = begin
+    helper₁ : ∣ x ^ z ∣ ≡ x ^ z' · ∣ x ∣
+    helper₁ = begin
       ∣ x ^ z ∣                
         ≡˘⟨ (cong ∣_∣ $ ℝp.^-cong {x} refl $ ℤp.+-identityˡ z) ⟩
       ∣ x ^ (0ℤ + z) ∣
@@ -995,6 +999,17 @@ double-exp x ⦃ q ⦄ z@([ v₁ , p₁ ]) w@([ v₂ , p₂ ]) = begin
       ∣ x ∣ · ∣ x ^ z' ∣ ≡⟨ (cong (_·_ ∣ x ∣) $ help₀ x r) ⟩
       ∣ x ∣ · x ^ z'     ≡⟨ ℝp.*-comm ∣ x ∣ (x ^ z') ⟩
       x ^ z' · ∣ x ∣     ∎
+    helper₂ : z · (v - 1ℤ) + z' ≡ z · v - 1ℤ
+    helper₂ = begin
+      z · (v - 1ℤ) + z'        ≡⟨ (cong (_+ z') $ ℤp.*-distribˡ-+ z v -1ℤ) ⟩
+      z · v + (z · -1ℤ) + z'   ≡⟨ (cong (λ y → z · v + y + z') $ ℤp.*-comm z -1ℤ) ⟩
+      z · v + (-1ℤ · z) + z'   ≡⟨ (cong (λ y → z · v + y + z') $ ℤp.-1*n≡-n z) ⟩
+      z · v - z + (-1ℤ + z)    ≡⟨ (cong (_+_ ((z · v) - z)) $ ℤp.+-comm -1ℤ z) ⟩
+      z · v - z + (z - 1ℤ)     ≡⟨ ℤp.+-assoc (z · v) (- z) (z - 1ℤ) ⟩
+      z · v + (- z + (z - 1ℤ)) ≡˘⟨ (cong (_+_ (z · v)) $ ℤp.+-assoc (- z) z -1ℤ) ⟩
+      z · v + ((- z + z) - 1ℤ) ≡⟨ (cong (λ y → z · v + (y - 1ℤ)) $ ℤp.+-inverseˡ z) ⟩
+      z · v + (0ℤ - 1ℤ)        ≡⟨ (cong (_+_ (z · v)) $ ℤp.+-identityˡ -1ℤ) ⟩
+      z · v - 1ℤ               ∎
 
   help-par-𝔽₂-to-ℤ : (x : 𝔽₂) → par (𝔽₂-to-ℤ x) ≡ x
   help-par-𝔽₂-to-ℤ x with x
@@ -1074,6 +1089,34 @@ double-exp x ⦃ q ⦄ z@([ v₁ , p₁ ]) w@([ v₂ , p₂ ]) = begin
     x ^ ((v₃ - k₃) + (k₃ + v₄ - k₁₂))
       ≡⟨ (cong (λ e → x ^ e) $ help₃) ⟩
     x ^ (v₁₂ - k₁₂) ∎
+```
+:::
+
+::: {.remark name="Absolute value"}
+As defined in \@ref(real-powers), a real elevated to the power of the even unit
+is its absolute value: $x^l=|x|$.
+:::
+::: {.proof}
+\
+```agda
+xˡ : (x : ℝ) .⦃ _ : NonZero x ⦄ → x ^ l ≡ ∣ x ∣
+xˡ x rewrite ℝp.*-identityʳ ∣ x ∣ = ℝp.*-identityˡ ∣ x ∣
+```
+:::
+
+::: {.remark name="Sign function"}
+A real number elevated to the power of the odd zero is the sign function:
+$x^o=\mathrm{sgn}(x)$.
+:::
+::: {.proof}
+\
+```agda
+xᵒ : (x : ℝ) .⦃ _ : NonZero x ⦄ → x ^ o ≡ sgn x
+xᵒ x ⦃ p ⦄ rewrite ℝp.⁻¹-distrib-* x 1ℝ ⦃ p ⦄ ⦃ 1-nonZero ⦄ | ℝp.1⁻¹
+  | ℝp.*-identityʳ (x ⁻¹) | ℝp.*-identityʳ ∣ x ∣ with ℝp.≤-total x 0ℝ
+... | inj₁ x≤0 = trans (sym $ ℝp.-‿distribʳ-* (x ⁻¹) x)
+                       (cong (-_) $ ℝp.*-inverseˡ x)
+... | inj₂ x≥0 = ℝp.*-inverseˡ x
 ```
 :::
 
