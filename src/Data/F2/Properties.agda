@@ -46,6 +46,10 @@ module Data.F2.Properties where
   ∧-distribʳ-⊕ c one  zero = sym (⊕-comm c zero)
   ∧-distribʳ-⊕ c one  one  = sym (⊕-self c)
 
+  ∧-distribˡ-⊕ : (c a b : 𝔽₂) → c · (a ⊕ b) ≡ c · a ⊕ c · b
+  ∧-distribˡ-⊕ zero a b = refl
+  ∧-distribˡ-⊕ one  a b = refl
+
   pow : (z : 𝔽₂) (n : ℕ) → z ^ (suc n) ≡ z
   pow z zero   = ∧-identityʳ z
   pow z (suc n) rewrite pow z n = ∧-idem z

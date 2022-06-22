@@ -193,3 +193,14 @@ module Data.PostulatedReals.Properties where
     ((∣ x ∣ ^ 2ℤ) ^ z)    ≡⟨ ^-cong ⦃ ∣x∣²-nonZero ⦃ p ⦄ ⦄ ⦃ _ ⦄ {z} (∣x∣² x) refl ⟩
     ((x ^ 2ℤ) ^ z) ⦃ _ ⦄  ≡⟨ double-exp x 2ℤ z ⟩
     x ^ (2ℤ · z)          ∎
+
+  ∣x^2z∣ : (x : ℝ) .⦃ p : NonZero x ⦄ → (z : ℤ) → ∣ x ^ (2ℤ · z) ∣ ≡ x ^ (2ℤ · z)
+  ∣x^2z∣ x ⦃ p ⦄ z rewrite ℤp.*-comm 2ℤ z | sym $ double-exp x z 2ℤ with ≤-total (x ^ z) 0ℝ
+  ... | inj₁ x^z≤0 with ≤-total (((x ^ z) ^ 2ℤ) ⦃ x^z-nonZero ⦃ p ⦄ {z} ⦄) 0ℝ
+  ... | inj₂ x^2z≥0 = refl
+  ... | inj₁ x^2z≤0 rewrite *-identityʳ (x ^ z)
+    | ≤-antisym x^2z≤0 (*-mono-≤0 x^z≤0 x^z≤0) = -0#≈0#
+  ∣x^2z∣ x ⦃ p ⦄ z  | inj₂ x^z≥0 with ≤-total (((x ^ z) ^ 2ℤ) ⦃ x^z-nonZero ⦃ p ⦄ {z} ⦄) 0ℝ
+  ... | inj₂ x^2z≥0 = refl
+  ... | inj₁ x^2z≤0 rewrite *-identityʳ (x ^ z)
+    | ≤-antisym x^2z≤0 (*-mono-≥0 x^z≥0 x^z≥0) = -0#≈0#

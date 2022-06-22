@@ -1,3 +1,4 @@
+
 <!--
 ```agda
 -- (c) Davide Peressoni 2022
@@ -893,7 +894,7 @@ instance
 double-exp : (x : ℝ) .⦃ q : NonZero x ⦄ → (z w : ℤC) → let
   r = x^zc-nonZero ⦃ q ⦄ {z}
   in ((x ^ z) ^ w) ⦃ r ⦄ ≡ x ^ (z · w)
-double-exp x z@([ v₁ , p₁ ]) w@([ v₂ , p₂ ]) = begin
+double-exp x ⦃ q ⦄ z@([ v₁ , p₁ ]) w@([ v₂ , p₂ ]) = begin
   ((x ^ (v₁ - k₁) · ∣ x ∣ ^ k₁) ^ w) ⦃ _ ⦄
     ≡⟨ mul-base (x ^ (v₁ - k₁)) (∣ x ∣ ^ k₁) ⦃ _ ⦄ ⦃ _ ⦄ w ⟩
   ((x ^ (v₁ - k₁)) ^ w) ⦃ _ ⦄ · ((∣ x ∣ ^ k₁) ^ w) ⦃ _ ⦄
@@ -904,7 +905,7 @@ double-exp x z@([ v₁ , p₁ ]) w@([ v₂ , p₂ ]) = begin
     ≡⟨⟩
   (x ^ (v₃ - k₃) · ∣ x ∣ ^ k₃) · (∣ x ∣ ^ (v₄ - k₄) · ∣ ∣ x ∣ ∣ ^ k₄)
     ≡⟨ (cong (λ y → (x ^ (v₃ - k₃) · ∣ x ∣ ^ k₃) ·
-      (∣ x ∣ ^ (v₄ - k₄) · y ^ k₄)) $ ℝp.∣∣x∣∣ x) ⟩
+      (∣ x ∣ ^ (v₄ - k₄) · y)) $ ℝp.^-cong {z = k₄} (ℝp.∣∣x∣∣ x) refl) ⟩
   (x ^ (v₃ - k₃) · ∣ x ∣ ^ k₃) · (∣ x ∣ ^ (v₄ - k₄) · ∣ x ∣ ^ k₄)
     ≡⟨ (cong (_·_ (x ^ (v₃ - k₃) · ∣ x ∣ ^ k₃)) $
       trans (sym $ ℝp.sum-exp ∣ x ∣ (v₄ - k₄) k₄)
@@ -934,10 +935,66 @@ double-exp x z@([ v₁ , p₁ ]) w@([ v₂ , p₂ ]) = begin
   p₄ = par k₁ · p₂
   k₄ =  𝔽₂-to-ℤ (par v₄ ⊕ p₄)
 
+  help-kz : (z v : ℤ) → (p : 𝔽₂) → let
+    k = par v ⊕ p
+    in par (z · v) ⊕ par z · p ≡ par z  · k
+  help-kz z v p = begin
+    par (z · v) ⊕ par z · p   ≡⟨ (cong (_⊕ par z · p) $ th-par-mul-ℤ {z} {v}) ⟩
+    par z · par v ⊕ par z · p ≡˘⟨ 𝔽₂p.∧-distribˡ-⊕ (par z) (par v) p ⟩
+    par z · (par v ⊕ p)       ∎ 
+
+  help₀ : (x : ℝ) .⦃ _ : NonZero x ⦄ → {z : ℤ} → Even z → ∣ x ^ z ∣ ≡ x ^ z
+  help₀ x {z} p with half-even p
+  ... | z/2 , 2z/2≡z = begin
+    ∣ x ^ z ∣          ≡˘⟨ (cong ∣_∣ $ ℝp.^-cong refl 2z/2≡z) ⟩
+    ∣ x ^ (2ℤ · z/2) ∣ ≡⟨ ℝp.∣x^2z∣ x z/2 ⟩
+    x ^ (2ℤ · z/2)     ≡⟨ ℝp.^-cong refl 2z/2≡z ⟩
+    x ^ z              ∎
+
   help₁ : (x : ℝ) .⦃ q : NonZero x ⦄ → (z : ℤ) → (w : ℤC) → let
     r = ℝp.x^z-nonZero ⦃ q ⦄ {z}
     in ((x ^ z) ^ w) ⦃ r ⦄ ≡ x ^ (proj₁ (fℤ z) · w)
-  help₁ x z w = {!   !}
+  help₁ x z [ v , p ] rewrite help-kz z v p with par v ⊕ p
+  ... | zero rewrite ℤp.+-identityʳ v | 𝔽₂p.∧-zeroʳ (par z)
+    | ℤp.+-identityʳ (z · v) = cong (_· 1ℝ) $ ℝp.double-exp x z v   
+  ... | one  with even-or-odd z
+  ... | even q rewrite ℤp.+-identityʳ (z · v) | help₀ x q
+    | ℝp.*-identityʳ (x ^ z) | ℝp.*-identityʳ (x ^ (z · v))
+    | ℝp.double-exp x z (v - 1ℤ) = trans (sym $ ℝp.sum-exp x (z · (v - 1ℤ)) z)
+    $ ℝp.^-cong refl $ begin
+    z · (v - 1ℤ) + z       ≡⟨ (cong (_+ z) $ ℤp.*-distribˡ-+ z v (- 1ℤ)) ⟩
+    z · v + (z · - 1ℤ) + z ≡⟨ (cong (λ y → z · v + y + z) $ ℤp.*-comm z (- 1ℤ)) ⟩
+    z · v + (- 1ℤ · z) + z ≡⟨ (cong (λ y → z · v + y + z) $ ℤp.-1*n≡-n z) ⟩
+    z · v - z + z          ≡⟨ ℤp.+-assoc (z · v) (- z) z ⟩
+    z · v + (- z + z)      ≡⟨ (cong (_+_ (z · v)) $ ℤp.+-inverseˡ z) ⟩
+    z · v + 0ℤ             ≡⟨ ℤp.+-identityʳ (z · v) ⟩
+    z · v                  ∎
+  ... | odd q with pred-odd q
+  ... | r rewrite ℝp.*-identityʳ ∣ x ^ z ∣ | ℝp.*-identityʳ ∣ x ∣ = begin
+    ((x ^ z) ^ (v - 1ℤ)) ⦃ _ ⦄ · ∣ x ^ z ∣
+      ≡⟨ cong₂ _·_ (ℝp.double-exp x z (v - 1ℤ)) helper ⟩
+    x ^ (z · (v - 1ℤ)) · (x ^ z' · ∣ x ∣) ≡⟨ {!!} ⟩
+    (x ^ (z · (v - 1ℤ)) · x ^ z') · ∣ x ∣ ≡⟨ {!!} ⟩
+    x ^ (z · (v - 1ℤ) + z') · ∣ x ∣       ≡⟨ {!!} ⟩
+    x ^ (z · v - 1ℤ) · ∣ x ∣              ∎
+    where
+    z' = -1ℤ + z
+    helper : ∣ x ^ z ∣ ≡ x ^ z' · ∣ x ∣
+    helper = begin
+      ∣ x ^ z ∣                
+        ≡˘⟨ (cong ∣_∣ $ ℝp.^-cong {x} refl $ ℤp.+-identityˡ z) ⟩
+      ∣ x ^ (0ℤ + z) ∣
+        ≡˘⟨ (cong ∣_∣ $ ℝp.^-cong {x} refl $ cong (_+ z) $ ℤp.+-inverseʳ 1ℤ) ⟩
+      ∣ x ^ (1ℤ - 1ℤ + z) ∣
+        ≡⟨ (cong ∣_∣ $ ℝp.^-cong {x} refl $ ℤp.+-assoc 1ℤ -1ℤ z) ⟩
+      ∣ x ^ (1ℤ + (-1ℤ + z)) ∣
+        ≡⟨ (cong ∣_∣ $ ℝp.sum-exp x 1ℤ (-1ℤ + z)) ⟩
+      ∣ x ^ 1ℤ · x ^ z' ∣
+        ≡⟨ (cong (λ y → ∣ y · x ^ z' ∣) $ ℝp.*-identityʳ x) ⟩
+      ∣ x · x ^ z' ∣     ≡˘⟨ ℝp.∣x∣∣y∣ x (x ^ z') ⟩
+      ∣ x ∣ · ∣ x ^ z' ∣ ≡⟨ (cong (_·_ ∣ x ∣) $ help₀ x r) ⟩
+      ∣ x ∣ · x ^ z'     ≡⟨ ℝp.*-comm ∣ x ∣ (x ^ z') ⟩
+      x ^ z' · ∣ x ∣     ∎
 
   help-par-𝔽₂-to-ℤ : (x : 𝔽₂) → par (𝔽₂-to-ℤ x) ≡ x
   help-par-𝔽₂-to-ℤ x with x
