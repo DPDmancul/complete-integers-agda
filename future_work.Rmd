@@ -1,6 +1,6 @@
 # Future work {-}
 
-## Agda implementation
+## Agda implementation {-}
 
 For what concerns the Agda implementation of the proofs it would be interesting
 to remove all the postulates in [PostulatedReals.agda](Data.PostulatedReals.html)
@@ -15,7 +15,7 @@ being different from zero, with witnesses of the base being non null or the
 exponent be positive. In fact with the actual certificate of the base being non
 zero we are not permitted to compute and prove for $0^z$, whit $z$ positive.
 
-## Functions by cases in a polynomial-like form
+## Functions by cases in a polynomial-like form {-}
 
 The last remark tell us that using complete integers as exponents we can write
 functions with a discontinuity in zero. We can use this fact to define an
@@ -32,7 +32,7 @@ represented with a polynomial.
 For example $\frac{(x - a)^o - (x - b)^o}2$ is always zero, except in the
 interval $(a,b)$, and so can be used as a "mask" for that case.
 
-## Complete rationals
+## Complete rationals {-}
 
 As we have defined the commutative ring $\bZ_C=\bZ\times\bF_2$, we can define
 also a commutative ring over $\bQ_H=\bQ\times\bF_2$. In this case however we

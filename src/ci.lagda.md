@@ -172,19 +172,16 @@ module RingℤC where
     { isSemigroup = ℤC-+-isSemigroup
     ; identity    = +-identityˡ , +-identityʳ
     }
-    where open import Agda.Builtin.Sigma
   ℤC-·-isMonoid = record
     { isSemigroup = ℤC-·-isSemigroup
     ; identity    = ·-identityˡ , ·-identityʳ
     }
-    where open import Agda.Builtin.Sigma
 
   ℤC-+-isGroup = record
     { isMonoid = ℤC-+-isMonoid
     ; inverse  = +-inverseˡ , +-inverseʳ
     ; ⁻¹-cong  = cong (-_)
     }
-    where open import Agda.Builtin.Sigma
 
   ℤC-+-isAbelianGroup = record
     { isGroup = ℤC-+-isGroup
@@ -197,7 +194,6 @@ module RingℤC where
     ; distrib          = ·-distribˡ-+ , ·-distribʳ-+
     ; zero             = ·-zeroˡ , ·-zeroʳ
     }
-    where open import Agda.Builtin.Sigma
 
   ℤC-isCommRing = record
     { isRing = ℤC-isRing
